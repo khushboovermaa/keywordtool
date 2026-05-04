@@ -93,6 +93,85 @@
             margin-top: 0.5rem;
         }
 
+        .file-upload-area {
+            border: 2px dashed rgba(96, 165, 250, 0.5);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            background: rgba(96, 165, 250, 0.05);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1.5rem;
+        }
+
+        .file-upload-area:hover {
+            border-color: rgba(96, 165, 250, 0.8);
+            background: rgba(96, 165, 250, 0.1);
+        }
+
+        .file-upload-area.dragover {
+            border-color: #60a5fa;
+            background: rgba(96, 165, 250, 0.15);
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-text {
+            color: #cbd5e1;
+            margin-bottom: 0.25rem;
+        }
+
+        .upload-subtext {
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .file-info {
+            background: rgba(52, 211, 153, 0.1);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            color: #34d399;
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+            font-size: 0.9rem;
+        }
+
+        .file-info.show {
+            display: block;
+        }
+
+        .tab-btn {
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            color: #60a5fa;
+            border-bottom-color: #60a5fa !important;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
         .button-group {
             display: flex;
             gap: 1rem;
@@ -347,6 +426,29 @@
             .stats {
                 grid-template-columns: 1fr 1fr;
             }
+
+            th, td {
+                padding: 0.5rem;
+                font-size: 0.8rem;
+            }
+
+            .primary-keyword {
+                min-width: 120px;
+            }
+
+            .variants-list {
+                max-height: 100px;
+                font-size: 0.75rem;
+            }
+
+            .category-badge {
+                font-size: 0.7rem;
+                padding: 0.3rem 0.6rem;
+            }
+
+            .table-container {
+                font-size: 0.85rem;
+            }
         }
 
         .scroll-container {
@@ -369,8 +471,115 @@
             border-radius: 3px;
         }
 
-        .scroll-container::-webkit-scrollbar-thumb:hover {
-            background: rgba(96, 165, 250, 0.5);
+        .table-container {
+            overflow-x: auto;
+            margin-bottom: 1.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(15, 23, 42, 0.6);
+        }
+
+        thead {
+            background: rgba(51, 65, 85, 0.8);
+            border-bottom: 2px solid rgba(96, 165, 250, 0.3);
+        }
+
+        th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #cbd5e1;
+            white-space: nowrap;
+            border-right: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        th:last-child {
+            border-right: none;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+            transition: background 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background: rgba(96, 165, 250, 0.1);
+        }
+
+        td {
+            padding: 0.75rem 1rem;
+            color: #e2e8f0;
+            font-size: 0.9rem;
+            border-right: 1px solid rgba(148, 163, 184, 0.05);
+        }
+
+        td:last-child {
+            border-right: none;
+        }
+
+        .primary-keyword {
+            font-weight: 600;
+            color: #60a5fa;
+        }
+
+        .variants-list {
+            max-height: 150px;
+            overflow-y: auto;
+            padding: 0.5rem;
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+
+        .variants-list div {
+            padding: 0.25rem 0;
+            color: #cbd5e1;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .variants-list div:last-child {
+            border-bottom: none;
+        }
+
+        .category-badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: rgba(96, 165, 250, 0.2);
+            color: #60a5fa;
+        }
+
+        .category-badge.blog {
+            background: rgba(168, 85, 247, 0.2);
+            color: #a855f7;
+        }
+
+        .category-badge.service {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+
+        .category-badge.case_study {
+            background: rgba(251, 146, 60, 0.2);
+            color: #fb923c;
+        }
+
+        .volume-cell {
+            text-align: right;
+            font-weight: 600;
+            color: #34d399;
+        }
+
+        .count-cell {
+            text-align: center;
+            background: rgba(96, 165, 250, 0.1);
+            font-weight: 600;
+            color: #60a5fa;
         }
     </style>
 </head>
@@ -382,23 +591,58 @@
         </header>
 
         <div class="input-section">
-            <div class="form-group">
-                <label for="keywords">Step 1: Paste Your Keywords</label>
-                <textarea id="keywords" placeholder="digital marketing, digital marketing agency, digital amkretnmg&#10;social media marketing, social media marketing agency&#10;SEO services, search engine optimization..."></textarea>
-                <p class="input-hint">One keyword per line or comma-separated</p>
-            </div>
-
-            <div class="form-group">
-                <label for="metadata">Step 2: Paste Your Metadata (Optional)</label>
-                <textarea id="metadata" placeholder="Keyword | Volume | Type&#10;digital marketing | 5000 | commercial&#10;SEO services | 3000 | informational"></textarea>
-                <p class="input-hint">Format: Keyword | Volume | Type (pipe-separated). Helps enrich your results.</p>
-            </div>
-
-            <div class="button-group">
-                <button class="btn-primary" onclick="processKeywords()">
-                    <span id="processBtn">Process Keywords</span>
+            <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 2px solid rgba(148, 163, 184, 0.2); padding-bottom: 1rem;">
+                <button class="tab-btn active" onclick="switchTab('upload')" style="padding: 0.75rem 1.5rem; background: none; border: none; color: #cbd5e1; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -1rem; transition: all 0.3s ease;">
+                    📁 Upload File (Easy)
                 </button>
-                <button class="btn-secondary" onclick="clearAll()">Clear All</button>
+                <button class="tab-btn" onclick="switchTab('paste')" style="padding: 0.75rem 1.5rem; background: none; border: none; color: #94a3b8; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -1rem; transition: all 0.3s ease;">
+                    📝 Paste Keywords (Manual)
+                </button>
+            </div>
+
+            <!-- UPLOAD TAB -->
+            <div id="uploadTab" class="tab-content active">
+                <div class="form-group">
+                    <label>Step 1️⃣: Upload Your File</label>
+                    <div class="file-upload-area" id="dropZone">
+                        <div class="upload-icon">📁</div>
+                        <div class="upload-text">Drag & drop your CSV or Excel file here</div>
+                        <div class="upload-subtext">or click to browse</div>
+                    </div>
+                    <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" />
+                    <div class="file-info" id="fileInfo"></div>
+                    <p class="input-hint">✅ Supported formats: CSV, XLSX, XLS</p>
+                    <p class="input-hint">💡 Format: Column A = Keywords, Column B = Volume, Column C = Type</p>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-primary" onclick="processKeywords()">
+                        <span id="processBtn">Process Keywords</span>
+                    </button>
+                    <button class="btn-secondary" onclick="clearAll()">Clear All</button>
+                </div>
+            </div>
+
+            <!-- PASTE TAB -->
+            <div id="pasteTab" class="tab-content hidden">
+                <div class="form-group">
+                    <label for="keywords">Step 1️⃣: Paste Keywords</label>
+                    <textarea id="keywords" placeholder="digital marketing&#10;digital marketing agency&#10;social media marketing&#10;SEO services"></textarea>
+                    <p class="input-hint">📝 One keyword per line OR comma-separated</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="metadata">Step 2️⃣: Paste Volume & Type (Optional)</label>
+                    <textarea id="metadata" placeholder="digital marketing | 5000 | commercial&#10;SEO services | 3000 | informational&#10;how to start blog | 1000 | informational"></textarea>
+                    <p class="input-hint">📊 Format: Keyword | Volume | Type (one per line, pipe-separated)</p>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-primary" onclick="processKeywords()">
+                        <span id="processBtn">Process Keywords</span>
+                    </button>
+                    <button class="btn-secondary" onclick="clearAll()">Clear All</button>
+                </div>
             </div>
         </div>
 
@@ -426,8 +670,35 @@
             </div>
 
             <div class="card">
-                <h2>🔗 Grouped Keywords</h2>
-                <div class="scroll-container" id="groupedKeywords"></div>
+                <h2>🔗 Grouped Keywords Table</h2>
+                
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <input type="text" id="searchInput" placeholder="🔍 Search keywords..." style="width: 100%; padding: 0.75rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(148, 163, 184, 0.3); border-radius: 8px; color: #e2e8f0; font-size: 0.95rem;">
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
+                    <button onclick="filterByCategory('all')" class="btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;">📊 All Categories</button>
+                    <button onclick="filterByCategory('service')" class="btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;">🛠️ Service Pages</button>
+                    <button onclick="filterByCategory('blog')" class="btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;">📝 Blog Posts</button>
+                    <button onclick="filterByCategory('case_study')" class="btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;">🏆 Case Studies</button>
+                </div>
+                
+                <div class="table-container">
+                    <table id="keywordTable">
+                        <thead>
+                            <tr>
+                                <th onclick="sortTable(0)">Primary Keyword ⬍</th>
+                                <th>Variants</th>
+                                <th onclick="sortTable(2)">Count ⬍</th>
+                                <th onclick="sortTable(3)">Category ⬍</th>
+                                <th onclick="sortTable(4)">Volume ⬍</th>
+                                <th>Type</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <div class="card">
@@ -439,8 +710,9 @@
                 <h2>💾 Export Data</h2>
                 <div class="export-buttons">
                     <button class="export-btn" onclick="exportToCSV()">📥 Export CSV</button>
-                    <button class="export-btn" onclick="exportToJSON()">📥 Export JSON</button>
-                    <button class="export-btn" onclick="copyToClipboard()">📋 Copy Results</button>
+                    <button class="export-btn" onclick="exportToExcel()">📊 Export Excel</button>
+                    <button class="export-btn" onclick="exportJSON()">📋 Export JSON</button>
+                    <button class="export-btn" onclick="copyToClipboard()">📋 Copy Table</button>
                 </div>
             </div>
         </div>
@@ -452,7 +724,124 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
     <script>
+        // File Upload Handlers
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) handleFile(files[0]);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) handleFile(e.target.files[0]);
+        });
+
+        function handleFile(file) {
+            const fileName = file.name;
+            const fileExt = fileName.split('.').pop().toLowerCase();
+
+            if (fileExt === 'csv') {
+                const reader = new FileReader();
+                reader.onload = (e) => parseCSV(e.target.result, fileName);
+                reader.readAsText(file);
+            } else if (['xlsx', 'xls'].includes(fileExt)) {
+                const reader = new FileReader();
+                reader.onload = (e) => parseExcel(e.target.result, fileName);
+                reader.readAsArrayBuffer(file);
+            } else {
+                alert('Please upload a CSV or Excel file');
+            }
+        }
+
+        function parseCSV(content, fileName) {
+            const lines = content.trim().split('\n');
+            let keywords = [];
+            let metadata = [];
+
+            // Try to detect if it has headers
+            const firstLine = lines[0];
+            const isMetadata = firstLine.includes('|') || firstLine.includes(',');
+
+            lines.forEach((line, index) => {
+                if (line.trim()) {
+                    if (isMetadata && line.includes('|')) {
+                        metadata.push(line);
+                    } else if (isMetadata && index === 0) {
+                        // Skip header
+                    } else {
+                        keywords.push(line);
+                    }
+                }
+            });
+
+            populateTextareas(keywords, metadata, fileName);
+        }
+
+        function parseExcel(arrayBuffer, fileName) {
+            try {
+                const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const data = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+
+                let keywords = [];
+                let metadata = [];
+
+                data.forEach((row, index) => {
+                    if (index === 0) return; // Skip header
+                    
+                    if (row.length >= 2) {
+                        // Has volume/type data
+                        const keyword = row[0]?.toString().trim();
+                        const volume = row[1]?.toString().trim();
+                        const type = row[2]?.toString().trim();
+                        
+                        if (keyword) {
+                            keywords.push(keyword);
+                            if (volume || type) {
+                                metadata.push(`${keyword} | ${volume || 0} | ${type || 'mixed'}`);
+                            }
+                        }
+                    } else if (row.length === 1 && row[0]) {
+                        keywords.push(row[0].toString().trim());
+                    }
+                });
+
+                populateTextareas(keywords, metadata, fileName);
+            } catch (error) {
+                alert('Error reading Excel file: ' + error.message);
+            }
+        }
+
+        function populateTextareas(keywords, metadata, fileName) {
+            const keywordCount = keywords.length;
+            const metadataCount = metadata.length;
+
+            document.getElementById('keywords').value = keywords.join('\n');
+            if (metadata.length > 0) {
+                document.getElementById('metadata').value = metadata.join('\n');
+            }
+
+            const fileInfo = document.getElementById('fileInfo');
+            fileInfo.innerHTML = `✅ Loaded: <strong>${fileName}</strong> | ${keywordCount} keywords | ${metadataCount} with metadata`;
+            fileInfo.classList.add('show');
+        }
+
         const levenshteinDistance = (s1, s2) => {
             const a = s1.toLowerCase();
             const b = s2.toLowerCase();
@@ -501,6 +890,27 @@
             if (maxScore === 0) return 'service';
             return Object.keys(scores).find(k => scores[k] === maxScore);
         };
+
+        function switchTab(tab) {
+            // Hide all tabs
+            document.getElementById('uploadTab').classList.remove('active');
+            document.getElementById('pasteTab').classList.remove('active');
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            // Show selected tab
+            if (tab === 'upload') {
+                document.getElementById('uploadTab').classList.add('active');
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+            } else {
+                document.getElementById('pasteTab').classList.add('active');
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+            }
+            
+            // Clear previous inputs
+            clearAll();
+        }
 
         function processKeywords() {
             const keywordInput = document.getElementById('keywords').value;
@@ -581,26 +991,16 @@
             document.getElementById('duplicatesRemoved').textContent = removed;
             document.getElementById('groupCount').textContent = groups.length;
 
-            const groupsHtml = groups.map(group => `
-                <div class="keyword-group">
-                    <div class="group-header">
-                        <div class="group-title">🎯 ${group.primary}</div>
-                        <div class="group-meta">
-                            <span class="badge badge-primary">${group.keywords.length} variants</span>
-                            <span class="badge badge-info">${getCategoryEmoji(group.category)} ${group.category.replace('_', ' ')}</span>
-                            ${group.volume ? `<span class="badge badge-success">📊 ${group.volume.toLocaleString()} vol</span>` : ''}
-                            ${group.type ? `<span class="badge badge-warning">${group.type}</span>` : ''}
-                        </div>
-                    </div>
-                    <div class="keywords-list">
-                        <span class="keyword-tag primary">${group.primary}</span>
-                        ${group.keywords.slice(1).map(kw => `<span class="keyword-tag">${kw}</span>`).join('')}
-                    </div>
-                </div>
-            `).join('');
+            // Store data globally for export
+            window.currentGroupData = groups;
 
-            document.getElementById('groupedKeywords').innerHTML = groupsHtml || '<p class="empty-state">No groups found</p>';
+            // Render table
+            renderTable(groups);
 
+            // Setup search
+            setTimeout(setupSearch, 100);
+
+            // Recommendations section
             const categoryStats = {};
             groups.forEach(g => {
                 if (!categoryStats[g.category]) categoryStats[g.category] = [];
@@ -628,35 +1028,183 @@
             return emojis[category] || '📄';
         }
 
-        function exportToCSV() {
-            const grouped = document.getElementById('groupedKeywords').innerText;
-            const csv = `Primary Keyword,Variants Count,Category,Volume,Type\n${
-                [...document.querySelectorAll('.keyword-group')].map(group => {
-                    const title = group.querySelector('.group-title').textContent.replace('🎯 ', '');
-                    const badges = group.querySelectorAll('.badge');
-                    const count = badges[0]?.textContent.match(/\d+/)?.[0] || '0';
-                    const category = badges[1]?.textContent || '';
-                    const volume = badges[2]?.textContent.match(/\d+/)?.[0] || '0';
-                    const type = badges[3]?.textContent || '';
-                    return `${title},${count},${category},${volume},${type}`;
-                }).join('\n')
-            }`;
-            downloadFile(csv, 'keywords.csv', 'text/csv');
+        function renderTable(groups) {
+            const tableBody = document.getElementById('tableBody');
+            const tableRows = groups.map(group => `
+                <tr>
+                    <td class="primary-keyword">${group.primary}</td>
+                    <td>
+                        <div class="variants-list">
+                            ${group.keywords.map(kw => `<div>${kw}</div>`).join('')}
+                        </div>
+                    </td>
+                    <td class="count-cell">${group.keywords.length}</td>
+                    <td>
+                        <span class="category-badge ${group.category}">
+                            ${getCategoryEmoji(group.category)} ${group.category.replace('_', ' ')}
+                        </span>
+                    </td>
+                    <td class="volume-cell">${group.volume ? group.volume.toLocaleString() : '—'}</td>
+                    <td>${group.type || '—'}</td>
+                </tr>
+            `).join('');
+
+            tableBody.innerHTML = tableRows || '<tr><td colspan="6" style="text-align: center; color: #94a3b8;">No data found</td></tr>';
         }
 
-        function exportToJSON() {
+        function filterByCategory(category) {
+            if (!window.currentGroupData) return;
+            
+            if (category === 'all') {
+                renderTable(window.currentGroupData);
+            } else {
+                const filtered = window.currentGroupData.filter(g => g.category === category);
+                renderTable(filtered);
+            }
+            document.getElementById('searchInput').value = '';
+        }
+
+        function sortTable(columnIndex) {
+            if (!window.currentGroupData) return;
+
+            const sorted = [...window.currentGroupData].sort((a, b) => {
+                let aVal, bVal;
+
+                switch(columnIndex) {
+                    case 0: // Primary Keyword
+                        aVal = a.primary.toLowerCase();
+                        bVal = b.primary.toLowerCase();
+                        return aVal.localeCompare(bVal);
+                    case 2: // Count
+                        aVal = a.keywords.length;
+                        bVal = b.keywords.length;
+                        return bVal - aVal;
+                    case 3: // Category
+                        aVal = a.category;
+                        bVal = b.category;
+                        return aVal.localeCompare(bVal);
+                    case 4: // Volume
+                        aVal = a.volume || 0;
+                        bVal = b.volume || 0;
+                        return bVal - aVal;
+                    default:
+                        return 0;
+                }
+            });
+
+            window.currentGroupData = sorted;
+            renderTable(sorted);
+            document.getElementById('searchInput').value = '';
+        }
+
+        function setupSearch() {
+            const searchInput = document.getElementById('searchInput');
+            if (!searchInput) return;
+
+            searchInput.addEventListener('keyup', (e) => {
+                if (!window.currentGroupData) return;
+                
+                const query = e.target.value.toLowerCase();
+                const filtered = window.currentGroupData.filter(group => 
+                    group.primary.toLowerCase().includes(query) ||
+                    group.keywords.some(kw => kw.toLowerCase().includes(query))
+                );
+
+                renderTable(filtered);
+            });
+        }
+
+        function exportToCSV() {
+            if (!window.currentGroupData) return;
+            
+            const headers = ['Primary Keyword', 'Variants', 'Count', 'Category', 'Volume', 'Type'];
+            const rows = window.currentGroupData.map(group => [
+                group.primary,
+                group.keywords.join('; '),
+                group.keywords.length,
+                group.category.replace('_', ' '),
+                group.volume || 0,
+                group.type || 'mixed'
+            ]);
+
+            let csv = headers.join(',') + '\n';
+            rows.forEach(row => {
+                csv += row.map(cell => {
+                    if (typeof cell === 'string' && cell.includes(',')) {
+                        return `"${cell}"`;
+                    }
+                    return cell;
+                }).join(',') + '\n';
+            });
+
+            downloadFile(csv, 'keywords-grouped.csv', 'text/csv');
+        }
+
+        function exportToExcel() {
+            if (!window.currentGroupData) return;
+
+            const data = [['Primary Keyword', 'Variants', 'Count', 'Category', 'Volume', 'Type']];
+            
+            window.currentGroupData.forEach(group => {
+                data.push([
+                    group.primary,
+                    group.keywords.join('; '),
+                    group.keywords.length,
+                    group.category.replace('_', ' '),
+                    group.volume || 0,
+                    group.type || 'mixed'
+                ]);
+            });
+
+            const worksheet = XLSX.utils.aoa_to_sheet(data);
+            
+            // Set column widths
+            worksheet['!cols'] = [
+                { wch: 30 },
+                { wch: 40 },
+                { wch: 8 },
+                { wch: 15 },
+                { wch: 12 },
+                { wch: 15 }
+            ];
+
+            // Style header row
+            for (let i = 0; i < 6; i++) {
+                const cell = worksheet[XLSX.utils.encode_col(i) + '1'];
+                if (cell) {
+                    cell.s = {
+                        font: { bold: true, color: { rgb: 'FFFFFF' } },
+                        fill: { fgColor: { rgb: '334155' } },
+                        alignment: { horizontal: 'left', vertical: 'center' }
+                    };
+                }
+            }
+
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Keywords');
+            XLSX.writeFile(workbook, 'keywords-grouped.xlsx');
+        }
+
+        function exportJSON() {
+            if (!window.currentGroupData) return;
+            
             const data = {
                 exportDate: new Date().toISOString(),
-                totalKeywords: document.getElementById('totalKeywords').textContent,
-                deduplicatedCount: document.getElementById('deduplicatedCount').textContent,
-                groupCount: document.getElementById('groupCount').textContent,
-                groups: [...document.querySelectorAll('.keyword-group')].map(group => {
-                    const title = group.querySelector('.group-title').textContent.replace('🎯 ', '');
-                    const keywords = [...group.querySelectorAll('.keyword-tag')].map(tag => tag.textContent);
-                    return { primary: title, variants: keywords.slice(1), count: keywords.length };
-                })
+                summary: {
+                    totalGroups: window.currentGroupData.length,
+                    totalKeywords: window.currentGroupData.reduce((sum, g) => sum + g.keywords.length, 0)
+                },
+                groups: window.currentGroupData.map(group => ({
+                    primary: group.primary,
+                    variants: group.keywords,
+                    count: group.keywords.length,
+                    category: group.category,
+                    volume: group.volume,
+                    type: group.type
+                }))
             };
-            downloadFile(JSON.stringify(data, null, 2), 'keywords.json', 'application/json');
+            
+            downloadFile(JSON.stringify(data, null, 2), 'keywords-grouped.json', 'application/json');
         }
 
         function downloadFile(content, filename, type) {
@@ -670,9 +1218,22 @@
         }
 
         function copyToClipboard() {
-            const text = document.getElementById('groupedKeywords').innerText;
+            if (!window.currentGroupData) return;
+
+            let text = 'Primary Keyword\tVariants\tCount\tCategory\tVolume\tType\n';
+            window.currentGroupData.forEach(group => {
+                text += `${group.primary}\t${group.keywords.join('; ')}\t${group.keywords.length}\t${group.category.replace('_', ' ')}\t${group.volume || 0}\t${group.type || 'mixed'}\n`;
+            });
+
             navigator.clipboard.writeText(text).then(() => {
-                alert('✅ Results copied to clipboard!');
+                const btn = event.target;
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '✅ Copied!';
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                }, 2000);
+            }).catch(() => {
+                alert('Failed to copy to clipboard');
             });
         }
 
