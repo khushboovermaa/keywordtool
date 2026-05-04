@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keyword Manager Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #60a5fa, #34d399);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: #94a3b8;
+        }
+
+        .input-section {
+            background: linear-gradient(135deg, rgba(51, 65, 85, 0.5), rgba(30, 41, 59, 0.5));
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: #cbd5e1;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 8px;
+            color: #e2e8f0;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            resize: vertical;
+            min-height: 120px;
+            transition: all 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: rgba(96, 165, 250, 0.5);
+            background: rgba(15, 23, 42, 1);
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+        }
+
+        .input-hint {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-top: 0.5rem;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #60a5fa, #3b82f6);
+            color: white;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(96, 165, 250, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(148, 163, 184, 0.2);
+            color: #cbd5e1;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(148, 163, 184, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #34d399, #10b981);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(52, 211, 153, 0.3);
+        }
+
+        .results-section {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        .card {
+            background: linear-gradient(135deg, rgba(51, 65, 85, 0.3), rgba(30, 41, 59, 0.3));
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .card h2 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #e2e8f0;
+        }
+
+        .card h2::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(135deg, #60a5fa, #34d399);
+            border-radius: 2px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-box {
+            background: rgba(15, 23, 42, 0.8);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 3px solid #60a5fa;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #34d399;
+        }
+
+        .keyword-group {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.15);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.75rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .group-title {
+            font-weight: 600;
+            color: #cbd5e1;
+            font-size: 1rem;
+        }
+
+        .group-meta {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .badge-primary {
+            background: rgba(96, 165, 250, 0.2);
+            color: #60a5fa;
+        }
+
+        .badge-success {
+            background: rgba(52, 211, 153, 0.2);
+            color: #34d399;
+        }
+
+        .badge-warning {
+            background: rgba(251, 146, 60, 0.2);
+            color: #fb923c;
+        }
+
+        .badge-info {
+            background: rgba(168, 85, 247, 0.2);
+            color: #a855f7;
+        }
+
+        .keywords-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .keyword-tag {
+            background: rgba(71, 85, 105, 0.5);
+            color: #cbd5e1;
+            padding: 0.4rem 0.85rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .keyword-tag.primary {
+            background: rgba(96, 165, 250, 0.15);
+            color: #60a5fa;
+            border-color: rgba(96, 165, 250, 0.3);
+            font-weight: 600;
+        }
+
+        .category-icon {
+            display: inline-block;
+            margin-right: 0.3rem;
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .export-btn {
+            padding: 0.75rem 1.25rem;
+            background: linear-gradient(135deg, #a855f7, #7c3aed);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(168, 85, 247, 0.3);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #94a3b8;
+        }
+
+        .loader {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(96, 165, 250, 0.3);
+            border-top-color: #60a5fa;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn-primary {
+                flex: 1;
+            }
+
+            .stats {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .scroll-container {
+            max-height: 600px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .scroll-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .scroll-container::-webkit-scrollbar-track {
+            background: rgba(148, 163, 184, 0.1);
+            border-radius: 3px;
+        }
+
+        .scroll-container::-webkit-scrollbar-thumb {
+            background: rgba(96, 165, 250, 0.3);
+            border-radius: 3px;
+        }
+
+        .scroll-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(96, 165, 250, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 Keyword Manager Pro</h1>
+            <p class="subtitle">Smart keyword grouping, deduplication, and SEO categorization</p>
+        </header>
+
+        <div class="input-section">
+            <div class="form-group">
+                <label for="keywords">Step 1: Paste Your Keywords</label>
+                <textarea id="keywords" placeholder="digital marketing, digital marketing agency, digital amkretnmg&#10;social media marketing, social media marketing agency&#10;SEO services, search engine optimization..."></textarea>
+                <p class="input-hint">One keyword per line or comma-separated</p>
+            </div>
+
+            <div class="form-group">
+                <label for="metadata">Step 2: Paste Your Metadata (Optional)</label>
+                <textarea id="metadata" placeholder="Keyword | Volume | Type&#10;digital marketing | 5000 | commercial&#10;SEO services | 3000 | informational"></textarea>
+                <p class="input-hint">Format: Keyword | Volume | Type (pipe-separated). Helps enrich your results.</p>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-primary" onclick="processKeywords()">
+                    <span id="processBtn">Process Keywords</span>
+                </button>
+                <button class="btn-secondary" onclick="clearAll()">Clear All</button>
+            </div>
+        </div>
+
+        <div id="resultsContainer" class="hidden results-section">
+            <div class="card">
+                <h2>📊 Analysis Summary</h2>
+                <div class="stats">
+                    <div class="stat-box">
+                        <div class="stat-label">Total Keywords</div>
+                        <div class="stat-value" id="totalKeywords">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">After Deduplication</div>
+                        <div class="stat-value" id="deduplicatedCount">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Keyword Groups</div>
+                        <div class="stat-value" id="groupCount">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Duplicates Removed</div>
+                        <div class="stat-value" id="duplicatesRemoved">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>🔗 Grouped Keywords</h2>
+                <div class="scroll-container" id="groupedKeywords"></div>
+            </div>
+
+            <div class="card">
+                <h2>📑 Content Type Recommendations</h2>
+                <div id="recommendations"></div>
+            </div>
+
+            <div class="card">
+                <h2>💾 Export Data</h2>
+                <div class="export-buttons">
+                    <button class="export-btn" onclick="exportToCSV()">📥 Export CSV</button>
+                    <button class="export-btn" onclick="exportToJSON()">📥 Export JSON</button>
+                    <button class="export-btn" onclick="copyToClipboard()">📋 Copy Results</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="emptyState" class="card">
+            <div class="empty-state">
+                <p>👆 Enter keywords above to get started</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const levenshteinDistance = (s1, s2) => {
+            const a = s1.toLowerCase();
+            const b = s2.toLowerCase();
+            const arr = [];
+            for (let i = 0; i <= b.length; i++) arr[i] = [i];
+            for (let j = 0; j <= a.length; j++) arr[0][j] = j;
+            for (let i = 1; i <= b.length; i++) {
+                for (let j = 1; j <= a.length; j++) {
+                    const cost = a[j - 1] === b[i - 1] ? 0 : 1;
+                    arr[i][j] = Math.min(arr[i][j - 1] + 1, arr[i - 1][j] + 1, arr[i - 1][j - 1] + cost);
+                }
+            }
+            return arr[b.length][a.length];
+        };
+
+        const isSimilar = (s1, s2, threshold = 0.75) => {
+            const maxLen = Math.max(s1.length, s2.length);
+            if (maxLen === 0) return true;
+            const distance = levenshteinDistance(s1, s2);
+            const similarity = 1 - distance / maxLen;
+            return similarity >= threshold;
+        };
+
+        const cleanKeyword = (keyword) => {
+            return keyword.trim().toLowerCase().replace(/\s+/g, ' ').replace(/[^a-z0-9\s]/g, '');
+        };
+
+        const categorizeKeyword = (keyword) => {
+            const content_keywords = {
+                'blog': ['how to', 'why', 'what is', 'guide', 'tutorial', 'tips', 'best practices', 'beginner', 'learn'],
+                'service': ['services', 'solutions', 'agency', 'company', 'provider', 'help', 'professional', 'hire', 'get'],
+                'case_study': ['case study', 'results', 'success', 'before after', 'portfolio', 'project', 'client', 'accomplished']
+            };
+
+            let scores = { blog: 0, service: 0, case_study: 0 };
+
+            for (const word of keyword.toLowerCase().split(/\s+/)) {
+                for (const [type, triggers] of Object.entries(content_keywords)) {
+                    if (triggers.some(trigger => trigger.includes(word) || word.includes(trigger))) {
+                        scores[type]++;
+                    }
+                }
+            }
+
+            const maxScore = Math.max(...Object.values(scores));
+            if (maxScore === 0) return 'service';
+            return Object.keys(scores).find(k => scores[k] === maxScore);
+        };
+
+        function processKeywords() {
+            const keywordInput = document.getElementById('keywords').value;
+            const metadataInput = document.getElementById('metadata').value;
+
+            if (!keywordInput.trim()) {
+                alert('Please enter at least one keyword');
+                return;
+            }
+
+            document.getElementById('processBtn').textContent = 'Processing...';
+
+            setTimeout(() => {
+                const keywords = keywordInput
+                    .split(/[,\n]+/)
+                    .map(k => cleanKeyword(k))
+                    .filter(k => k.length > 0);
+
+                const originalCount = keywords.length;
+                const uniqueKeywords = [...new Set(keywords)];
+                const duplicatesCount = originalCount - uniqueKeywords.length;
+
+                const metadata = {};
+                if (metadataInput.trim()) {
+                    metadataInput.split('\n').forEach(line => {
+                        const [keyword, volume, type] = line.split('|').map(x => x.trim());
+                        if (keyword) {
+                            metadata[cleanKeyword(keyword)] = { volume: parseInt(volume) || 0, type: type || 'mixed' };
+                        }
+                    });
+                }
+
+                const groups = [];
+                const processed = new Set();
+
+                for (const keyword of uniqueKeywords) {
+                    if (processed.has(keyword)) continue;
+
+                    const group = [keyword];
+                    processed.add(keyword);
+
+                    for (const otherKeyword of uniqueKeywords) {
+                        if (!processed.has(otherKeyword) && isSimilar(keyword, otherKeyword)) {
+                            group.push(otherKeyword);
+                            processed.add(otherKeyword);
+                        }
+                    }
+
+                    groups.push(group.sort((a, b) => b.length - a.length));
+                }
+
+                const groupedData = groups.map(group => {
+                    const primary = group[0];
+                    const category = categorizeKeyword(primary);
+                    const meta = metadata[primary] || { volume: 0, type: 'mixed' };
+                    
+                    return {
+                        primary,
+                        keywords: group,
+                        category,
+                        volume: meta.volume,
+                        type: meta.type,
+                        count: group.length
+                    };
+                }).sort((a, b) => (b.volume || 0) - (a.volume || 0));
+
+                displayResults(originalCount, uniqueKeywords.length, duplicatesCount, groupedData);
+                document.getElementById('processBtn').textContent = 'Process Keywords';
+            }, 300);
+        }
+
+        function displayResults(original, deduplicated, removed, groups) {
+            document.getElementById('emptyState').classList.add('hidden');
+            document.getElementById('resultsContainer').classList.remove('hidden');
+
+            document.getElementById('totalKeywords').textContent = original;
+            document.getElementById('deduplicatedCount').textContent = deduplicated;
+            document.getElementById('duplicatesRemoved').textContent = removed;
+            document.getElementById('groupCount').textContent = groups.length;
+
+            const groupsHtml = groups.map(group => `
+                <div class="keyword-group">
+                    <div class="group-header">
+                        <div class="group-title">🎯 ${group.primary}</div>
+                        <div class="group-meta">
+                            <span class="badge badge-primary">${group.keywords.length} variants</span>
+                            <span class="badge badge-info">${getCategoryEmoji(group.category)} ${group.category.replace('_', ' ')}</span>
+                            ${group.volume ? `<span class="badge badge-success">📊 ${group.volume.toLocaleString()} vol</span>` : ''}
+                            ${group.type ? `<span class="badge badge-warning">${group.type}</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="keywords-list">
+                        <span class="keyword-tag primary">${group.primary}</span>
+                        ${group.keywords.slice(1).map(kw => `<span class="keyword-tag">${kw}</span>`).join('')}
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('groupedKeywords').innerHTML = groupsHtml || '<p class="empty-state">No groups found</p>';
+
+            const categoryStats = {};
+            groups.forEach(g => {
+                if (!categoryStats[g.category]) categoryStats[g.category] = [];
+                categoryStats[g.category].push(g);
+            });
+
+            const recommendationsHtml = Object.entries(categoryStats).map(([category, items]) => `
+                <div class="keyword-group">
+                    <div class="group-header">
+                        <div class="group-title">${getCategoryEmoji(category)} ${category.replace('_', ' ').toUpperCase()}</div>
+                        <span class="badge badge-primary">${items.length} keywords</span>
+                    </div>
+                    <div class="keywords-list">
+                        ${items.slice(0, 10).map(item => `<span class="keyword-tag">${item.primary}</span>`).join('')}
+                        ${items.length > 10 ? `<span class="keyword-tag">+${items.length - 10} more</span>` : ''}
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('recommendations').innerHTML = recommendationsHtml;
+        }
+
+        function getCategoryEmoji(category) {
+            const emojis = { blog: '📝', service: '🛠️', case_study: '🏆' };
+            return emojis[category] || '📄';
+        }
+
+        function exportToCSV() {
+            const grouped = document.getElementById('groupedKeywords').innerText;
+            const csv = `Primary Keyword,Variants Count,Category,Volume,Type\n${
+                [...document.querySelectorAll('.keyword-group')].map(group => {
+                    const title = group.querySelector('.group-title').textContent.replace('🎯 ', '');
+                    const badges = group.querySelectorAll('.badge');
+                    const count = badges[0]?.textContent.match(/\d+/)?.[0] || '0';
+                    const category = badges[1]?.textContent || '';
+                    const volume = badges[2]?.textContent.match(/\d+/)?.[0] || '0';
+                    const type = badges[3]?.textContent || '';
+                    return `${title},${count},${category},${volume},${type}`;
+                }).join('\n')
+            }`;
+            downloadFile(csv, 'keywords.csv', 'text/csv');
+        }
+
+        function exportToJSON() {
+            const data = {
+                exportDate: new Date().toISOString(),
+                totalKeywords: document.getElementById('totalKeywords').textContent,
+                deduplicatedCount: document.getElementById('deduplicatedCount').textContent,
+                groupCount: document.getElementById('groupCount').textContent,
+                groups: [...document.querySelectorAll('.keyword-group')].map(group => {
+                    const title = group.querySelector('.group-title').textContent.replace('🎯 ', '');
+                    const keywords = [...group.querySelectorAll('.keyword-tag')].map(tag => tag.textContent);
+                    return { primary: title, variants: keywords.slice(1), count: keywords.length };
+                })
+            };
+            downloadFile(JSON.stringify(data, null, 2), 'keywords.json', 'application/json');
+        }
+
+        function downloadFile(content, filename, type) {
+            const blob = new Blob([content], { type });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function copyToClipboard() {
+            const text = document.getElementById('groupedKeywords').innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('✅ Results copied to clipboard!');
+            });
+        }
+
+        function clearAll() {
+            document.getElementById('keywords').value = '';
+            document.getElementById('metadata').value = '';
+            document.getElementById('resultsContainer').classList.add('hidden');
+            document.getElementById('emptyState').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
