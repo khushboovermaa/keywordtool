@@ -1178,16 +1178,34 @@ function processKeywords() {
   btn.disabled = true;
 
   setTimeout(() => {
-    const raw = kwInput.split(/[,\n]+/).map(clean).filter(k => k.length > 0);
+    // Split on newlines only — NOT commas (commas are CSV field separators, not keyword separators)
+    const raw = kwInput.split('\n').map(clean).filter(k => k.length > 1);
     const unique = [...new Set(raw)];
-    const relevant = unique.filter(k => !isIrrelevant(k));
+
+    // ── Quality pre-filter: strip obvious non-keywords before relevance check ──
+    const META_ONLY = new Set(['informational','commercial','transactional','navigational',
+      'mixed','blog','service','high','low','medium','unknown','branded','unbranded',
+      'yes','no','na','n a','none','other']);
+    const relevant = unique.filter(k => {
+      if (k.length < 3) return false;                     // too short
+      if (/^\d[\d\s,\.]*$/.test(k)) return false;         // pure number / formatted number ("1,900")
+      if (META_ONLY.has(k.toLowerCase())) return false;   // lone metadata word
+      if (isIrrelevant(k)) return false;                  // relevance blacklist
+      return true;
+    });
     const filteredCount = unique.length - relevant.length;
 
     const meta = {};
     if (metaInput.trim()) {
       metaInput.split('\n').forEach(line => {
-        const [kw, vol, tp] = line.split('|').map(x => x.trim());
-        if (kw) meta[clean(kw)] = { volume: parseInt(vol)||0, type: tp||'mixed' };
+        if (!line.trim()) return;
+        const parts = line.split('|').map(x => x.trim());
+        const kw = parts[0]; const vol = parts[1]; const tp = parts[2]; const vars = parts[3] || '';
+        if (kw) meta[clean(kw)] = {
+          volume: parseInt((vol||'').replace(/[,\s]/g,'')) || 0,
+          type: tp || 'mixed',
+          variants: vars ? vars.split(/[;,]+/).map(v=>v.trim()).filter(Boolean) : []
+        };
       });
     }
 
@@ -1208,8 +1226,9 @@ function processKeywords() {
 
     allData = groups.map(group => {
       const primary = group[0];
-      const m = meta[primary] || { volume:0, type:'mixed' };
-      return { primary, keywords: group, category: categorize(primary), volume: m.volume, type: m.type };
+      const m = meta[primary] || { volume:0, type:'mixed', variants:[] };
+      const allVariants = [...new Set([...group.slice(1), ...(m.variants||[])])];
+      return { primary, keywords: allVariants, category: categorize(primary), volume: m.volume, type: m.type };
     }).sort((a,b) => (b.volume||0) - (a.volume||0));
 
     // Stats
@@ -1234,6 +1253,15 @@ function processKeywords() {
 // ════════════════════════════════════════════════
 // TABLE RENDERING
 // ════════════════════════════════════════════════
+function toggleVariants(i) {
+  const row = document.getElementById(`variants-${i}`);
+  const btn = document.getElementById(`vbtn-${i}`);
+  if (!row) return;
+  const open = row.style.display !== 'none';
+  row.style.display = open ? 'none' : 'table-row';
+  btn.textContent = open ? `▼ All ${filteredData[i].keywords.length}` : `▲ Hide`;
+}
+
 function renderTable() {
   const tbody = document.getElementById('tableBody');
   const catColors = { blog:'blog', service:'service', case_study:'case_study' };
@@ -1248,18 +1276,31 @@ function renderTable() {
   tbody.innerHTML = filteredData.map((row, i) => {
     const vol = row.volume > 0 ? row.volume.toLocaleString() : '—';
     const volClass = row.volume > 0 ? '' : 'zero';
+    const hasKws = row.keywords && row.keywords.length > 0;
+    const kwPreview = hasKws ? row.keywords.slice(0,3).join(' · ') + (row.keywords.length > 3 ? ` +${row.keywords.length-3} more` : '') : '—';
     return `
-    <tr>
+    <tr id="row-${i}">
       <td class="row-num">${i+1}</td>
       <td class="td-keyword"><span title="${row.primary}">${row.primary}</span></td>
-      <td class="td-variants" style="text-align:center"><span class="count-badge">${row.keywords.length}</span></td>
+      <td style="max-width:320px;">
+        <div style="font-size:0.78rem;color:var(--muted);line-height:1.5;">${kwPreview}</div>
+        ${hasKws ? `<button onclick="toggleVariants(${i})" style="margin-top:4px;padding:2px 8px;background:var(--blue-dim);border:1px solid rgba(59,130,246,0.2);border-radius:4px;color:var(--blue);font-size:0.7rem;cursor:pointer;font-family:var(--sans);" id="vbtn-${i}">▼ All ${row.keywords.length}</button>` : ''}
+      </td>
       <td><span class="cat-badge ${catColors[row.category]}">${catLabels[row.category]}</span></td>
       <td class="td-vol ${volClass}">${vol}</td>
       <td class="td-type">${row.type||'—'}</td>
       <td style="text-align:center">
         <button class="btn-gen" id="genBtn-${i}" onclick="openModal(${i})">✍️ Generate</button>
       </td>
-    </tr>`;
+    </tr>
+    ${hasKws ? `<tr id="variants-${i}" style="display:none;background:rgba(15,23,42,0.5);">
+      <td colspan="7" style="padding:0.75rem 1rem 1rem 2.5rem;">
+        <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);margin-bottom:0.5rem;">Secondary Keywords</div>
+        <div style="display:flex;flex-wrap:wrap;gap:0.4rem;">
+          ${row.keywords.map(k=>`<span style="background:var(--surface2);border:1px solid var(--border2);border-radius:4px;padding:0.25rem 0.6rem;font-size:0.78rem;color:var(--text);">${k}</span>`).join('')}
+        </div>
+      </td>
+    </tr>` : ''}`;
   }).join('');
 
   document.getElementById('tableInfo').textContent =
@@ -1668,7 +1709,7 @@ function dlFile(content, name, type) {
 }
 
 // ════════════════════════════════════════════════
-// FILE UPLOAD
+// FILE UPLOAD  —  Proper CSV + Excel parsing
 // ════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
   const dz = document.getElementById('dropZone');
@@ -1691,45 +1732,121 @@ document.addEventListener('DOMContentLoaded', () => {
       reader.readAsText(file);
     } else if (['xlsx','xls'].includes(ext)) {
       if (!window.__xlsxOK || !window.XLSX) {
-        alert('Excel support is still loading — please wait a moment and try again, or save your file as CSV and upload that instead.');
+        alert('Excel support is still loading — please wait a moment, or save as CSV and upload that instead.');
         return;
       }
       reader.onload = e => parseExcel(e.target.result, file.name);
       reader.readAsArrayBuffer(file);
-    } else { alert('Please upload CSV or Excel'); }
+    } else { alert('Please upload a CSV or Excel (.xlsx/.xls) file.'); }
   }
 
+  // ── Parse a single CSV line correctly (handles quoted commas) ──
+  function splitCSVLine(line) {
+    const cols = [];
+    let cur = '', inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      if (line[i] === '"') { inQ = !inQ; }
+      else if (line[i] === ',' && !inQ) { cols.push(cur.trim().replace(/^"|"$/g,'')); cur = ''; }
+      else { cur += line[i]; }
+    }
+    cols.push(cur.trim().replace(/^"|"$/g,''));
+    return cols;
+  }
+
+  // ── CSV parser: reads keyword, volume, type per row ──
   function parseCSV(content, name) {
-    const lines = content.trim().split('\n');
+    const lines = content.trim().split(/\r?\n/);
     const kws = [], metas = [];
+    let kwCol=0, volCol=1, typeCol=2;
+    let headerRow = true;
+
     lines.forEach((line, i) => {
-      if (i === 0 && line.toLowerCase().includes('keyword')) return;
-      if (line.trim()) {
-        if (line.includes('|')) metas.push(line);
-        else kws.push(line.trim());
+      if (!line.trim()) return;
+      const cols = splitCSVLine(line);
+
+      // Auto-detect header row
+      if (i === 0) {
+        const lc = cols.map(c => c.toLowerCase().trim());
+        if (lc.some(c => c.includes('keyword') || c === 'kw' || c === 'primary keyword')) {
+          lc.forEach((h, idx) => {
+            if ((h.includes('primary') && h.includes('keyword')) || h === 'keyword' || h === 'kw') kwCol = idx;
+            if (h === 'volume' || h === 'search volume' || h === 'vol' || h === 'avg. monthly searches') volCol = idx;
+            if (h === 'type' || h === 'intent' || h === 'keyword intent') typeCol = idx;
+          });
+          return; // skip header
+        }
+        headerRow = false; // no header — start from row 0
       }
+
+      const kw = cols[kwCol] || '';
+      if (!kw || kw.length < 2) return;
+
+      kws.push(kw);
+      const vol = cols[volCol] || '';
+      const tp  = cols[typeCol] || 'mixed';
+      metas.push(`${kw} | ${vol || 0} | ${tp}`);
     });
+
     populate(kws, metas, name);
   }
 
+  // ── Excel parser: auto-detects column layout ──
   function parseExcel(buf, name) {
     if (!window.__xlsxOK || !window.XLSX) { alert('Excel library not loaded. Please use CSV instead.'); return; }
-    const wb = XLSX.read(buf, { type:'array' });
-    const data = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header:1 });
-    const kws = [], metas = [];
-    data.forEach((row, i) => {
-      if (i === 0) return;
-      if (row && row[0]) {
-        kws.push(row[0].toString().trim());
-        if (row[1] || row[2]) metas.push(`${row[0]} | ${row[1]||0} | ${row[2]||'mixed'}`);
+    try {
+      const wb   = XLSX.read(buf, { type:'array' });
+      const data = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header:1, raw:false, defval:'' });
+      if (!data.length) { alert('No data found in file'); return; }
+
+      const kws = [], metas = [];
+
+      // Detect column indices from header row
+      const hdr = (data[0] || []).map(h => (h||'').toString().toLowerCase().trim());
+      let kwCol=0, volCol=-1, typeCol=-1, varCol=-1;
+
+      hdr.forEach((h, i) => {
+        if (h === 'primary keyword' || h === 'keyword' || h === 'kw') kwCol = i;
+        if (h === 'volume' || h === 'search volume' || h === 'avg. monthly searches') volCol = i;
+        if (h === 'type' || h === 'intent' || h === 'keyword intent') typeCol = i;
+        if (h === 'variants' || h === 'secondary keywords' || h === 'related keywords') varCol = i;
+      });
+
+      // Fallback column guessing if no named headers found
+      if (volCol === -1) {
+        // Look for a column that's mostly numbers
+        for (let c = 1; c < Math.min(hdr.length, 6); c++) {
+          const vals = data.slice(1,10).map(r => r[c]).filter(v=>v!=='');
+          const nums = vals.filter(v => !isNaN(parseInt(v)));
+          if (nums.length > vals.length * 0.5) { volCol = c; break; }
+        }
       }
-    });
-    populate(kws, metas, name);
+      if (typeCol === -1 && hdr.length > 2) typeCol = hdr.length - 1;
+
+      const hasHeader = hdr.some(h => h.includes('keyword') || h.includes('volume') || h.includes('type'));
+      const startRow  = hasHeader ? 1 : 0;
+
+      for (let i = startRow; i < data.length; i++) {
+        const row = data[i];
+        if (!row || !row[kwCol]) continue;
+        const kw = row[kwCol].toString().trim();
+        if (!kw || kw.length < 2) continue;
+
+        kws.push(kw);
+
+        const vol = volCol >= 0 ? (row[volCol]||'').toString().trim() : '';
+        const tp  = typeCol >= 0 ? (row[typeCol]||'mixed').toString().trim() : 'mixed';
+        const variants = varCol >= 0 ? (row[varCol]||'').toString().trim() : '';
+
+        metas.push(`${kw} | ${vol || 0} | ${tp}${variants ? ' | ' + variants : ''}`);
+      }
+
+      populate(kws, metas, name);
+    } catch (err) { alert('Error reading Excel: ' + err.message); }
   }
 
   function populate(kws, metas, name) {
-    document.getElementById('kwInput').value = kws.join('\n');
-    if (metas.length) document.getElementById('metaInput').value = metas.join('\n');
+    document.getElementById('kwInput').value   = kws.join('\n');
+    document.getElementById('metaInput').value = metas.join('\n');
     const badge = document.getElementById('fileBadge');
     badge.innerHTML = `✅ <strong>${name}</strong> — ${kws.length} keywords loaded`;
     badge.classList.add('show');
