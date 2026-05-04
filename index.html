@@ -4,6 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Keyword Manager Pro</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        // Fallback if CDN fails
+        window.addEventListener('error', function(e) {
+            if (e.target && e.target.src && e.target.src.includes('xlsx')) {
+                var s = document.createElement('script');
+                s.src = 'https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js';
+                document.head.appendChild(s);
+            }
+        }, true);
+    </script>
     <style>
         * {
             margin: 0;
@@ -724,7 +735,6 @@
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
     <script>
         // Wait for DOM to be fully loaded
         document.addEventListener('DOMContentLoaded', function() {
@@ -826,6 +836,9 @@
 
             function parseExcel(arrayBuffer, fileName) {
                 try {
+                    if (typeof XLSX === 'undefined') {
+                        throw new Error('XLSX library failed to load. Please refresh the page and try again.');
+                    }
                     const workbook = XLSX.read(arrayBuffer, { type: 'array' });
                     const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                     const data = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
