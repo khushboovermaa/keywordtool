@@ -688,6 +688,20 @@ tbody tr:nth-child(even):hover { background: rgba(59,130,246,0.04); }
 
   <div class="dash-header">
     <div class="dash-title">Keyword Dashboard <span id="dashSubtitle"></span></div>
+    <!-- Download bar -->
+    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
+      <button onclick="exportToCSV()" style="padding:0.55rem 1.1rem;background:var(--green);color:#fff;border:none;border-radius:8px;font-weight:700;font-size:0.85rem;cursor:pointer;font-family:var(--sans);">⬇️ Download CSV</button>
+      <button onclick="exportToExcel()" style="padding:0.55rem 1.1rem;background:var(--blue);color:#fff;border:none;border-radius:8px;font-weight:700;font-size:0.85rem;cursor:pointer;font-family:var(--sans);">⬇️ Download Excel</button>
+      <button onclick="exportJSON()" style="padding:0.55rem 1.1rem;background:var(--surface2);color:var(--muted);border:1px solid var(--border2);border-radius:8px;font-weight:600;font-size:0.85rem;cursor:pointer;font-family:var(--sans);">⬇️ JSON</button>
+    </div>
+  </div>
+
+  <!-- API Key notice bar -->
+  <div id="apiKeyBar" style="background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.3);border-radius:10px;padding:0.85rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+    <span style="font-size:0.85rem;color:var(--purple);font-weight:600;">🔑 Content Generation needs your Anthropic API Key</span>
+    <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." style="flex:1;min-width:260px;padding:0.55rem 0.85rem;background:var(--bg);border:1px solid rgba(139,92,246,0.4);border-radius:7px;color:var(--text);font-size:0.85rem;font-family:var(--mono);">
+    <button onclick="saveApiKey()" style="padding:0.55rem 1rem;background:var(--purple);color:#fff;border:none;border-radius:7px;font-weight:700;font-size:0.82rem;cursor:pointer;font-family:var(--sans);white-space:nowrap;">Save Key</button>
+    <span id="apiKeyStatus" style="font-size:0.8rem;color:var(--muted);">Key stored in browser only — never sent anywhere except Anthropic</span>
   </div>
 
   <!-- Stat Cards -->
@@ -1340,6 +1354,20 @@ async function runGenerate() {
   document.getElementById('configArea').style.display = 'none';
   document.getElementById('genLoadingState').classList.add('show');
 
+  // Check API key
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    document.getElementById('genLoadingState').classList.remove('show');
+    document.getElementById('configArea').style.display = 'block';
+    document.getElementById('mGenBtn').disabled = false;
+    closeModal();
+    document.getElementById('apiKeyBar').style.display = 'flex';
+    document.getElementById('apiKeyStatus').textContent = '⬆ Enter your key above, then try again';
+    document.getElementById('apiKeyStatus').style.color = 'var(--amber)';
+    alert('Enter your Anthropic API key first — see the purple bar at the top of the dashboard.');
+    return;
+  }
+
   // Update the row button
   const genBtn = document.getElementById(`genBtn-${activeRowIdx}`);
   if (genBtn) {
@@ -1391,7 +1419,12 @@ A: 2-sentence answer]`;
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-allow-browser': 'true'
+      },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 4096,
@@ -1457,7 +1490,23 @@ function extract(text, startTag, endTag) {
 }
 
 // ════════════════════════════════════════════════
-// DOC DOWNLOAD
+// API KEY MANAGEMENT
+// ════════════════════════════════════════════════
+function saveApiKey() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (!key || !key.startsWith('sk-ant-')) {
+    document.getElementById('apiKeyStatus').textContent = '❌ Invalid — key must start with sk-ant-';
+    document.getElementById('apiKeyStatus').style.color = 'var(--red)';
+    return;
+  }
+  sessionStorage.setItem('anthropic_key', key);
+  document.getElementById('apiKeyStatus').textContent = '✅ Saved for this session';
+  document.getElementById('apiKeyStatus').style.color = 'var(--green)';
+  document.getElementById('apiKeyInput').value = '••••••••••••••••';
+  setTimeout(() => { document.getElementById('apiKeyBar').style.display = 'none'; }, 1800);
+}
+
+function getApiKey() { return sessionStorage.getItem('anthropic_key') || ''; }
 // ════════════════════════════════════════════════
 function downloadDoc() {
   if (!lastGenData) return;
@@ -1710,6 +1759,14 @@ function switchTab(tab) {
 // Close modal on overlay click
 document.getElementById('genModal').addEventListener('click', e => {
   if (e.target === document.getElementById('genModal')) closeModal();
+});
+
+// Restore API key bar state
+document.addEventListener('DOMContentLoaded', () => {
+  if (sessionStorage.getItem('anthropic_key')) {
+    const bar = document.getElementById('apiKeyBar');
+    if (bar) bar.style.display = 'none';
+  }
 });
 </script>
 </body>
