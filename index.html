@@ -665,7 +665,7 @@ tbody tr:nth-child(even):hover { background: rgba(59,130,246,0.04); }
       </div>
       <input type="file" id="fileInput" accept=".csv,.xlsx,.xls">
       <div class="file-badge" id="fileBadge"></div>
-      <p class="hint">✅ Supported: CSV, XLSX, XLS — Column A = Keyword, B = Volume, C = Type</p>
+      <p class="hint" id="xlsxHint">⏳ Loading Excel support…</p>
     </div>
 
     <!-- Paste Tab -->
@@ -886,27 +886,44 @@ tbody tr:nth-child(even):hover { background: rgba(59,130,246,0.04); }
 </div>
 
 <script>
-// Load XLSX with multiple CDN fallbacks
-(function loadXLSX() {
-  const cdns = [
-    'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js',
+// ── XLSX Loader: tries 4 CDNs in sequence, locks UI until ready ──
+(function() {
+  var SRCS = [
+    'https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js',
     'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js',
-    'https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js'
+    'https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js'
   ];
-  let idx = 0;
-  function tryNext() {
-    if (idx >= cdns.length) {
-      console.warn('XLSX library failed to load from all CDNs. Excel upload/export disabled.');
-      window.XLSX = null;
+  var i = 0;
+  function next() {
+    if (i >= SRCS.length) {
+      // All failed — mark unavailable, show message on drop zone
+      window.__xlsxOK = false;
+      var dz = document.getElementById('dropZone');
+      if (dz) dz.querySelector('p') && (dz.querySelector('p').textContent = 'Excel unavailable — please use CSV');
       return;
     }
-    const s = document.createElement('script');
-    s.src = cdns[idx++];
-    s.onload = () => { window._xlsxReady = true; };
-    s.onerror = tryNext;
+    var s = document.createElement('script');
+    s.src = SRCS[i++];
+    s.onload = function() {
+      window.__xlsxOK = true;
+      // Unlock drop zone
+      var dz = document.getElementById('dropZone');
+      if (dz) { dz.style.opacity = '1'; dz.style.pointerEvents = ''; }
+      var hint = document.getElementById('xlsxHint');
+      if (hint) hint.textContent = '✅ Supported: CSV, XLSX, XLS — Column A = Keyword, B = Volume, C = Type';
+    };
+    s.onerror = next;
     document.head.appendChild(s);
   }
-  tryNext();
+  // Lock drop zone while loading
+  document.addEventListener('DOMContentLoaded', function() {
+    var dz = document.getElementById('dropZone');
+    if (dz && !window.__xlsxOK) { dz.style.opacity = '0.6'; dz.style.pointerEvents = 'none'; }
+    var hint = document.getElementById('xlsxHint');
+    if (hint) hint.textContent = '⏳ Loading Excel support…';
+  });
+  next();
 })();
 </script>
 <script>
@@ -1578,7 +1595,7 @@ function exportToCSV() {
 
 function exportToExcel() {
   if (!allData.length) return;
-  if (!window.XLSX) { alert('Excel library not loaded — use CSV export instead.'); return; }
+  if (!window.__xlsxOK || !window.XLSX) { alert('Excel library not loaded — please use CSV export instead.'); return; }
   const data = [['Primary Keyword','Variants','Count','Category','Volume','Type']];
   allData.forEach(g => data.push([g.primary, g.keywords.join('; '), g.keywords.length, g.category, g.volume||0, g.type||'mixed']));
   const ws = XLSX.utils.aoa_to_sheet(data);
@@ -1624,8 +1641,8 @@ document.addEventListener('DOMContentLoaded', () => {
       reader.onload = e => parseCSV(e.target.result, file.name);
       reader.readAsText(file);
     } else if (['xlsx','xls'].includes(ext)) {
-      if (!window.XLSX) {
-        alert('Excel support is still loading — please wait a moment and try again, or use a CSV file instead.');
+      if (!window.__xlsxOK || !window.XLSX) {
+        alert('Excel support is still loading — please wait a moment and try again, or save your file as CSV and upload that instead.');
         return;
       }
       reader.onload = e => parseExcel(e.target.result, file.name);
@@ -1647,7 +1664,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function parseExcel(buf, name) {
-    if (!window.XLSX) { alert('Excel library not loaded. Please use CSV instead.'); return; }
+    if (!window.__xlsxOK || !window.XLSX) { alert('Excel library not loaded. Please use CSV instead.'); return; }
     const wb = XLSX.read(buf, { type:'array' });
     const data = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header:1 });
     const kws = [], metas = [];
