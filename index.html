@@ -726,121 +726,155 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
     <script>
-        // File Upload Handlers
-        const dropZone = document.getElementById('dropZone');
-        const fileInput = document.getElementById('fileInput');
+        // Wait for DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropZone = document.getElementById('dropZone');
+            const fileInput = document.getElementById('fileInput');
 
-        dropZone.addEventListener('click', () => fileInput.click());
-
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.classList.add('dragover');
-        });
-
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('dragover');
-        });
-
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('dragover');
-            const files = e.dataTransfer.files;
-            if (files.length > 0) handleFile(files[0]);
-        });
-
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) handleFile(e.target.files[0]);
-        });
-
-        function handleFile(file) {
-            const fileName = file.name;
-            const fileExt = fileName.split('.').pop().toLowerCase();
-
-            if (fileExt === 'csv') {
-                const reader = new FileReader();
-                reader.onload = (e) => parseCSV(e.target.result, fileName);
-                reader.readAsText(file);
-            } else if (['xlsx', 'xls'].includes(fileExt)) {
-                const reader = new FileReader();
-                reader.onload = (e) => parseExcel(e.target.result, fileName);
-                reader.readAsArrayBuffer(file);
-            } else {
-                alert('Please upload a CSV or Excel file');
+            if (!dropZone || !fileInput) {
+                console.error('Upload elements not found!');
+                return;
             }
-        }
 
-        function parseCSV(content, fileName) {
-            const lines = content.trim().split('\n');
-            let keywords = [];
-            let metadata = [];
+            // Click to browse
+            dropZone.addEventListener('click', function(e) {
+                e.preventDefault();
+                fileInput.click();
+            });
 
-            // Try to detect if it has headers
-            const firstLine = lines[0];
-            const isMetadata = firstLine.includes('|') || firstLine.includes(',');
+            // Drag over
+            dropZone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.classList.add('dragover');
+            });
 
-            lines.forEach((line, index) => {
-                if (line.trim()) {
-                    if (isMetadata && line.includes('|')) {
-                        metadata.push(line);
-                    } else if (isMetadata && index === 0) {
-                        // Skip header
-                    } else {
-                        keywords.push(line);
-                    }
+            // Drag leave
+            dropZone.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.classList.remove('dragover');
+            });
+
+            // Drop
+            dropZone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFile(files[0]);
                 }
             });
 
-            populateTextareas(keywords, metadata, fileName);
-        }
+            // File input change
+            fileInput.addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    handleFile(e.target.files[0]);
+                }
+            });
 
-        function parseExcel(arrayBuffer, fileName) {
-            try {
-                const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                const data = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+            function handleFile(file) {
+                const fileName = file.name;
+                const fileExt = fileName.split('.').pop().toLowerCase();
 
-                let keywords = [];
-                let metadata = [];
+                if (fileExt === 'csv') {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        parseCSV(e.target.result, fileName);
+                    };
+                    reader.readAsText(file);
+                } else if (['xlsx', 'xls'].includes(fileExt)) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        parseExcel(e.target.result, fileName);
+                    };
+                    reader.readAsArrayBuffer(file);
+                } else {
+                    alert('❌ Please upload a CSV or Excel file (.csv, .xlsx, .xls)');
+                    fileInput.value = '';
+                }
+            }
 
-                data.forEach((row, index) => {
-                    if (index === 0) return; // Skip header
-                    
-                    if (row.length >= 2) {
-                        // Has volume/type data
-                        const keyword = row[0]?.toString().trim();
-                        const volume = row[1]?.toString().trim();
-                        const type = row[2]?.toString().trim();
-                        
-                        if (keyword) {
-                            keywords.push(keyword);
-                            if (volume || type) {
-                                metadata.push(`${keyword} | ${volume || 0} | ${type || 'mixed'}`);
+            function parseCSV(content, fileName) {
+                try {
+                    const lines = content.trim().split('\n');
+                    let keywords = [];
+                    let metadata = [];
+
+                    lines.forEach((line, index) => {
+                        if (line.trim()) {
+                            if (line.includes('|')) {
+                                // Has pipe separator - treat as metadata
+                                metadata.push(line);
+                            } else {
+                                keywords.push(line.trim());
                             }
                         }
-                    } else if (row.length === 1 && row[0]) {
-                        keywords.push(row[0].toString().trim());
+                    });
+
+                    if (keywords.length === 0) {
+                        alert('❌ No keywords found in file');
+                        return;
                     }
-                });
 
-                populateTextareas(keywords, metadata, fileName);
-            } catch (error) {
-                alert('Error reading Excel file: ' + error.message);
-            }
-        }
-
-        function populateTextareas(keywords, metadata, fileName) {
-            const keywordCount = keywords.length;
-            const metadataCount = metadata.length;
-
-            document.getElementById('keywords').value = keywords.join('\n');
-            if (metadata.length > 0) {
-                document.getElementById('metadata').value = metadata.join('\n');
+                    populateTextareas(keywords, metadata, fileName);
+                } catch (error) {
+                    alert('❌ Error reading CSV: ' + error.message);
+                }
             }
 
-            const fileInfo = document.getElementById('fileInfo');
-            fileInfo.innerHTML = `✅ Loaded: <strong>${fileName}</strong> | ${keywordCount} keywords | ${metadataCount} with metadata`;
-            fileInfo.classList.add('show');
-        }
+            function parseExcel(arrayBuffer, fileName) {
+                try {
+                    const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const data = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+
+                    let keywords = [];
+                    let metadata = [];
+
+                    data.forEach((row, index) => {
+                        if (index === 0) return; // Skip header
+                        
+                        if (row && row.length > 0) {
+                            const keyword = row[0]?.toString().trim();
+                            const volume = row[1]?.toString().trim();
+                            const type = row[2]?.toString().trim();
+                            
+                            if (keyword) {
+                                keywords.push(keyword);
+                                if (volume || type) {
+                                    metadata.push(`${keyword} | ${volume || 0} | ${type || 'mixed'}`);
+                                }
+                            }
+                        }
+                    });
+
+                    if (keywords.length === 0) {
+                        alert('❌ No keywords found in Excel file');
+                        return;
+                    }
+
+                    populateTextareas(keywords, metadata, fileName);
+                } catch (error) {
+                    alert('❌ Error reading Excel: ' + error.message);
+                }
+            }
+
+            function populateTextareas(keywords, metadata, fileName) {
+                const keywordCount = keywords.length;
+                const metadataCount = metadata.length;
+
+                document.getElementById('keywords').value = keywords.join('\n');
+                if (metadata.length > 0) {
+                    document.getElementById('metadata').value = metadata.join('\n');
+                }
+
+                const fileInfo = document.getElementById('fileInfo');
+                fileInfo.innerHTML = `✅ <strong>File Loaded!</strong> ${fileName} | ${keywordCount} keywords | ${metadataCount} with data`;
+                fileInfo.classList.add('show');
+            }
+        });
 
         const levenshteinDistance = (s1, s2) => {
             const a = s1.toLowerCase();
