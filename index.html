@@ -4,17 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Keyword Manager Pro</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script>
-        // Fallback if CDN fails
-        window.addEventListener('error', function(e) {
-            if (e.target && e.target.src && e.target.src.includes('xlsx')) {
-                var s = document.createElement('script');
-                s.src = 'https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js';
-                document.head.appendChild(s);
-            }
-        }, true);
-    </script>
     <style>
         * {
             margin: 0;
@@ -677,6 +666,10 @@
                         <div class="stat-label">Duplicates Removed</div>
                         <div class="stat-value" id="duplicatesRemoved">0</div>
                     </div>
+                    <div class="stat-box" style="border-left-color: #f87171;">
+                        <div class="stat-label">Irrelevant Filtered</div>
+                        <div class="stat-value" style="color: #f87171;" id="irrelevantRemoved">0</div>
+                    </div>
                 </div>
             </div>
 
@@ -735,6 +728,7 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
     <script>
         // Wait for DOM to be fully loaded
         document.addEventListener('DOMContentLoaded', function() {
@@ -836,9 +830,6 @@
 
             function parseExcel(arrayBuffer, fileName) {
                 try {
-                    if (typeof XLSX === 'undefined') {
-                        throw new Error('XLSX library failed to load. Please refresh the page and try again.');
-                    }
                     const workbook = XLSX.read(arrayBuffer, { type: 'array' });
                     const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                     const data = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
@@ -888,6 +879,71 @@
                 fileInfo.classList.add('show');
             }
         });
+
+        // ─── Relevance Filter ────────────────────────────────────────────────────
+        const IRRELEVANT_PATTERNS = [
+            // Personal names
+            'chris lingenfelter', 'keith abass', 'jeffrey barlow', 'mitchell green',
+            'ryan leader', 'jeff leader', 'wolf leader', 'amy leader', 'tom leader', 'herb leader',
+            'kathy clark', 'justin welsh', 'lauren leader chivee', 'aron linkedin tech lead',
+            'jimmy coleman', 'grace roberts', 'victoria gillete', 'jason smith linked',
+            // Brand / company lookups
+            'examplecorp', 'example com', 'examplecom', 'levelup leads', 'cleverly linkedin',
+            'all web leads inc', 'lead edge capital', 'fuel rollup', 'ag leader technology',
+            'lead forensics', 'find that lead', 'lead bounty', 'lead angels',
+            'media matters agency', 'asbury automotive', 'lead onion vs',
+            'project lead the way', 'the female lead linkedin', 'the tech lead linkedin',
+            'female lead linkedin', 'newell brands', 'stitch fix',
+            'converge using linkedin', 'oktopost', 'leading edge energy linkedin',
+            'the leading hotels of the world', 'parasol insurance',
+            'is it leading linkedin automation', 'franchise linkedin leads advertising agency',
+            'blitzleadmanager', 'leadhealthstaff', 'preciseleads',
+            // LinkedIn course downloads / exam answers
+            'download linkedin navigating', 'download linkedin leading', 'download linkedin tips',
+            'download linkedin learning', 'download linkedin performance marketing',
+            'watch linkedin navigating', 'linkedin exam answers',
+            'leading with emotional intelligence linkedin answers',
+            'leading without formal authority linkedin exam',
+            'leading without formal authority linkedin answers',
+            // URL dumps
+            'https wwwlinkedincom', 'wwwlinkedincom',
+            // Off-topic / LinkedIn UI navigation
+            'linkedin park lead singer', 'linkedin banner servant leader',
+            'first lead second company twitter facebook instagram',
+            'linkedin kudos inspirational leader',
+            'product leader titles linkedin search terms',
+            'linkedin profile senior leader examplecorp', 'linkedin senior leader profile examplecorp',
+            'examplecorp com linkedin senior leader',
+            'senior leader who shares your job function linkedin meaning',
+            'linkedin host leader interview', 'business leader linkedin profile',
+            'linkedin member people leader', 'thought leader linkedin profile',
+            // Non-English dominant keywords
+            'leads generieren', 'leads generering', 'leads genereren',
+            'leads uit linkedin', 'formulaire lead', 'leads agentur',
+            'crer des leads', 'gnrer des leads', 'leads immobiliiers',
+            'gnration de leads', 'generer des leads', 'ferramenta leads',
+            'cmo generar leads', 'generar leads', 'anuncios linkedin para generar',
+            'generar leads inmobiliarios', 'comment generer des leads',
+            'astuces pour gnrer', 'utiliser linkedin pour gnrer',
+            'optimizacin de perfiles', 'leads met linkedin', 'leads uit',
+            // Other irrelevant
+            'inspirational leader linkedin', 'leading seo experts linkedin',
+            'leading linkedin communities us',
+            'linkedin navigating politics as a senior leader',
+            'linkedin leading with intelligent disobedience',
+            'health leads linkedin', 'analytical lead google linkedin',
+            'lead by example marketing linkedin company page',
+            'b2b leads generation expert via linkedin  sales prospecting',
+            'b2b leads generation expert via linkedin sales prospecting',
+            'linkedin marketing lead generation b2b sales for linkedin coupon',
+            'linkedin marketing b2b sales  lead generation from scratch',
+        ];
+
+        function isIrrelevant(keyword) {
+            const kw = keyword.toLowerCase();
+            return IRRELEVANT_PATTERNS.some(p => kw.includes(p));
+        }
+        // ─────────────────────────────────────────────────────────────────────────
 
         const levenshteinDistance = (s1, s2) => {
             const a = s1.toLowerCase();
@@ -980,6 +1036,10 @@
                 const uniqueKeywords = [...new Set(keywords)];
                 const duplicatesCount = originalCount - uniqueKeywords.length;
 
+                // ── Relevance filter: remove untargetable keywords ──
+                const relevantKeywords = uniqueKeywords.filter(k => !isIrrelevant(k));
+                const irrelevantCount = uniqueKeywords.length - relevantKeywords.length;
+
                 const metadata = {};
                 if (metadataInput.trim()) {
                     metadataInput.split('\n').forEach(line => {
@@ -993,13 +1053,13 @@
                 const groups = [];
                 const processed = new Set();
 
-                for (const keyword of uniqueKeywords) {
+                for (const keyword of relevantKeywords) {
                     if (processed.has(keyword)) continue;
 
                     const group = [keyword];
                     processed.add(keyword);
 
-                    for (const otherKeyword of uniqueKeywords) {
+                    for (const otherKeyword of relevantKeywords) {
                         if (!processed.has(otherKeyword) && isSimilar(keyword, otherKeyword)) {
                             group.push(otherKeyword);
                             processed.add(otherKeyword);
@@ -1024,18 +1084,19 @@
                     };
                 }).sort((a, b) => (b.volume || 0) - (a.volume || 0));
 
-                displayResults(originalCount, uniqueKeywords.length, duplicatesCount, groupedData);
+                displayResults(originalCount, relevantKeywords.length, duplicatesCount, irrelevantCount, groupedData);
                 document.getElementById('processBtn').textContent = 'Process Keywords';
             }, 300);
         }
 
-        function displayResults(original, deduplicated, removed, groups) {
+        function displayResults(original, deduplicated, removed, irrelevant, groups) {
             document.getElementById('emptyState').classList.add('hidden');
             document.getElementById('resultsContainer').classList.remove('hidden');
 
             document.getElementById('totalKeywords').textContent = original;
             document.getElementById('deduplicatedCount').textContent = deduplicated;
             document.getElementById('duplicatesRemoved').textContent = removed;
+            document.getElementById('irrelevantRemoved').textContent = irrelevant;
             document.getElementById('groupCount').textContent = groups.length;
 
             // Store data globally for export
