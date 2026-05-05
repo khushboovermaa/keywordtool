@@ -294,6 +294,34 @@
         .cd-kw-vol { color: var(--muted); font-size: 0.7rem; min-width: 50px; text-align: right; flex-shrink: 0; }
         .cd-qw { font-size: 0.62rem; color: var(--green); flex-shrink: 0; }
 
+        /* RESULT TABS NAVIGATION */
+        .rtabs-nav { display: flex; gap: 0.35rem; flex-wrap: wrap; padding: 0.65rem; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 1.25rem; }
+        .rtab { padding: 0.5rem 1rem; border-radius: 6px; font-family: var(--mono); font-size: 0.72rem; cursor: pointer; border: 1px solid transparent; background: transparent; color: var(--muted); transition: all 0.2s; font-weight: 600; letter-spacing: 0.02em; white-space: nowrap; }
+        .rtab:hover { background: rgba(59,130,246,0.08); color: var(--text); border-color: var(--border); }
+        .rtab.active { background: rgba(59,130,246,0.15); color: #fff; border-color: rgba(59,130,246,0.5); }
+        .rtab.rtab-green.active { background: rgba(16,185,129,0.15); color: var(--green); border-color: rgba(16,185,129,0.4); }
+        .rtab.rtab-red.active { background: rgba(239,68,68,0.12); color: var(--red); border-color: rgba(239,68,68,0.35); }
+        .rtab.rtab-purple.active { background: rgba(168,85,247,0.15); color: var(--purple); border-color: rgba(168,85,247,0.4); }
+        .result-panel { display: none; }
+        .result-panel.active { display: block; }
+
+        /* PANEL HEADER ROW with inline download button */
+        .panel-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+        .panel-header .panel-title { margin-bottom: 0; }
+        .btn-dl { padding: 0.4rem 0.9rem; border-radius: 6px; font-family: var(--mono); font-size: 0.68rem; cursor: pointer; border: 1px solid rgba(168,85,247,0.3); background: rgba(168,85,247,0.1); color: var(--purple); transition: all 0.2s; font-weight: 600; }
+        .btn-dl:hover { background: rgba(168,85,247,0.2); transform: translateY(-1px); }
+        .btn-dl-green { border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.1); color: var(--green); }
+        .btn-dl-green:hover { background: rgba(16,185,129,0.2); }
+
+        /* EXPORT CARDS */
+        .export-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; }
+        .export-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; display: flex; flex-direction: column; gap: 0.65rem; transition: border-color 0.2s; }
+        .export-card:hover { border-color: var(--border-bright); }
+        .export-card-icon { font-size: 1.5rem; }
+        .export-card-title { font-weight: 700; font-size: 0.88rem; color: #fff; }
+        .export-card-desc { font-family: var(--mono); font-size: 0.68rem; color: var(--muted); line-height: 1.5; flex: 1; }
+        .export-card .btn-dl { width: 100%; text-align: center; padding: 0.55rem; font-size: 0.72rem; }
+
         @media (max-width: 640px) {
             .wrap { padding: 1rem; }
             header { flex-direction: column; }
@@ -353,7 +381,7 @@
         <div class="settings-grid">
             <div class="field">
                 <label>Min Search Volume</label>
-                <input type="number" id="minVolume" value="0" min="0" placeholder="0 = no limit">
+                <input type="number" id="minVolume" value="10" min="0" placeholder="0 = no limit">
             </div>
             <div class="field">
                 <label>Quality Threshold (0–100)</label>
@@ -388,142 +416,189 @@
     <!-- RESULTS -->
     <div id="results">
 
-        <!-- STATS -->
+        <!-- STATS BAR — always visible across all tabs -->
         <div class="panel">
             <div class="panel-title">03 — Curation Summary</div>
             <div class="stats-bar" id="statsBar"></div>
         </div>
 
-        <!-- TOPIC CLUSTERS -->
-        <div class="panel" id="clusterPanel">
-            <div class="panel-title">04 — Topic Clusters Dashboard</div>
-            <div class="cd-toolbar">
-                <div class="cd-filters">
-                    <button class="cd-filter active" onclick="filterClusters('all',this)">All Clusters</button>
-                    <button class="cd-filter" onclick="filterClusters('cannibal',this)" style="border-color:rgba(239,68,68,0.3);color:var(--red)">⚠ Cannibal Risk</button>
-                    <button class="cd-filter" onclick="filterClusters('large',this)">★ 4+ Keywords</button>
-                    <button class="cd-filter" onclick="filterClusters('quickwins',this)" style="border-color:rgba(16,185,129,0.3);color:var(--green)">⚡ Has Quick Wins</button>
-                </div>
-                <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap">
-                    <span class="cd-meta" id="clusterMeta"></span>
-                    <button class="btn btn-export" style="padding:0.45rem 1rem;font-size:0.8rem" onclick="exportClusters()">⬇ Download Clusters CSV</button>
-                </div>
-            </div>
-            <div class="tbl-wrap">
-                <table class="cd-table" id="clusterTable">
-                    <thead class="cd-head">
-                        <tr>
-                            <th style="width:36px"></th>
-                            <th>Cluster Topic</th>
-                            <th>Keywords</th>
-                            <th>Total Volume</th>
-                            <th>Intent</th>
-                            <th>Quick Wins</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="clusterGrid"></tbody>
-                </table>
-            </div>
+        <!-- RESULT TAB NAVIGATION -->
+        <div class="rtabs-nav" id="resultTabsNav">
+            <button class="rtab active"         onclick="showResultTab('clusters',this)">🗂 Clusters</button>
+            <button class="rtab rtab-purple"    onclick="showResultTab('pillar',this)">🏛 Pillar Plan</button>
+            <button class="rtab"                onclick="showResultTab('curated',this)">✅ Curated Keywords</button>
+            <button class="rtab rtab-red"       onclick="showResultTab('rejected',this)">❌ Rejected</button>
+            <button class="rtab rtab-green"     onclick="showResultTab('export',this)">📥 Export</button>
         </div>
 
-        <!-- PILLAR PAGE STRUCTURE -->
-        <div class="panel" id="pillarPanel">
-            <div class="panel-title">04B — Pillar Page Structure</div>
-            <div class="pillar-tip">
-                <strong>What is a Pillar Page?</strong> A pillar page covers a broad topic in depth and links to multiple <strong>cluster content pages</strong> that explore sub-topics in detail. Each cluster page links back to the pillar — this hub-and-spoke architecture signals topical authority to Google. The structure below is auto-generated from your keyword clusters.
-            </div>
-
-            <!-- HUB & SPOKE VISUAL -->
-            <div id="pillarStructureEl"></div>
-
-            <!-- CONTENT PLAN TABLE -->
-            <div class="pillar-section" id="pillarTableSection" style="margin-top:2rem;">
-                <div class="pillar-section-title">Content Production Roadmap <span>Priority order</span></div>
+        <!-- TAB: CLUSTERS -->
+        <div class="result-panel active" id="rtab-clusters">
+            <div class="panel" id="clusterPanel">
+                <div class="panel-header">
+                    <div class="panel-title">Topic Clusters Dashboard</div>
+                    <button class="btn-dl" onclick="exportClusters()">⬇ Download Clusters CSV</button>
+                </div>
+                <div class="cd-toolbar" style="margin-bottom:1.25rem">
+                    <div class="cd-filters">
+                        <button class="cd-filter active" onclick="filterClusters('all',this)">All Clusters</button>
+                        <button class="cd-filter" onclick="filterClusters('cannibal',this)" style="border-color:rgba(239,68,68,0.3);color:var(--red)">⚠ Cannibal Risk</button>
+                        <button class="cd-filter" onclick="filterClusters('large',this)">★ 4+ Keywords</button>
+                        <button class="cd-filter" onclick="filterClusters('quickwins',this)" style="border-color:rgba(16,185,129,0.3);color:var(--green)">⚡ Has Quick Wins</button>
+                    </div>
+                    <span class="cd-meta" id="clusterMeta"></span>
+                </div>
                 <div class="tbl-wrap">
-                    <table class="pillar-summary-table">
-                        <thead>
+                    <table class="cd-table">
+                        <thead class="cd-head">
                             <tr>
-                                <th>#</th>
-                                <th>Track</th>
-                                <th>Page / Article Title</th>
-                                <th>Target Keyword</th>
-                                <th>Type</th>
+                                <th style="width:36px"></th>
+                                <th>Cluster Topic</th>
+                                <th>Keywords</th>
+                                <th>Total Volume</th>
                                 <th>Intent</th>
-                                <th>Volume</th>
-                                <th>Priority</th>
-                                <th>Links To</th>
+                                <th>Quick Wins</th>
+                                <th>Status</th>
                             </tr>
                         </thead>
-                        <tbody id="pillarTableBody"></tbody>
+                        <tbody id="clusterGrid"></tbody>
                     </table>
                 </div>
             </div>
+        </div>
 
-            <div style="margin-top:1.25rem;">
-                <button class="btn btn-pillar" onclick="exportPillarCSV()">🏛 Export Pillar Plan CSV</button>
+        <!-- TAB: PILLAR PLAN -->
+        <div class="result-panel" id="rtab-pillar">
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">Pillar Page Structure</div>
+                    <button class="btn-dl" onclick="exportPillarCSV()">⬇ Download Pillar Plan CSV</button>
+                </div>
+                <div class="pillar-tip">
+                    <strong>Hub & Spoke:</strong> Each pillar page covers a broad topic and links to cluster content pages (sub-topics). Every cluster page links back to its pillar — this signals topical authority to Google.
+                </div>
+                <div id="pillarStructureEl"></div>
+                <div class="pillar-section" id="pillarTableSection" style="margin-top:2rem;">
+                    <div class="pillar-section-title">Content Production Roadmap <span>Priority order</span></div>
+                    <div class="tbl-wrap">
+                        <table class="pillar-summary-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th><th>Track</th><th>Page / Article Title</th>
+                                    <th>Target Keyword</th><th>Type</th><th>Intent</th>
+                                    <th>Volume</th><th>Priority</th><th>Links To</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pillarTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- CURATED TABLE -->
-        <div class="panel">
-            <div class="panel-title">05 — Curated Keywords</div>
-            <div class="tabs" id="tabsEl"></div>
-            <div class="tbl-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Keyword</th>
-                            <th>Suggested Title</th>
-                            <th>Intent</th>
-                            <th>Content</th>
-                            <th>SERP Features</th>
-                            <th>KD~</th>
-                            <th>Volume</th>
-                            <th>Quality</th>
-                            <th title="Opportunity Score: combines volume, difficulty & intent into one priority signal">Opp~</th>
-                            <th title="Recommended word count target based on intent & format">Words</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tBody"></tbody>
-                </table>
+        <!-- TAB: CURATED KEYWORDS -->
+        <div class="result-panel" id="rtab-curated">
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">Curated Keywords</div>
+                    <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+                        <button class="btn-dl btn-dl-green" onclick="exportCurrentTab()">⬇ Download This View</button>
+                        <button class="btn-dl" onclick="exportCSV()">⬇ Download All Curated</button>
+                    </div>
+                </div>
+                <div class="tabs" id="tabsEl"></div>
+                <div class="tbl-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th><th>Keyword</th><th>Suggested Title</th>
+                                <th>Intent</th><th>Content</th><th>SERP Features</th>
+                                <th>KD~</th><th>Volume</th><th>Quality</th>
+                                <th title="Opportunity Score">Opp~</th>
+                                <th title="Recommended word count">Words</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tBody"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
-        <!-- REJECTED TABLE -->
-        <div class="panel">
-            <div class="panel-title">06 — Rejected Keywords (with reasons)</div>
-            <div class="tip-box" style="margin-bottom:1rem;">
-                <strong>Transparency:</strong> Every rejected keyword shows exactly why it was cut. Review these — some may be worth saving with edits.
-            </div>
-            <div class="tbl-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Keyword</th>
-                            <th>Rejection Reason</th>
-                            <th>Score</th>
-                            <th>Volume</th>
-                        </tr>
-                    </thead>
-                    <tbody id="rejBody"></tbody>
-                </table>
+        <!-- TAB: REJECTED -->
+        <div class="result-panel" id="rtab-rejected">
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">Rejected Keywords</div>
+                    <button class="btn-dl" onclick="exportRejectedCSV()">⬇ Download Rejected CSV</button>
+                </div>
+                <div class="tip-box" style="margin-bottom:1rem;">
+                    <strong>Transparency:</strong> Every rejected keyword shows exactly why it was cut. Review these — some may be worth saving if you lower the quality threshold.
+                </div>
+                <div class="tbl-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th><th>Keyword</th><th>Rejection Reason</th>
+                                <th>Score</th><th>Volume</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rejBody"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
-        <!-- EXPORT -->
-        <div class="panel">
-            <div class="panel-title">07 — Export</div>
-            <div class="export-row">
-                <button class="btn btn-export" onclick="exportCSV()">📊 Export Curated CSV</button>
-                <button class="btn btn-export" onclick="exportClusters()">🗂 Export Clusters CSV</button>
-                <button class="btn btn-export" onclick="exportJSON()">📥 Export Full JSON</button>
-                <button class="btn btn-export" onclick="exportText()">📄 Export TXT Report</button>
+        <!-- TAB: EXPORT -->
+        <div class="result-panel" id="rtab-export">
+            <div class="panel">
+                <div class="panel-title">Export Results</div>
+                <div class="export-grid">
+                    <div class="export-card">
+                        <div class="export-card-icon">📊</div>
+                        <div class="export-card-title">Curated Keywords</div>
+                        <div class="export-card-desc">All passed keywords with intent, title, KD, Opp score, word count target, and quick win flag.</div>
+                        <button class="btn-dl" onclick="exportCSV()">⬇ Download CSV</button>
+                    </div>
+                    <div class="export-card">
+                        <div class="export-card-icon">⚡</div>
+                        <div class="export-card-title">Quick Wins Only</div>
+                        <div class="export-card-desc">Only the low-difficulty, real-volume keywords. Publish these first for fastest SEO results.</div>
+                        <button class="btn-dl btn-dl-green" onclick="exportQuickWinsCSV()">⬇ Download CSV</button>
+                    </div>
+                    <div class="export-card">
+                        <div class="export-card-icon">🗂</div>
+                        <div class="export-card-title">Topic Clusters</div>
+                        <div class="export-card-desc">All clusters with primary/secondary keywords, intent, volume, and cannibalization flags.</div>
+                        <button class="btn-dl" onclick="exportClusters()">⬇ Download CSV</button>
+                    </div>
+                    <div class="export-card">
+                        <div class="export-card-icon">🏛</div>
+                        <div class="export-card-title">Pillar Plan</div>
+                        <div class="export-card-desc">Content production roadmap in priority order — pillar pages, service pages, and blog posts.</div>
+                        <button class="btn-dl" onclick="exportPillarCSV()">⬇ Download CSV</button>
+                    </div>
+                    <div class="export-card">
+                        <div class="export-card-icon">❌</div>
+                        <div class="export-card-title">Rejected Keywords</div>
+                        <div class="export-card-desc">Every rejected keyword with its exact rejection reason and quality score.</div>
+                        <button class="btn-dl" onclick="exportRejectedCSV()">⬇ Download CSV</button>
+                    </div>
+                    <div class="export-card">
+                        <div class="export-card-icon">📥</div>
+                        <div class="export-card-title">Full JSON Report</div>
+                        <div class="export-card-desc">Complete structured data — all curated keywords, clusters, and rejected list in one file.</div>
+                        <button class="btn-dl" onclick="exportJSON()">⬇ Download JSON</button>
+                    </div>
+                    <div class="export-card">
+                        <div class="export-card-icon">📄</div>
+                        <div class="export-card-title">Text Report</div>
+                        <div class="export-card-desc">Human-readable summary with quick wins, clusters, and keyword details grouped by intent.</div>
+                        <button class="btn-dl" onclick="exportText()">⬇ Download TXT</button>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
+
+    </div><!-- end #results -->
 
 </div>
 
@@ -660,13 +735,25 @@ function buildKwArray() {
 // ═══════════════════════════════════════════════════════════════
 // FEATURE 7: NEAR-DUPLICATE REMOVAL
 // ═══════════════════════════════════════════════════════════════
+// ── NEAR-DUPLICATE NORMALISER ─────────────────────────────────
+// Word-level normalisation: strips plurals, gerunds, past tense
+// WITHOUT destroying words like "analysis"→"analysi" or "focus"→"focu"
 function normalize(kw) {
     return kw.toLowerCase().trim()
-        .replace(/s\b/g, '')       // crude plural → singular
-        .replace(/ing\b/g, '')     // gerund
-        .replace(/ed\b/g, '')      // past tense
         .replace(/[^a-z0-9\s]/g, '')
-        .replace(/\s+/g, ' ').trim();
+        .split(/\s+/)
+        .filter(Boolean)
+        .map(w => {
+            // Strip trailing 's' only if word won't become too short
+            // and doesn't end in 'ss', 'is', 'us', 'ous' (focus, analysis, bonus)
+            if (w.length > 4 && w.endsWith('s') && !w.endsWith('ss') && !w.endsWith('is') && !w.endsWith('us') && !w.endsWith('ous')) w = w.slice(0, -1);
+            // Strip 'ing' only from longer words (running→run, generating→generat)
+            if (w.length > 5 && w.endsWith('ing')) w = w.slice(0, -3);
+            // Strip 'ed' only from longer words
+            if (w.length > 4 && w.endsWith('ed') && !w.endsWith('eed') && !w.endsWith('ied')) w = w.slice(0, -2);
+            return w;
+        })
+        .join(' ');
 }
 
 function deduplicateKeywords(kwList) {
@@ -695,8 +782,8 @@ function deduplicateKeywords(kwList) {
 // SIGNALS kept for scoreKeyword compatibility
 const SIGNALS = {
     transactional: ['buy','order','purchase','shop','price','pricing','cost','cheap','deal','discount','coupon','near me','delivery','hire','book','booking','quote','get quote','free trial','subscribe','sign up','install','apply','rent','affordable','best price','low cost','offer','checkout','order online','buy online'],
-    informational: ['how to','how do','how does','what is','what are','why is','why does','when to','where to','guide','tutorial','tips','learn','understand','explain','difference between','meaning of','definition','examples','types of','list of','overview','introduction','beginners','step by step','checklist','template','ideas','inspiration','benefits','advantages','disadvantages','problems','mistakes','common','complete','ultimate','everything about','explained','vs','versus'],
-    commercial: ['best','top','review','reviews','comparison','compare','alternative','alternatives','recommend','recommended','which','pros cons','worth it','is it good','should i','ranking','rated','2024','2025','2026'],
+    informational: ['how to','how do','how does','what is','what are','why is','why does','when to','where to','guide','tutorial','tips','learn','understand','explain','difference between','meaning of','definition','examples','types of','list of','overview','introduction','beginners','step by step','checklist','template','ideas','inspiration','benefits','advantages','disadvantages','problems','mistakes','common','complete','ultimate','everything about','explained'],
+    commercial: ['best','top','review','reviews','comparison','compare','vs ','versus','alternative','alternatives','recommend','recommended','which','pros cons','worth it','is it good','should i','ranking','rated','2024','2025','2026'],
     navigational: ['login','sign in','website','official','contact','support','customer service','helpdesk','app','portal','dashboard','account','homepage']
 };
 
@@ -851,8 +938,26 @@ const JUNK_PATTERNS = [
 
 const EMPTY_SEEDS = new Set(['software','tool','tools','app','website','service','services','platform','solution','solutions','product','products','company','business','management','system','data','marketing','digital','online','web','content','media','technology','tech','process','strategy','information','work','job','jobs','career']);
 
+// Pre-computed constants — defined ONCE, not rebuilt on every keyword call
+const ALL_SIGNALS = Object.values(SIGNALS).flat(); // flat list for hasSignal check
+
+const CONTENT_INDICATORS = new Set([
+    'agency','agencies','consultant','consulting','management',
+    'outsource','freelance','retainer','proposal','contract',
+    'marketing','advertising','branding','campaign','analytics',
+    'outreach','prospecting','conversion','funnel','acquisition',
+    'retention','engagement','targeting','segmentation','copywriting',
+    'positioning','strategy','strategies','generation','automation',
+    'pipeline','nurture','sequence','qualification','scoring',
+    'sales','selling','revenue','crm','navigator','platform',
+    'software','integration','optimization','seo','ppc','sem',
+    'organic','traffic','ranking','visibility','content','social',
+    'email','newsletter','webinar','framework','methodology',
+    'b2b','b2c','saas','enterprise','startup','digital','service',
+    'services','company','companies','provider','solution',
+]);
+
 const REJECTION_REASONS = {
-    junk_pattern: 'Junk/noise pattern detected',
     vague_seed: 'Single vague seed word — no content potential',
     low_score: 'Quality score below threshold',
     low_volume: 'Search volume below minimum',
@@ -888,7 +993,7 @@ function scoreKeyword(kw, volume) {
     const intent = classifyIntent(kw);
     score += intent !== 'navigational' ? 18 : 5;
 
-    const hasSignal = Object.values(SIGNALS).flat().some(s => k.includes(s));
+    const hasSignal = ALL_SIGNALS.some(s => k.includes(s));
     if (hasSignal) score += 15;
 
     if (volume > 10000) score += 20;
@@ -908,27 +1013,81 @@ function scoreKeyword(kw, volume) {
     if (modifiers.some(m => k.includes(m))) score += 8;
 
     // ── PATTERN-LESS PENALTY ─────────────────────────────────────
-    // Keywords like "linkedin lead ninja" / "linkedin lead gibbon" have
-    // no question, no modifier, no intent signal, no comparison — they're
-    // just 2-3 random nouns strung together. An SEO strategist would skip these.
-    const allSignals = Object.values(SIGNALS).flat();
-    const hasAnySignal = allSignals.some(s => k.includes(s));
-    const hasQuestion = /^(how|what|why|when|where|which|who|is|are|can|does|do|should)\b/i.test(k);
-    const hasModifier = modifiers.some(m => k.includes(m));
+    // Designed to reject random noun stacks like "linkedin lead ninja",
+    // "lead gibbon", "pencil lead indonesia" — keywords with no
+    // recognisable search intent and no business context.
+    //
+    // BUG FIX: The old version rejected LEGITIMATE keywords like
+    // "linkedin lead generation" (score 56, barely passing) and
+    // "linkedin agency" (score 41, FAILING) because they have no
+    // question/modifier/comparison word — even though they're the
+    // site's core topic keywords.
+    //
+    // Fix: CONTENT_INDICATORS and ALL_SIGNALS are pre-computed constants
+    // defined outside this function — not rebuilt on every call.
+    const hasAnySignal  = hasSignal;
+    const hasQuestion   = /^(how|what|why|when|where|which|who|is|are|can|does|do|should)\b/i.test(k);
+    const hasModifier   = modifiers.some(m => k.includes(m));
     const hasComparison = / vs | versus /.test(k);
-    if (!hasAnySignal && !hasQuestion && !hasModifier && !hasComparison && words.length >= 2 && words.length <= 4) {
-        score -= 14; // penalise random noun stacks with no recognisable search pattern
+    const hasBizContext = words.some(w => CONTENT_INDICATORS.has(w));
+    const hasNoPattern  = !hasAnySignal && !hasQuestion && !hasComparison && !hasBizContext;
+
+    // BUG FIX: the old code fired BOTH penalties on 4-word zero-volume keywords
+    // (-14 + -20 = -34). Now they are mutually exclusive.
+    if (hasNoPattern && !hasModifier) {
+        // Zero volume + no pattern = very likely off-topic noise
+        if (volume === 0) score -= 22;
+        // Has some volume but still no pattern = suspicious, penalise less
+        else score -= 10;
     }
 
     return { score: Math.max(0, Math.min(100, Math.round(score))), pass: true, intent };
 }
 
 // ═══════════════════════════════════════════════════════════════
-// CONTENT TYPE
+// CONTENT TYPE — Service Page vs Blog
 // ═══════════════════════════════════════════════════════════════
+// A SERVICE PAGE is only warranted when the keyword signals someone
+// wants to HIRE or BUY a service — not just learn about a topic.
+// "best linkedin lead generation companies" = blog (comparison list)
+// "linkedin lead generation agency pricing" = service page (buying signal)
+// "how to generate leads on linkedin" = blog (educational)
+// "proven content framework for inbound leads" = blog (educational)
 function contentType(intent, kw) {
-    if (intent === 'transactional' || intent === 'navigational') return 'page';
-    if (intent === 'commercial') return kw.split(/\s+/).filter(Boolean).length >= 4 ? 'blog' : 'page';
+    const k = kw.toLowerCase();
+
+    // Navigational = always page (brand/direct searches)
+    if (intent === 'navigational') return 'page';
+
+    // Hard service page signals — someone is looking to HIRE or BUY
+    const SERVICE_SIGNALS = [
+        'agency','agencies','service','services','company','companies',
+        'provider','providers','consultant','consultancy','outsource',
+        'hire','pricing','price','cost','quote','package','packages',
+        'firm','firms','partner','managed','done for you','done-for-you',
+        'freelancer','contractor','retainer','proposal'
+    ];
+    const isServiceIntent = SERVICE_SIGNALS.some(s => k.includes(s));
+
+    // Hard blog signals — someone is learning, comparing, or researching
+    const BLOG_SIGNALS = [
+        'how to','what is','what are','why','guide','tutorial','tips',
+        'best ','top ','vs ','versus','review','reviews','alternative',
+        'examples','template','checklist','framework','strategy','strategies',
+        'ideas','inspiration','explained','learn','understand','difference',
+        'comparison','compare','tool','tools','software','platform','app',
+        'headline','recommendation','export','download','import','extract',
+        'course','training','certification','program','programme','webinar'
+    ];
+    const isBlogIntent = BLOG_SIGNALS.some(s => k.includes(s));
+
+    // Blog signals override transactional if the keyword is educational/research
+    if (isBlogIntent && !isServiceIntent) return 'blog';
+
+    // Pure transactional + service signal = service page
+    if (intent === 'transactional' && isServiceIntent) return 'page';
+
+    // Everything else defaults to blog — safer than wrongly labelling as service page
     return 'blog';
 }
 
@@ -1001,10 +1160,19 @@ function suggestTitle(kw, intent) {
 const CLUSTER_STOPS = new Set(['how','to','what','is','are','why','when','where','which','who','a','an','the','and','or','for','in','on','at','of','do','does','can','should','best','top','with','your','my','our','their','get','use','make','need','want','find','using','about','into','from','by','as','if','be','was','has','have','will','vs','versus','its','it','this','that','these','those','not','no','more','most','very','also','too','so','but','than','then','now','new','all','any','some','other','i','we','you','they','up','out','back','just','over','after','before','between','through','without','within','plus','since','per','via','re','un','pre','non','co','de','both','each','every','many','much','few','less','same','such','long','high','low','big','small','great','good','well','better','look','here','know','think']);
 
 function tokenizeForCluster(kw) {
+    // Basic plural normalisation: "leads"→"lead", "forms"→"form", "tools"→"tool"
+    // This prevents "linkedin lead" and "linkedin leads" from becoming different anchors
+    // which was causing the same topic to split into 5 separate clusters.
+    const depluralise = w => {
+        if (w.length >= 3 && w.endsWith('s') && !w.endsWith('ss') && !w.endsWith('is') && !w.endsWith('us') && !w.endsWith('ous'))
+            return w.slice(0, -1);
+        return w;
+    };
     return kw.toLowerCase()
         .split(/[\s\-_\/]+/)
         .map(w => w.replace(/[^a-z0-9]/g, ''))
-        .filter(w => w.length > 2 && !CLUSTER_STOPS.has(w) && /^[a-z]/.test(w));
+        .filter(w => w.length > 2 && !CLUSTER_STOPS.has(w) && /^[a-z]/.test(w))
+        .map(depluralise);
 }
 
 // Root cause of the 981-keyword cluster bug:
@@ -1267,6 +1435,16 @@ function run() {
         renderRejected();
 
         document.getElementById('results').classList.add('show');
+
+        // Update result tab labels with counts
+        const tabNav = document.getElementById('resultTabsNav');
+        tabNav.children[0].textContent = `🗂 Clusters (${clusters.length})`;
+        tabNav.children[2].textContent = `✅ Curated (${curated.length})`;
+        tabNav.children[3].textContent = `❌ Rejected (${rejected.length})`;
+
+        // Auto-switch to clusters tab on fresh analysis
+        showResultTab('clusters', tabNav.children[0]);
+
         btn.innerHTML = '⚡ Analyze & Curate Keywords';
         btn.disabled = false;
         document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1535,15 +1713,24 @@ function renderPillarStructure() {
     }
 
     // ── SPLIT CLUSTERS INTO SERVICE vs BLOG ──────────────────────
-    // Filter out meaningless clusters first
+    // Use the actual content type assigned to keywords (ctype='page' or 'blog')
+    // NOT intent — because "commercial" intent ≠ service page.
+    // A cluster is a SERVICE cluster only if the majority of its keywords
+    // are tagged as 'page' (i.e. have genuine hiring/buying signals).
     const meaningful = clusters.filter(isMeaningfulCluster);
 
+    const clusterIsService = c => {
+        const pageCount = c.keywords.filter(k => k.ctype === 'page').length;
+        return pageCount > c.keywords.length / 2; // majority must be service pages
+    };
+
     const serviceClusters = meaningful
-        .filter(c => { const d = clusterDominantIntent(c); return d === 'transactional' || d === 'commercial'; })
+        .filter(clusterIsService)
         .sort((a, b) => clusterTotalVol(b) - clusterTotalVol(a));
 
     const blogClusters = meaningful
-        .filter(c => clusterDominantIntent(c) === 'informational')
+        .filter(c => !clusterIsService(c))
+        .filter(c => clusterDominantIntent(c) !== 'navigational')
         .sort((a, b) => clusterTotalVol(b) - clusterTotalVol(a));
 
     // Navigational clusters → ignored (they're brand/direct searches, not content pages)
@@ -1664,11 +1851,47 @@ function renderRejected() {
         </tr>`).join('');
 }
 
-// ═══════════════════════════════════════════════════════════════
-// EXPORT
-// ═══════════════════════════════════════════════════════════════
-function exportCSV() {
+// ── RESULT TAB SWITCHING ─────────────────────────────────────
+function showResultTab(name, el) {
+    document.querySelectorAll('.rtab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.result-panel').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('rtab-' + name).classList.add('active');
+}
+
+// ── EXPORT: CURRENT VISIBLE TAB (filters curated table by activeTab) ──
+function exportCurrentTab() {
+    const rows = curated.filter(k => {
+        if (activeTab === 'all') return true;
+        if (activeTab === 'quickwins') return k.quickWin;
+        if (activeTab === 'page' || activeTab === 'blog') return k.ctype === activeTab;
+        return k.intent === activeTab;
+    });
+    const label = activeTab === 'all' ? 'all' : activeTab;
     let csv = 'Keyword,Suggested Title,Intent,Content Type,SERP Features,KD Estimate,Volume,Quality Score,Opportunity Score,Word Count Target,Quick Win\n';
+    rows.forEach(r => { csv += `"${r.keyword}","${r.title}","${r.intent}","${r.ctype}","${r.serpFeatures.join('/')}","${diffLabel(r.diff).label}","${r.volume}","${r.score}","${r.opp||''}","${r.wordTarget||''}","${r.quickWin?'YES':''}"\n`; });
+    dl(csv, `curated-${label}.csv`, 'text/csv');
+}
+
+// ── EXPORT: QUICK WINS ONLY ────────────────────────────────────
+function exportQuickWinsCSV() {
+    const rows = curated.filter(k => k.quickWin);
+    if (!rows.length) { alert('No Quick Wins found. Try lowering the quality threshold or minimum volume.'); return; }
+    let csv = 'Keyword,Suggested Title,Intent,Content Type,KD Estimate,Volume,Opportunity Score,Word Count Target\n';
+    rows.forEach(r => { csv += `"${r.keyword}","${r.title}","${r.intent}","${r.ctype}","${diffLabel(r.diff).label}","${r.volume}","${r.opp||''}","${r.wordTarget||''}"\n`; });
+    dl(csv, 'quick-wins.csv', 'text/csv');
+}
+
+// ── EXPORT: REJECTED KEYWORDS ──────────────────────────────────
+function exportRejectedCSV() {
+    if (!rejected.length) { alert('No rejected keywords to export.'); return; }
+    let csv = 'Keyword,Rejection Reason,Quality Score,Volume\n';
+    rejected.forEach(r => { csv += `"${r.keyword}","${REJECTION_REASONS[r.rejectReason]||r.rejectReason}","${r.score}","${r.volume}"\n`; });
+    dl(csv, 'rejected-keywords.csv', 'text/csv');
+}
+
+// ── EXPORT: CURATED CSV ────────────────────────────────────────
+function exportCSV() {
     curated.forEach(r => { csv += `"${r.keyword}","${r.title}","${r.intent}","${r.ctype}","${r.serpFeatures.join('/')}","${diffLabel(r.diff).label}","${r.volume}","${r.score}","${r.opp||''}","${r.wordTarget||''}","${r.quickWin?'YES':''}"\n`; });
     dl(csv, 'curated-keywords.csv', 'text/csv');
 }
@@ -1735,9 +1958,11 @@ function resetAll() {
 // All onclick="fn()" attributes in HTML need fn to be on window.
 // Functions defined inside DOMContentLoaded are closures, not global.
 Object.assign(window, {
-    run, resetAll, switchTab,
+    run, resetAll, switchTab, showResultTab,
     filterClusters, toggleCluster,
-    exportCSV, exportClusters, exportJSON, exportText, exportPillarCSV
+    exportCSV, exportCurrentTab, exportQuickWinsCSV,
+    exportClusters, exportRejectedCSV,
+    exportJSON, exportText, exportPillarCSV
 });
 
 }); // end DOMContentLoaded
