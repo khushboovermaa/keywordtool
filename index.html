@@ -807,8 +807,8 @@ tbody tr:nth-child(even):hover { background: rgba(59,130,246,0.04); }
             <th onclick="sortBy('primary')">Primary Keyword <span class="sort-icon">⬍</span></th>
             <th onclick="sortBy('count')" style="text-align:center">Variants <span class="sort-icon">⬍</span></th>
             <th onclick="sortBy('category')">Category <span class="sort-icon">⬍</span></th>
+            <th style="min-width:260px;">💡 Suggested Title</th>
             <th onclick="sortBy('volume')" style="text-align:right">Volume <span class="sort-icon">⬍</span></th>
-            <th>Intent Type</th>
             <th style="width:130px; cursor:default; text-align:center">Generate Content</th>
           </tr>
         </thead>
@@ -1288,16 +1288,16 @@ async function processKeywords() {
     allData = groups.map(g => {
       const primary = g.primary;
       const m = metaMap[normaliseForDedup(primary)] || { volume: 0, type: 'mixed' };
-      // Merge AI-assigned variants with any from metadata
       const variantsSet = new Set([...g.secondary]);
       (m.variants || []).forEach(v => variantsSet.add(v));
       variantsSet.delete(primary);
       return {
         primary,
         keywords: [...variantsSet],
-        category: g.intent,      // direct from AI
+        category: g.intent,
         notes: g.notes || '',
         groupName: g.groupName || primary,
+        suggestedTitle: g.suggestedTitle || '',
         volume: m.volume,
         type: m.type
       };
@@ -1357,32 +1357,54 @@ async function aiCluster(keywords, metaMap, apiKey, proxyUrl) {
       return `${i+1}. ${kw}${vol}`;
     }).join('\n');
 
-    const systemPrompt = `You are an expert SEO strategist. Your job is to cluster keywords into semantic groups for content planning.
+    const systemPrompt = `You are an expert SEO strategist. Cluster keywords into semantic groups for content planning.
 
-RULES (follow strictly):
-1. DO NOT change, rewrite, correct spelling, or modify any keyword. Keep them exactly as given.
-2. Group keywords by TOPIC SIMILARITY and SEARCH INTENT — not character similarity.
-   Example: "digital marketing company", "digital mrketing agency", "best digital marketing firm" → same group (same topic+intent even if misspelled)
-3. Each group = one piece of content (one page or one blog post).
-4. Pick the PRIMARY keyword with highest value/volume (hint: [vol:N] shown). If no volume, pick the cleanest/most representative.
-5. Assign INTENT:
-   - blog → informational, how-to, educational, research, tips, guides, comparisons
-   - service → commercial, transactional, hire/buy intent, agency/company/provider queries
-   - case_study → proof/results/ROI queries, "how X helped Y", portfolio queries
-   - navigational → brand-specific lookups, login, contact
-6. Remove / exclude keywords that are pure noise, random chars, meaningless, or zero-value.
-7. NOTES field: add a short insight (e.g. "High-conversion cluster", "Good TOF content", "Strong buying intent").
+STRICT RULES:
+1. DO NOT change, rewrite, correct, or modify ANY keyword. Keep exact original spelling always.
+2. Group by TOPIC + SEARCH INTENT — not character similarity.
+   Example: "digital mrketing agency", "best digital marketing firm", "digital marketing company" → same group (same topic+intent even if misspelled)
+3. Each group = one piece of content (one URL).
+4. PRIMARY keyword = highest volume (use [vol:N] hint) OR most natural/complete if no volume.
+5. INTENT classification — think like a human SEO. Ask: "What does this person want?"
+   - blog → They want to LEARN: how-to, tips, guides, what is, comparison, statistics, tools list, integration help, setup guides, "how to use X", "X vs Y", "best X for Y" (informational)
+   - service → They want to BUY or HIRE: agency, company, pricing, hire, outsource, "X service", "X agency", "best X agency" (commercial/transactional)
+   - case_study → They want PROOF: results, ROI, "how X helped", success stories, "increased by X%", portfolios
+   - navigational → Brand name + login/contact/signup only
+   
+   IMPORTANT EXAMPLES — classify these correctly:
+   "how to use linkedin lead gen forms" → blog (tutorial)
+   "linkedin lead gen forms integration google sheets" → blog (setup/how-to guide)
+   "linkedin lead generation agency" → service (hiring intent)
+   "best linkedin lead generation tools" → blog (informational list)
+   "linkedin lead generation services" → service (buying intent)
+   "linkedin lead validation criteria" → blog (informational — learning what criteria means)
+   "linkedin lead generation cost" → blog (research intent)
+   "hire linkedin lead generation expert" → service (transactional)
+   "linkedin lead gen campaigns" → blog (how-to/educational about campaigns)
+   "proven frameworks for linkedin content creation" → blog (educational)
 
-Return ONLY valid JSON — no markdown, no preamble:
+6. SUGGESTED TITLE — write a real SEO page title a human editor would use:
+   - Blog: "How to [Do X]: [Benefit]" or "[Number] [Best/Top] [X] for [Y]" or "What Is [X]? [Subtitle]"
+   - Service: "[City/Niche] [Service] Services | [Brand Benefit]" or "Professional [X] Services for [Audience]"  
+   - Case Study: "How [Brand] [Achieved Result] with [Method]"
+   - ONLY write a title if it CLEARLY fits that intent. If the keyword is ambiguous or weak, leave suggestedTitle as empty string "".
+   - Keep titles under 65 characters. Natural language, not keyword-stuffed.
+
+7. NOTES: One-line human SEO insight. Examples: "High-conversion cluster", "Good TOF content", "Strong buying intent", "Setup/integration guide", "Comparison opportunity"
+
+8. Remove pure noise keywords (random chars, URLs, meaningless phrases). List them in "removed".
+
+Return ONLY valid JSON — no markdown fences, no preamble:
 {
-  "removed": ["keyword that was noise"],
+  "removed": ["noisy keyword here"],
   "groups": [
     {
       "groupName": "Topic cluster label (3-5 words)",
-      "primary": "exact keyword string",
-      "secondary": ["exact keyword", "exact keyword"],
+      "primary": "exact original keyword",
+      "secondary": ["exact original keyword", "exact original keyword"],
       "intent": "blog|service|case_study|navigational",
-      "notes": "short insight"
+      "suggestedTitle": "Human-written SEO title or empty string if not clear",
+      "notes": "one-line SEO insight"
     }
   ]
 }`;
@@ -1473,6 +1495,7 @@ function renderTable() {
   const tbody = document.getElementById('tableBody');
   const catColors = { blog:'blog', service:'service', case_study:'case_study', navigational:'navigational' };
   const catLabels = { blog:'📝 Blog', service:'🛠 Service', case_study:'🏆 Case Study', navigational:'🧭 Nav' };
+  const titleIcons = { blog:'✍️', service:'🏢', case_study:'📈', navigational:'🔗' };
 
   if (filteredData.length === 0) {
     tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:3rem;color:var(--muted)">No keywords match your filter</td></tr>`;
@@ -1485,12 +1508,21 @@ function renderTable() {
     const volClass = row.volume > 0 ? '' : 'zero';
     const hasKws = row.keywords && row.keywords.length > 0;
     const kwPreview = hasKws ? row.keywords.slice(0,3).join(' · ') + (row.keywords.length > 3 ? ` +${row.keywords.length-3} more` : '') : '—';
+
     const groupLabel = row.groupName && row.groupName !== row.primary
-      ? `<div style="font-size:0.7rem;color:var(--blue);font-weight:600;margin-bottom:2px;opacity:0.8;">📂 ${row.groupName}</div>`
+      ? `<div style="font-size:0.68rem;color:var(--blue);font-weight:600;margin-bottom:2px;opacity:0.75;letter-spacing:0.2px;">📂 ${row.groupName}</div>`
       : '';
     const notesHtml = row.notes
-      ? `<div style="font-size:0.72rem;color:var(--amber);margin-top:3px;font-style:italic;">💡 ${row.notes}</div>`
+      ? `<div style="font-size:0.7rem;color:var(--amber);margin-top:4px;font-style:italic;">💡 ${row.notes}</div>`
       : '';
+
+    // Suggested title cell — only show if AI gave one
+    const icon = titleIcons[row.category] || '✍️';
+    const titleHtml = row.suggestedTitle
+      ? `<div style="font-size:0.82rem;color:var(--text);font-weight:500;line-height:1.4;">${icon} ${row.suggestedTitle}</div>
+         <div style="font-size:0.68rem;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:0.5px;">${catLabels[row.category] || ''} title</div>`
+      : `<div style="font-size:0.75rem;color:var(--border2);font-style:italic;">— not applicable —</div>`;
+
     return `
     <tr id="row-${i}">
       <td class="row-num">${i+1}</td>
@@ -1499,13 +1531,13 @@ function renderTable() {
         <span title="${row.primary}">${row.primary}</span>
         ${notesHtml}
       </td>
-      <td style="max-width:300px;">
+      <td style="max-width:260px;">
         <div style="font-size:0.78rem;color:var(--muted);line-height:1.5;">${kwPreview}</div>
         ${hasKws ? `<button onclick="toggleVariants(${i})" style="margin-top:4px;padding:2px 8px;background:var(--blue-dim);border:1px solid rgba(59,130,246,0.2);border-radius:4px;color:var(--blue);font-size:0.7rem;cursor:pointer;font-family:var(--sans);" id="vbtn-${i}">▼ All ${row.keywords.length}</button>` : ''}
       </td>
       <td><span class="cat-badge ${catColors[row.category] || 'service'}">${catLabels[row.category] || '🛠 Service'}</span></td>
+      <td style="min-width:260px;padding:0.75rem 1rem;">${titleHtml}</td>
       <td class="td-vol ${volClass}">${vol}</td>
-      <td class="td-type">${row.type||'—'}</td>
       <td style="text-align:center">
         <button class="btn-gen" id="genBtn-${i}" onclick="openModal(${i})">✍️ Generate</button>
       </td>
@@ -1937,23 +1969,40 @@ function copyAllSections() {
 // ════════════════════════════════════════════════
 function exportToCSV() {
   if (!allData.length) return;
-  const headers = ['Primary Keyword','Variants','Count','Category','Volume','Type'];
-  const rows = allData.map(g => [g.primary, g.keywords.join('; '), g.keywords.length, g.category, g.volume||0, g.type||'mixed']);
+  const headers = ['Primary Keyword','Variants','Count','Category','Suggested Title','Notes','Volume'];
+  const rows = allData.map(g => [
+    g.primary,
+    g.keywords.join('; '),
+    g.keywords.length,
+    g.category,
+    g.suggestedTitle || '',
+    g.notes || '',
+    g.volume || 0
+  ]);
   let csv = headers.join(',') + '\n';
-  rows.forEach(r => { csv += r.map(c => typeof c==='string'&&c.includes(',') ? `"${c}"` : c).join(',') + '\n'; });
+  rows.forEach(r => { csv += r.map(c => typeof c==='string' && (c.includes(',') || c.includes('"')) ? `"${c.replace(/"/g,'""')}"` : c).join(',') + '\n'; });
   dlFile(csv, 'keywords.csv', 'text/csv');
 }
 
 function exportToExcel() {
   if (!allData.length) return;
   if (!window.__xlsxOK || !window.XLSX) { alert('Excel library not loaded — please use CSV export instead.'); return; }
-  const data = [['Primary Keyword','Variants','Count','Category','Volume','Type']];
-  allData.forEach(g => data.push([g.primary, g.keywords.join('; '), g.keywords.length, g.category, g.volume||0, g.type||'mixed']));
+  const data = [['Primary Keyword','Secondary Keywords','Count','Category','Suggested Title','Notes','Volume']];
+  allData.forEach(g => data.push([
+    g.primary,
+    g.keywords.join('; '),
+    g.keywords.length,
+    g.category,
+    g.suggestedTitle || '',
+    g.notes || '',
+    g.volume || 0
+  ]));
   const ws = XLSX.utils.aoa_to_sheet(data);
-  ws['!cols'] = [{wch:35},{wch:50},{wch:8},{wch:15},{wch:10},{wch:20}];
+  ws['!cols'] = [{wch:35},{wch:55},{wch:8},{wch:14},{wch:55},{wch:35},{wch:10}];
+  // Style header row
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Keywords');
-  XLSX.writeFile(wb, 'keywords.xlsx');
+  XLSX.writeFile(wb, 'keywords-clustered.xlsx');
 }
 
 function exportJSON() {
