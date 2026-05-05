@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Keyword Curator Pro v2 — SEO Strategist Edition</title>
+    <title>Keyword Curator Pro v4 — SEO Strategist Edition</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -269,12 +269,12 @@
     <header>
         <div class="logo-block">
             <h1>Keyword<span>Curator</span> Pro</h1>
-            <p>SEO Strategist-Grade Filtering Engine v2.0</p>
+            <p>SEO Strategist-Grade Filtering Engine v4.0 — Smarter Engine</p>
         </div>
         <div class="header-badges">
-            <span class="hbadge hbadge-green">✦ 8 PRO FEATURES</span>
-            <span class="hbadge hbadge-blue">⚡ CANNIBALIZATION DETECTION</span>
-            <span class="hbadge hbadge-purple">🗂 TOPIC CLUSTERING</span>
+            <span class="hbadge hbadge-green">✦ SMARTER ENGINE v4</span>
+            <span class="hbadge hbadge-blue">⚡ QUICK WINS DETECTOR</span>
+            <span class="hbadge hbadge-purple">🗂 ENTITY CLUSTERING</span>
         </div>
     </header>
 
@@ -285,8 +285,9 @@
             <span class="icon">📂</span>
             <h3>Drop your CSV or Excel file here</h3>
             <p>Ahrefs · SEMrush · GSC · Ubersuggest · Any format · Auto column detection</p>
+            <label for="fileInput" style="display:inline-block;margin-top:1rem;padding:0.55rem 1.4rem;background:rgba(59,130,246,0.18);border:1px solid rgba(59,130,246,0.4);border-radius:7px;color:#93c5fd;font-family:var(--mono);font-size:0.78rem;cursor:pointer;letter-spacing:0.04em">📁 Browse Files</label>
         </div>
-        <input type="file" id="fileInput" accept=".csv,.xlsx,.xls">
+        <input type="file" id="fileInput" accept=".csv,.xlsx,.xls,.tsv" style="display:none">
         <div class="file-loaded" id="fileStatus"></div>
 
         <!-- COLUMN MAPPER (auto-detect fallback) -->
@@ -419,6 +420,8 @@
                             <th>KD~</th>
                             <th>Volume</th>
                             <th>Quality</th>
+                            <th title="Opportunity Score: combines volume, difficulty & intent into one priority signal">Opp~</th>
+                            <th title="Recommended word count target based on intent & format">Words</th>
                         </tr>
                     </thead>
                     <tbody id="tBody"></tbody>
@@ -462,17 +465,10 @@
 
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js" onerror="this.onerror=null;var s=document.createElement('script');s.src='https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js';document.head.appendChild(s);"></script>
 <script>
-(function(){
-  function loadXLSX(src,fb){
-    var s=document.createElement("script");s.src=src;
-    s.onerror=function(){if(fb)loadXLSX(fb);};
-    document.head.appendChild(s);
-  }
-  loadXLSX("https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js","https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js");
-})();
-</script>
-<script>
+window.addEventListener('DOMContentLoaded', function() {
+// ── INIT ──────────────────────────────────────────────────────
 // ═══════════════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════════════
@@ -634,6 +630,7 @@ function deduplicateKeywords(kwList) {
 // ═══════════════════════════════════════════════════════════════
 // INTENT CLASSIFICATION
 // ═══════════════════════════════════════════════════════════════
+// SIGNALS kept for scoreKeyword compatibility
 const SIGNALS = {
     transactional: ['buy','order','purchase','shop','price','pricing','cost','cheap','deal','discount','coupon','near me','delivery','hire','book','booking','quote','get quote','free trial','subscribe','sign up','install','apply','rent','affordable','best price','low cost','offer','checkout','order online','buy online'],
     informational: ['how to','how do','how does','what is','what are','why is','why does','when to','where to','guide','tutorial','tips','learn','understand','explain','difference between','meaning of','definition','examples','types of','list of','overview','introduction','beginners','step by step','checklist','template','ideas','inspiration','benefits','advantages','disadvantages','problems','mistakes','common','complete','ultimate','everything about','explained','vs','versus'],
@@ -641,14 +638,51 @@ const SIGNALS = {
     navigational: ['login','sign in','website','official','contact','support','customer service','helpdesk','app','portal','dashboard','account','homepage']
 };
 
+// ── WEIGHTED INTENT CLASSIFIER (v4 — no first-match bias) ─────
 function classifyIntent(kw) {
-    const k = kw.toLowerCase();
-    if (SIGNALS.transactional.some(s => k.includes(s))) return 'transactional';
-    if (SIGNALS.informational.some(s => k.includes(s))) return 'informational';
-    if (SIGNALS.commercial.some(s => k.includes(s))) return 'commercial';
-    if (SIGNALS.navigational.some(s => k.includes(s))) return 'navigational';
+    const k = kw.toLowerCase().trim();
     const words = k.split(/\s+/).filter(Boolean);
-    return words.length >= 3 ? 'informational' : 'commercial';
+    const scores = { transactional: 0, informational: 0, commercial: 0, navigational: 0 };
+
+    // NAVIGATIONAL — highest priority override
+    ['login','sign in','sign-in','dashboard','portal','helpdesk','contact us','my account','homepage','official site'].forEach(s => { if (k.includes(s)) scores.navigational += 55; });
+
+    // TRANSACTIONAL signals
+    ['buy ','order ','purchase ','hire ','book now','get quote','free trial','sign up for','subscribe to','checkout','apply now','rent ','book a ','get started','download now','install '].forEach(s => { if (k.includes(s)) scores.transactional += 30; });
+    ['pricing','price','cost','cheap','affordable','discount','coupon','deal','near me','delivery','for sale','quote','free demo','book'].forEach(s => { if (k.includes(s)) scores.transactional += 15; });
+    if (/\bnear me\b/.test(k)) scores.transactional += 22;
+
+    // INFORMATIONAL signals
+    const infoQ = ['how to ','how do ','how does ','what is ','what are ','why is ','why does ','why are ','when to ','where to ','who is ','who are ','can i ','should i '];
+    infoQ.forEach(s => { if (k.startsWith(s) || k.includes(s)) scores.informational += 35; });
+    ['guide','tutorial','step by step','step-by-step','checklist','template','explained','meaning of','definition','difference between'].forEach(s => { if (k.includes(s)) scores.informational += 22; });
+    ['tips','ideas','inspiration','learn ','understand','benefits','advantages','disadvantages','problems','mistakes','types of','list of','overview','introduction','beginners','complete guide','everything about'].forEach(s => { if (k.includes(s)) scores.informational += 12; });
+
+    // COMMERCIAL signals
+    [' vs ',' versus ','alternative','alternatives','compare','comparison','review','reviews','ranking','ranked'].forEach(s => { if (k.includes(s)) scores.commercial += 26; });
+    ['best ','top ','worth it','is it good','pros and cons','pros cons','recommended','2024','2025','2026','rated','rating','which is best'].forEach(s => { if (k.includes(s)) scores.commercial += 15; });
+
+    // ── Disambiguation overrides ──────────────────────────────
+    // "vs" = comparison (commercial), NOT transactional
+    if (/ vs | versus /.test(k)) { scores.commercial += 22; scores.transactional = Math.max(0, scores.transactional - 30); }
+    // "how to buy/get/hire X" = transactional despite how-to prefix
+    if (/how to (buy|get|order|hire|find|book)\b/.test(k)) { scores.transactional += 28; scores.informational = Math.max(0, scores.informational - 25); }
+    // "best X for Y" = commercial list, not transactional
+    if (/^best .+ for /.test(k)) { scores.commercial += 20; scores.transactional = Math.max(0, scores.transactional - 10); }
+    // "X review" without "how" prefix = commercial
+    if (/\breview(s)?\b/.test(k) && !k.startsWith('how')) { scores.commercial += 25; }
+    // "worth it" = commercial (evaluation)
+    if (/\bworth it\b/.test(k)) { scores.commercial += 28; scores.transactional = Math.max(0, scores.transactional - 15); }
+    // "is X worth/good" = commercial
+    if (/^is .+(worth|good|better|best)\b/.test(k)) { scores.commercial += 20; }
+    // Question starting with "is/are" without buy intent = informational
+    if (/^(is|are) /.test(k) && scores.transactional < 20) scores.informational += 12;
+
+    // Length bias: very short = lean commercial; very long = lean informational
+    if (words.length <= 2) scores.commercial += 8;
+    else if (words.length >= 6) scores.informational += 10;
+
+    return Object.entries(scores).sort((a, b) => b[1] - a[1])[0][0];
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -675,36 +709,57 @@ function predictSerpFeatures(kw, intent) {
 // ═══════════════════════════════════════════════════════════════
 // FEATURE 3: KEYWORD DIFFICULTY ESTIMATE
 // ═══════════════════════════════════════════════════════════════
+// ── SMARTER DIFFICULTY ESTIMATOR (v4) ────────────────────────
 function estimateDifficulty(kw, volume) {
     const k = kw.toLowerCase();
     const words = k.split(/\s+/).filter(Boolean);
-    let d = 50; // base
+    let d = 48; // base
 
-    // More words = less competition (long-tail effect)
-    if (words.length === 1) d += 35;
-    else if (words.length === 2) d += 20;
-    else if (words.length === 3) d += 5;
-    else if (words.length >= 4) d -= 10;
-    else if (words.length >= 6) d -= 20;
+    // Word count: long-tail = lower competition
+    if (words.length === 1) d += 32;
+    else if (words.length === 2) d += 18;
+    else if (words.length === 3) d += 6;
+    else if (words.length === 4) d -= 5;
+    else if (words.length === 5) d -= 12;
+    else if (words.length >= 6) d -= 18;
 
-    // High volume = more competitive
-    if (volume > 100000) d += 25;
-    else if (volume > 10000) d += 15;
+    // Volume: higher search volume usually = more competitive
+    if (volume > 100000) d += 24;
+    else if (volume > 50000) d += 18;
+    else if (volume > 10000) d += 12;
     else if (volume > 1000) d += 5;
-    else if (volume <= 100) d -= 10;
+    else if (volume <= 100 && volume > 0) d -= 10;
+    else if (volume === 0) d -= 5; // no volume data → assume niche
 
-    // Branded = high difficulty
-    const brandSignals = ['google','facebook','amazon','apple','microsoft','youtube','instagram','twitter','linkedin','shopify','hubspot','salesforce','mailchimp'];
-    if (brandSignals.some(b => k.includes(b))) d += 20;
+    // Brand keywords = high difficulty
+    const BRANDS = ['google','facebook','amazon','apple','microsoft','youtube','instagram','twitter','linkedin','shopify','hubspot','salesforce','mailchimp','slack','stripe','notion','ahrefs','semrush'];
+    if (BRANDS.some(b => k.includes(b))) d += 22;
 
-    // Question-format = often easier (less exact competition)
-    if (/^(how|what|why|when|where|which|who)\b/.test(k)) d -= 8;
+    // Question format = often less competed (exact-match search intent page harder to land)
+    if (/^(how|what|why|when|where|which|who)\b/.test(k)) d -= 9;
 
-    // Informational long-tail = typically easier
-    if (words.length >= 5 && SIGNALS.informational.some(s => k.includes(s))) d -= 12;
+    // Comparison keywords = highly competitive (both sides compete)
+    if (/ vs | versus /.test(k)) d += 8;
 
-    // Near me = local = moderate
-    if (k.includes('near me')) d = Math.max(d - 5, 20);
+    // "Near me" = local competition, usually lower than national
+    if (/\bnear me\b/.test(k)) d -= 8;
+
+    // Highly specific long-tail with 3+ modifiers = very low competition
+    const specificModifiers = ['for small business','for beginners','for freelancer','for startup','without ','step by step','for enterprise','in 2026','in 2025','case study','real estate','b2b','saas'];
+    if (specificModifiers.filter(m => k.includes(m)).length >= 2) d -= 12;
+    else if (specificModifiers.some(m => k.includes(m))) d -= 6;
+
+    // Generic single-word competitors: very high competition
+    if (words.length === 1 && volume > 5000) d = Math.max(d, 75);
+
+    // Very informational long-tail = typically easier
+    if (words.length >= 5 && /\b(how to|what is|guide|tutorial|tips|checklist)\b/.test(k)) d -= 10;
+
+    // Branded + comparison = elevated
+    if (BRANDS.some(b => k.includes(b)) && / vs /.test(k)) d += 10;
+
+    // Pricing keywords: moderate competition (buyers are specific)
+    if (/\b(pricing|cost of|how much)\b/.test(k)) d -= 6;
 
     return Math.max(1, Math.min(99, Math.round(d)));
 }
@@ -799,63 +854,135 @@ function contentType(intent, kw) {
 // ═══════════════════════════════════════════════════════════════
 // TITLE GENERATION
 // ═══════════════════════════════════════════════════════════════
+// ── CONTEXT-AWARE TITLE GENERATOR (v4) ───────────────────────
 function suggestTitle(kw, intent) {
     const k = kw.trim();
-    const isQ = /^(how|what|why|when|where|which|who|is|are|can|does|do|should)\b/i.test(k);
-    const h = s => { let n = 0; for (let i = 0; i < s.length; i++) n = (Math.imul(31,n) + s.charCodeAt(i)) | 0; return Math.abs(n); };
-    const tc = s => s.replace(/\b\w+/g, (w,i) => { const m = new Set(['a','an','the','and','but','or','for','nor','on','at','to','by','in','of','up','as','if','is','are']); return (i===0||!m.has(w.toLowerCase())) ? w[0].toUpperCase()+w.slice(1) : w; });
-    const T = {
-        informational: isQ ? [`${tc(k.replace(/^(how to|what is|what are|how do|how does)\s+/i,''))}: Complete Guide`] : [`How to ${tc(k)}: Step-by-Step Guide`,`${tc(k)}: Everything You Need to Know`,`The Ultimate Guide to ${tc(k)}`,`${tc(k)} Explained for Beginners`,`${tc(k)}: Tips, Examples & Best Practices`],
-        transactional: [`Best ${tc(k)} — Pricing & Options`,`${tc(k)}: Get Started Today`,`Hire ${tc(k)} Experts — Free Quote`,`Top-Rated ${tc(k)} Services`,`${tc(k)}: Compare Plans & Pricing`],
-        commercial: [`Best ${tc(k)} in 2026 — In-Depth Review`,`${tc(k)} vs Alternatives: Which Is Best?`,`Top ${tc(k)} Tools Compared`,`${tc(k)}: Pros, Cons & Our Verdict`,`Is ${tc(k)} Worth It? Honest Review`],
-        navigational: [`${tc(k)} — Official Resource`]
-    };
-    const opts = T[intent] || T.informational;
-    return opts[h(k) % opts.length];
+    const kl = k.toLowerCase();
+    const yr = new Date().getFullYear();
+
+    // Title Case helper (skips prepositions/articles mid-string)
+    const tc = s => s.trim().replace(/\b\w+/g, (w, pos) => {
+        const skip = new Set(['a','an','the','and','but','or','for','nor','on','at','to','by','in','of','up','as','if','is','are','vs']);
+        return (pos === 0 || !skip.has(w.toLowerCase())) ? w[0].toUpperCase() + w.slice(1) : w;
+    });
+
+    // Strip common question prefixes so we can reframe them properly
+    const stripped = k.replace(/^(how to|what is|what are|how do you|how does|how do|why is|why are|why does|when to|where to|who is|who are|should i|can i)\s+/i, '').trim();
+
+    // ── Pattern detection ─────────────────────────────────────
+    const isHowTo      = /^how to\b/i.test(k);
+    const isWhatIs     = /^what (is|are)\b/i.test(k);
+    const isWhy        = /^why\b/i.test(k);
+    const isVs         = /\bvs\.?\b|\bversus\b/i.test(kl);
+    const isAlternative= /\balternative(s)?\b/i.test(kl) && !isVs;
+    const isReview     = /\breview(s)?\b/i.test(kl) && !isHowTo;
+    const isBestList   = /^best\s/i.test(kl);
+    const isTopN       = /^top\s+\d+/i.test(kl);
+    const isPricing    = /\b(pricing|price|cost(?: of)?|how much (does|is))\b/i.test(kl);
+    const isNearMe     = /\bnear me\b/i.test(kl);
+    const isComparison = /\bcompar(e|ison)\b/i.test(kl) && !isVs;
+    const isTools      = /\b(tools?|software|apps?|platforms?|systems?)\b/i.test(kl);
+    const isAgency     = /\b(agency|agencies|services?|company|companies|firm)\b/i.test(kl);
+    const isGuide      = /\b(guide|tutorial|checklist|template)\b/i.test(kl) && !isHowTo;
+    const isWorthIt    = /\bworth it\b/i.test(kl);
+    const isCheap      = /\b(cheap|affordable|free)\b/i.test(kl);
+    const isCertified  = /\b(certif|certificat|exam|test\b)/i.test(kl);
+
+    // ── Specific formulas in priority order ──────────────────
+    if (isHowTo && isPricing) return `How Much Does ${tc(stripped.replace(/\b(pricing|price|cost(?: of)?)\b/i,'').trim())} Cost? [${yr} Pricing]`;
+    if (isHowTo)              return `How to ${tc(stripped)}: Step-by-Step Guide (${yr})`;
+    if (isWhatIs)             return `What Is ${tc(stripped)}? Definition, Examples & How It Works`;
+    if (isWhy)                return `Why ${tc(stripped.replace(/^(is|are|does|do)\s+/i,''))}: Key Reasons Explained`;
+    if (isVs)                 return `${tc(k.replace(/\bvs\.?\b/i, 'vs.'))} — Full Comparison [${yr}]`;
+    if (isAlternative)        return `Best ${tc(k.replace(/\balternative(s)?\b/i,'').trim())} Alternatives in ${yr}: Top Picks`;
+    if (isReview && isWorthIt)return `${tc(k.replace(/\b(review(s)?|worth it)\b/ig,'').trim())} Review: Is It Worth It? [${yr}]`;
+    if (isReview)             return `${tc(k.replace(/\breview(s)?\b/i,'').trim())} Review ${yr}: Pros, Cons & Honest Verdict`;
+    if (isBestList && isTools)return `Best ${tc(k.replace(/^best\s+/i,''))} in ${yr} — Ranked & Reviewed`;
+    if (isBestList)           return `Best ${tc(k.replace(/^best\s+/i,''))} in ${yr}: Expert Picks`;
+    if (isTopN)               return `${tc(k)}: Expert-Curated List (${yr})`;
+    if (isPricing)            return `${tc(k.replace(/\b(pricing|price|cost(?: of)?)\b/i,'').trim())} Pricing ${yr}: Complete Cost Breakdown`;
+    if (isNearMe)             return `${tc(k.replace(/\bnear me\b/i,'').trim())}: Find the Best Options Near You`;
+    if (isComparison)         return `${tc(k.replace(/\bcompar(e|ison)\b/i,'').trim())}: Which One Should You Choose? [${yr}]`;
+    if (isGuide)              return `The Complete ${tc(k.replace(/\b(guide|tutorial|checklist|template)\b/i,'').trim())} Guide (${yr})`;
+    if (isCheap)              return `${tc(k)}: Best Affordable Options in ${yr}`;
+    if (isAgency && intent === 'transactional') return `${tc(k)}: Top-Rated Services & How to Choose`;
+    if (isCertified)          return `${tc(k)}: Everything You Need to Pass in ${yr}`;
+
+    // ── Intent-based fallbacks ────────────────────────────────
+    if (intent === 'transactional') return `${tc(k)}: Get Started Today — Pricing & Options`;
+    if (intent === 'commercial')    return `${tc(k)}: Complete Buyer's Guide (${yr})`;
+    if (intent === 'informational') return `${tc(k)}: Everything You Need to Know [${yr}]`;
+    return `${tc(k)} — Official Resource`;
 }
 
-// ═══════════════════════════════════════════════════════════════
-// FEATURE 4: TOPIC CLUSTERING
-// ═══════════════════════════════════════════════════════════════
-function extractTopicCore(kw) {
-    const stopwords = new Set(['how','to','what','is','are','why','when','where','which','who','a','an','the','and','or','for','in','on','at','of','do','does','can','should','best','top','vs','with','your','my','our','their','get','use','make','need','want','find','buy','using']);
-    const words = kw.toLowerCase().split(/\s+/).filter(w => w.length > 2 && !stopwords.has(w));
-    return words.slice(0, 3).join(' '); // take up to 3 core words
+// ── N-GRAM ENTITY CLUSTERING (v4) ────────────────────────────
+// Groups keywords by the shared content entity they target,
+// not by raw character overlap. "best linkedin tools" and
+// "linkedin lead gen agency" both contain "linkedin" but are
+// different entities → correctly split into different clusters.
+
+const CLUSTER_STOPS = new Set(['how','to','what','is','are','why','when','where','which','who','a','an','the','and','or','for','in','on','at','of','do','does','can','should','best','top','with','your','my','our','their','get','use','make','need','want','find','using','about','into','from','by','as','if','be','was','has','have','will','vs','versus','its','it','this','that','these','those','not','no','more','most','very','also','too','so','but','than','then','now','new','all','any','some','other','i','we','you','they','up','out','back','just','over','after','before','between','through','without','within','plus','since','per','via','re','un','pre','non','co','de','vs','both','each','every','many','much','few','less','more','same','such','long','high','low','big','small','great','good','well','better','best','look','here','know','think']);
+
+function tokenizeForCluster(kw) {
+    return kw.toLowerCase()
+        .split(/[\s\-_\/]+/)
+        .map(w => w.replace(/[^a-z0-9]/g, ''))
+        .filter(w => w.length > 2 && !CLUSTER_STOPS.has(w) && /^[a-z]/.test(w));
 }
 
 function clusterKeywords(kwList) {
-    // Build clusters by finding overlapping core topic words
-    const clusters = [];
-    const assigned = new Set();
+    // Step 1: Build n-gram index (2–4 word sequences of content tokens)
+    const ngramIdx = new Map(); // ngram → Set<kw index>
+    kwList.forEach((item, i) => {
+        const tokens = tokenizeForCluster(item.keyword);
+        for (let len = 2; len <= Math.min(4, tokens.length); len++) {
+            for (let s = 0; s <= tokens.length - len; s++) {
+                const ng = tokens.slice(s, s + len).join(' ');
+                if (!ngramIdx.has(ng)) ngramIdx.set(ng, new Set());
+                ngramIdx.get(ng).add(i);
+            }
+        }
+    });
 
+    // Step 2: Find shared anchors — n-grams that appear in 2+ keywords
+    // Sort by: longer n-grams first (more specific), then higher frequency
+    const anchors = [...ngramIdx.entries()]
+        .filter(([, set]) => set.size >= 2)
+        .map(([ng, set]) => ({ ng, size: set.size, len: ng.split(' ').length, indices: [...set] }))
+        .sort((a, b) => (b.len * 3 + b.size) - (a.len * 3 + a.size));
+
+    // Step 3: Greedy assignment — each keyword goes to its best (longest/most frequent) anchor
+    const assigned = new Map(); // kw index → anchor string
+    const clusterMap = new Map(); // anchor → [kw indices]
+
+    anchors.forEach(({ ng, indices }) => {
+        const free = indices.filter(i => !assigned.has(i));
+        if (free.length >= 2) {
+            free.forEach(i => {
+                assigned.set(i, ng);
+                if (!clusterMap.has(ng)) clusterMap.set(ng, []);
+                clusterMap.get(ng).push(i);
+            });
+        }
+    });
+
+    // Step 4: Build cluster objects
+    const clusters = [];
+
+    clusterMap.forEach((indices, anchor) => {
+        const kws = indices.map(i => ({ ...kwList[i], isPrimary: false }));
+        kws.sort((a, b) => (b.volume || 0) - (a.volume || 0));
+        kws[0].isPrimary = true;
+        const topicTitle = anchor.split(' ').map(w => w[0].toUpperCase() + w.slice(1)).join(' ');
+        clusters.push({ topic: topicTitle, topicAnchor: anchor, keywords: kws });
+    });
+
+    // Step 5: Singletons — keywords that shared no anchor
     kwList.forEach((item, i) => {
         if (assigned.has(i)) return;
-        const coreA = extractTopicCore(item.keyword);
-        const wordsA = new Set(coreA.split(' '));
-
-        const cluster = { topic: item.keyword, keywords: [{ ...item, isPrimary: true }] };
-        assigned.add(i);
-
-        kwList.forEach((other, j) => {
-            if (i === j || assigned.has(j)) return;
-            const coreB = extractTopicCore(other.keyword);
-            const wordsB = new Set(coreB.split(' '));
-            // Jaccard similarity on core words
-            const intersection = [...wordsA].filter(w => wordsB.has(w)).length;
-            const union = new Set([...wordsA, ...wordsB]).size;
-            const sim = union > 0 ? intersection / union : 0;
-            if (sim >= 0.4 || coreA.includes(coreB) || coreB.includes(coreA)) {
-                cluster.keywords.push({ ...other, isPrimary: false });
-                assigned.add(j);
-            }
-        });
-
-        // Sort: highest volume = primary
-        cluster.keywords.sort((a, b) => (b.volume || 0) - (a.volume || 0));
-        cluster.keywords[0].isPrimary = true;
-        cluster.topic = cluster.keywords[0].keyword;
-
-        clusters.push(cluster);
+        const tokens = tokenizeForCluster(item.keyword);
+        const topicTitle = tokens.slice(0, 3).map(w => w[0].toUpperCase() + w.slice(1)).join(' ') || item.keyword;
+        clusters.push({ topic: topicTitle, topicAnchor: tokens.join(' '), keywords: [{ ...item, isPrimary: true }] });
     });
 
     return clusters.sort((a, b) => b.keywords.length - a.keywords.length);
@@ -877,6 +1004,44 @@ function detectCannibalization(clusterList, simThreshold) {
         cluster.hasCannibal = cluster.cannibalGroups.length > 0;
     });
     return clusterList;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NEW v4: OPPORTUNITY SCORE, WORD COUNT TARGET, QUICK WIN FLAG
+// ═══════════════════════════════════════════════════════════════
+
+// Opportunity Score: single priority signal combining volume, difficulty, intent
+function computeOpportunityScore(kw) {
+    const vol = kw.volume || 0;
+    // Log-normalized volume score
+    const volScore = vol >= 100000 ? 100 : vol >= 50000 ? 90 : vol >= 10000 ? 75 : vol >= 5000 ? 65 : vol >= 1000 ? 50 : vol >= 100 ? 30 : vol > 0 ? 15 : 0;
+    // Inverse difficulty (lower KD = higher opportunity)
+    const diffScore = Math.max(0, 100 - kw.diff);
+    // Intent value: transactional & commercial keywords have higher business value
+    const intentScore = { transactional: 100, commercial: 85, informational: 65, navigational: 20 }[kw.intent] || 50;
+    // Quality & SERP bonuses
+    const qualBonus  = kw.score >= 80 ? 12 : kw.score >= 65 ? 6 : 0;
+    const serpBonus  = kw.serpFeatures.includes('FS') ? 10 : kw.serpFeatures.includes('PAA') ? 5 : 0;
+    return Math.round(Math.min(99, volScore * 0.35 + diffScore * 0.30 + intentScore * 0.25 + qualBonus * 0.05 + serpBonus * 0.05));
+}
+
+// Recommended word count based on intent + keyword format signals
+function getWordCountTarget(intent, kw) {
+    const kl = kw.toLowerCase();
+    if (intent === 'navigational') return '300–500w';
+    if (intent === 'transactional') return '600–900w';
+    if (/^how to\b/i.test(kl) || /\bstep by step\b/.test(kl)) return '1,500–2,500w';
+    if (/\bvs\.?\b|\bversus\b|\bcompar|\breview(s)?\b/i.test(kl)) return '1,200–2,000w';
+    if (/^(best|top \d+)\b/i.test(kl)) return '1,500–2,500w';
+    if (/\b(guide|tutorial|checklist|template|explained)\b/i.test(kl)) return '1,500–2,500w';
+    if (/^(what is|what are)\b/i.test(kl)) return '800–1,500w';
+    if (intent === 'commercial') return '1,000–1,800w';
+    return '1,200–2,000w'; // informational default
+}
+
+// A keyword is a Quick Win if it's low-competition AND has real volume AND isn't just navigational
+function isQuickWin(kw) {
+    return kw.diff <= 42 && (kw.volume || 0) > 0 && kw.intent !== 'navigational' && kw.score >= 55;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -926,6 +1091,14 @@ function run() {
         curated = scored.filter(k => k.passes).sort((a, b) => (b.volume || 0) - (a.volume || 0));
         rejected = scored.filter(k => !k.passes);
 
+        // Step 3a: Compute opportunity scores + word count targets + quick win flag
+        curated = curated.map(k => ({
+            ...k,
+            opp: computeOpportunityScore(k),
+            wordTarget: getWordCountTarget(k.intent, k.keyword),
+            quickWin: isQuickWin(k)
+        }));
+
         // Step 3: Topic clustering
         let rawClusters = clusterKeywords(curated);
         clusters = detectCannibalization(rawClusters, cannibalThreshold);
@@ -939,6 +1112,7 @@ function run() {
         const blogs = curated.filter(k => k.ctype === 'blog').length;
         const cannibalCount = clusters.filter(c => c.hasCannibal).length;
         const dupeCount = rejected.filter(k => k.rejectReason === 'near_duplicate').length;
+        const quickWinCount = curated.filter(k => k.quickWin).length;
 
         document.getElementById('statsBar').innerHTML = `
             <div class="stat good"><div class="stat-n">${curated.length.toLocaleString()}</div><div class="stat-l">Passed</div></div>
@@ -946,6 +1120,7 @@ function run() {
             <div class="stat pink"><div class="stat-n">${dupeCount}</div><div class="stat-l">Dupes Removed</div></div>
             <div class="stat warn"><div class="stat-n">${cannibalCount}</div><div class="stat-l">Cannibal Risk</div></div>
             <div class="stat info"><div class="stat-n">${clusters.length}</div><div class="stat-l">Clusters</div></div>
+            <div class="stat" style="background:rgba(16,185,129,0.08);border-color:rgba(16,185,129,0.2)"><div class="stat-n" style="color:#10b981">⚡${quickWinCount}</div><div class="stat-l">Quick Wins</div></div>
             <div class="stat info"><div class="stat-n">${tx}</div><div class="stat-l">Transactional</div></div>
             <div class="stat amber"><div class="stat-n">${cm}</div><div class="stat-l">Commercial</div></div>
             <div class="stat purple"><div class="stat-n">${inf}</div><div class="stat-l">Informational</div></div>
@@ -956,6 +1131,7 @@ function run() {
         // Tabs
         document.getElementById('tabsEl').innerHTML = `
             <button class="tab active" onclick="switchTab('all',this)">All (${curated.length})</button>
+            <button class="tab" style="color:#10b981;border-color:rgba(16,185,129,0.3)" onclick="switchTab('quickwins',this)">⚡ Quick Wins (${quickWinCount})</button>
             <button class="tab" onclick="switchTab('transactional',this)">💳 Transactional (${tx})</button>
             <button class="tab tab-amber" onclick="switchTab('commercial',this)">🔍 Commercial (${cm})</button>
             <button class="tab" onclick="switchTab('informational',this)">📖 Informational (${inf})</button>
@@ -990,22 +1166,25 @@ function switchTab(tab, el) {
 function renderTable() {
     const rows = curated.filter(k => {
         if (activeTab === 'all') return true;
+        if (activeTab === 'quickwins') return k.quickWin;
         if (activeTab === 'page' || activeTab === 'blog') return k.ctype === activeTab;
         return k.intent === activeTab;
     });
 
-    if (!rows.length) { document.getElementById('tBody').innerHTML = `<tr><td colspan="9"><div class="empty">No keywords in this category.</div></td></tr>`; return; }
+    if (!rows.length) { document.getElementById('tBody').innerHTML = `<tr><td colspan="11"><div class="empty">No keywords in this category.</div></td></tr>`; return; }
 
     const iB = { transactional:'<span class="badge badge-tx">💳 TX</span>', commercial:'<span class="badge badge-cm">🔍 CM</span>', informational:'<span class="badge badge-in">📖 INFO</span>', navigational:'<span class="badge badge-nv">🧭 NAV</span>' };
     const serpMap = { FS:'serp-fs', PAA:'serp-paa', LOCAL:'serp-local', VIDEO:'serp-video', IMG:'serp-img', SHOP:'serp-shop' };
     const sc = s => s >= 80 ? '#10b981' : s >= 60 ? '#f59e0b' : '#ef4444';
+    const oc = o => o >= 70 ? '#10b981' : o >= 50 ? '#f59e0b' : '#64748b';
 
     document.getElementById('tBody').innerHTML = rows.map((r, i) => {
         const { label, color } = diffLabel(r.diff);
         const serpHTML = r.serpFeatures.length ? `<div class="serp-tags">${r.serpFeatures.map(f => `<span class="serp-tag ${serpMap[f]}">${f}</span>`).join('')}</div>` : '<span style="color:var(--muted);font-size:0.7rem">—</span>';
+        const qwBadge = r.quickWin ? `<span style="font-family:var(--mono);font-size:0.58rem;padding:0.1rem 0.35rem;border-radius:3px;background:rgba(16,185,129,0.12);color:#10b981;border:1px solid rgba(16,185,129,0.25);margin-left:0.3rem" title="Quick Win: low difficulty + real volume">⚡</span>` : '';
         return `<tr>
             <td style="color:var(--muted);font-family:var(--mono);font-size:0.72rem">${i+1}</td>
-            <td class="kw-cell">${escHtml(r.keyword)}</td>
+            <td class="kw-cell">${escHtml(r.keyword)}${qwBadge}</td>
             <td class="title-cell">${escHtml(r.title)}</td>
             <td>${iB[r.intent]||r.intent}</td>
             <td><span class="ctype ctype-${r.ctype}">${r.ctype.toUpperCase()}</span></td>
@@ -1013,6 +1192,8 @@ function renderTable() {
             <td><div class="diff-wrap"><div class="diff-bar"><div class="diff-fill" style="width:${r.diff}%;background:${color}"></div></div><span class="diff-label" style="color:${color}">${label}</span></div></td>
             <td style="font-family:var(--mono);font-size:0.78rem;text-align:right">${r.volume ? r.volume.toLocaleString() : '—'}</td>
             <td><div class="score-wrap"><div class="score-bar"><div class="score-fill" style="width:${r.score}%;background:${sc(r.score)}"></div></div><span class="score-num" style="color:${sc(r.score)}">${r.score}</span></div></td>
+            <td><div class="score-wrap"><div class="score-bar"><div class="score-fill" style="width:${r.opp||0}%;background:${oc(r.opp||0)}"></div></div><span class="score-num" style="color:${oc(r.opp||0)}">${r.opp||'—'}</span></div></td>
+            <td style="font-family:var(--mono);font-size:0.68rem;color:var(--muted);white-space:nowrap">${r.wordTarget||'—'}</td>
         </tr>`;
     }).join('');
 }
@@ -1309,8 +1490,8 @@ function renderRejected() {
 // EXPORT
 // ═══════════════════════════════════════════════════════════════
 function exportCSV() {
-    let csv = 'Keyword,Suggested Title,Intent,Content Type,SERP Features,KD Estimate,Volume,Quality Score\n';
-    curated.forEach(r => { csv += `"${r.keyword}","${r.title}","${r.intent}","${r.ctype}","${r.serpFeatures.join('/')}","${diffLabel(r.diff).label}","${r.volume}","${r.score}"\n`; });
+    let csv = 'Keyword,Suggested Title,Intent,Content Type,SERP Features,KD Estimate,Volume,Quality Score,Opportunity Score,Word Count Target,Quick Win\n';
+    curated.forEach(r => { csv += `"${r.keyword}","${r.title}","${r.intent}","${r.ctype}","${r.serpFeatures.join('/')}","${diffLabel(r.diff).label}","${r.volume}","${r.score}","${r.opp||''}","${r.wordTarget||''}","${r.quickWin?'YES':''}"\n`; });
     dl(csv, 'curated-keywords.csv', 'text/csv');
 }
 
@@ -1328,7 +1509,7 @@ function exportJSON() {
     const out = {
         exportDate: new Date().toISOString(),
         summary: { total: curated.length, rejected: rejected.length, clusters: clusters.length, cannibalizationRisks: clusters.filter(c => c.hasCannibal).length },
-        curated: curated.map(k => ({ keyword: k.keyword, title: k.title, intent: k.intent, contentType: k.ctype, serpFeatures: k.serpFeatures, difficultyEstimate: diffLabel(k.diff).label, volume: k.volume, qualityScore: k.score })),
+        curated: curated.map(k => ({ keyword: k.keyword, title: k.title, intent: k.intent, contentType: k.ctype, serpFeatures: k.serpFeatures, difficultyEstimate: diffLabel(k.diff).label, volume: k.volume, qualityScore: k.score, opportunityScore: k.opp, wordCountTarget: k.wordTarget, quickWin: k.quickWin })),
         clusters: clusters.map(c => ({ topic: c.topic, cannibalizationRisk: c.hasCannibal, keywords: c.keywords.map(k => ({ keyword: k.keyword, isPrimary: k.isPrimary, intent: k.intent, ctype: k.ctype, volume: k.volume })) })),
         rejected: rejected.map(k => ({ keyword: k.keyword, reason: REJECTION_REASONS[k.rejectReason] || k.rejectReason, score: k.score, volume: k.volume }))
     };
@@ -1337,9 +1518,11 @@ function exportJSON() {
 
 function exportText() {
     const sep = '─'.repeat(60);
-    let t = `SEO KEYWORD CURATION REPORT v2\n${sep}\nGenerated: ${new Date().toLocaleString()}\nCurated: ${curated.length} | Rejected: ${rejected.length} | Clusters: ${clusters.length}\n\n`;
+    let t = `SEO KEYWORD CURATION REPORT v4\n${sep}\nGenerated: ${new Date().toLocaleString()}\nCurated: ${curated.length} | Rejected: ${rejected.length} | Clusters: ${clusters.length} | Quick Wins: ${curated.filter(k=>k.quickWin).length}\n\n`;
     t += `CANNIBALIZATION RISKS: ${clusters.filter(c=>c.hasCannibal).length} cluster(s)\n${sep}\n`;
     clusters.filter(c=>c.hasCannibal).forEach(c => { t += `• ${c.topic} → ${c.cannibalGroups.map(g=>g.map(k=>k.keyword).join(' vs ')).join('; ')}\n`; });
+    t += `\n⚡ QUICK WINS (publish these first)\n${sep}\n`;
+    curated.filter(k=>k.quickWin).forEach(k => { t += `• ${k.keyword} | KD: ${diffLabel(k.diff).label} | Vol: ${k.volume||'—'} | Opp: ${k.opp} | ${k.wordTarget}\n`; });
     t += `\nTOPIC CLUSTERS\n${sep}\n`;
     clusters.forEach(c => { t += `\n[${c.keywords.length} kw] ${c.topic}${c.hasCannibal?' ⚠ CANNIBAL':''}\n`; c.keywords.forEach(k => { t += `  ${k.isPrimary?'★':' '} ${k.keyword} (${k.intent}, ${k.ctype}, vol: ${k.volume||'—'})\n`; }); });
     t += `\nCURATED KEYWORDS\n${sep}\n`;
@@ -1347,7 +1530,7 @@ function exportText() {
         const g = curated.filter(k=>k.intent===intent);
         if (!g.length) return;
         t += `\n${intent.toUpperCase()} (${g.length})\n`;
-        g.forEach(k => { t += `• ${k.keyword}\n  Title: ${k.title}\n  Type: ${k.ctype.toUpperCase()} | SERP: ${k.serpFeatures.join(',')||'—'} | KD: ${diffLabel(k.diff).label} | Vol: ${k.volume||'N/A'} | Score: ${k.score}\n\n`; });
+        g.forEach(k => { t += `• ${k.keyword}${k.quickWin?' ⚡':''}\n  Title: ${k.title}\n  Type: ${k.ctype.toUpperCase()} | SERP: ${k.serpFeatures.join(',')||'—'} | KD: ${diffLabel(k.diff).label} | Vol: ${k.volume||'N/A'} | Score: ${k.score} | Opp: ${k.opp||'—'} | ${k.wordTarget||'—'}\n\n`; });
     });
     t += `\nREJECTED KEYWORDS\n${sep}\n`;
     rejected.forEach(k => { t += `✗ ${k.keyword} — ${REJECTION_REASONS[k.rejectReason]||k.rejectReason}\n`; });
@@ -1370,6 +1553,7 @@ function resetAll() {
     selectedIntents.clear();
 }
 
+}); // end DOMContentLoaded
 </script>
 </body>
 </html>
