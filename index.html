@@ -807,7 +807,7 @@ tbody tr:nth-child(even):hover { background: rgba(59,130,246,0.04); }
             <th onclick="sortBy('primary')">Primary Keyword <span class="sort-icon">⬍</span></th>
             <th onclick="sortBy('count')" style="text-align:center">Variants <span class="sort-icon">⬍</span></th>
             <th onclick="sortBy('category')">Category <span class="sort-icon">⬍</span></th>
-            <th style="min-width:280px">Suggested Title</th>
+            <th style="min-width:300px">📄 Suggested Title</th>
             <th onclick="sortBy('volume')" style="text-align:right">Volume <span class="sort-icon">⬍</span></th>
             <th>Intent Type</th>
             <th style="width:130px; cursor:default; text-align:center">Generate Content</th>
@@ -1384,28 +1384,29 @@ function toggleVariants(i) {
   btn.textContent = open ? `▼ All ${filteredData[i].keywords.length}` : `▲ Hide`;
 }
 
-function generateSuggestedTitle(keyword, category) {
+// Generate AI-powered title suggestions based on keyword and category
+function generateTitle(keyword, category) {
   const kw = keyword.trim();
-  const titleTemplates = {
+  const templates = {
     blog: [
       `Complete Guide to ${kw}`,
       `${kw}: Everything You Need to Know`,
       `Best Practices for ${kw}`,
       `How to Master ${kw}`,
-      `${kw} for Beginners: A Complete Guide`,
+      `${kw} for Beginners: Step-by-Step Guide`,
       `The Ultimate ${kw} Tutorial`,
-      `Top Tips for ${kw} Success`,
-      `Understanding ${kw}: Best Strategies`
+      `Top Tips for ${kw}`,
+      `Understanding ${kw}: Complete Guide`
     ],
     service: [
       `${kw} Services | Professional Solutions`,
       `Expert ${kw} Services for Your Business`,
-      `Get Started with ${kw} | We Help You Succeed`,
-      `${kw} Solutions | Transform Your Business`,
-      `Professional ${kw} Services | Trusted Experts`,
-      `${kw} Services | Quality & Results Guaranteed`,
-      `Affordable & Reliable ${kw} Services`,
-      `${kw} Specialists | Industry Leaders`
+      `Professional ${kw} | Transform Your Success`,
+      `${kw} Solutions | Quality & Results`,
+      `Trusted ${kw} Services | Industry Leaders`,
+      `Get Professional ${kw} Support Today`,
+      `Premium ${kw} Services | Expert Help`,
+      `${kw} Services | We Deliver Results`
     ],
     case_study: [
       `${kw}: Real Results & Success Story`,
@@ -1414,13 +1415,13 @@ function generateSuggestedTitle(keyword, category) {
       `Real-World ${kw} Implementation: Results`,
       `${kw} Case Study: Proven Results`,
       `Success Story: ${kw} Transformation`,
-      `${kw} in Action: Results You Can See`,
+      `${kw} in Action: Success Results`,
       `Client Success: ${kw} Implementation`
     ]
   };
-
-  const templates = titleTemplates[category] || titleTemplates.blog;
-  return templates[Math.floor(Math.random() * templates.length)];
+  
+  const cats = templates[category] || templates.blog;
+  return cats[Math.floor(Math.random() * cats.length)];
 }
 
 function renderTable() {
@@ -1448,7 +1449,7 @@ function renderTable() {
         ${hasKws ? `<button onclick="toggleVariants(${i})" style="margin-top:4px;padding:2px 8px;background:var(--blue-dim);border:1px solid rgba(59,130,246,0.2);border-radius:4px;color:var(--blue);font-size:0.7rem;cursor:pointer;font-family:var(--sans);" id="vbtn-${i}">▼ All ${row.keywords.length}</button>` : ''}
       </td>
       <td><span class="cat-badge ${catColors[row.category]}">${catLabels[row.category]}</span></td>
-      <td style="min-width:280px;"><span style="background:var(--blue-dim);color:var(--blue);padding:0.4rem 0.7rem;border-radius:5px;font-size:0.82rem;border:1px solid rgba(59,130,246,0.3);" title="${generateSuggestedTitle(row.primary, row.category)}">${generateSuggestedTitle(row.primary, row.category)}</span></td>
+      <td style="min-width:300px;"><span style="background:rgba(59,130,246,0.15);color:var(--blue);padding:0.5rem 0.75rem;border-radius:6px;font-size:0.81rem;border:1px solid rgba(59,130,246,0.3);display:block;line-height:1.4;" title="${generateTitle(row.primary, row.category)}">${generateTitle(row.primary, row.category)}</span></td>
       <td class="td-vol ${volClass}">${vol}</td>
       <td class="td-type">${row.type||'—'}</td>
       <td style="text-align:center">
