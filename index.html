@@ -1668,10 +1668,16 @@ async function runGenerate() {
     document.getElementById('configArea').style.display = 'block';
     document.getElementById('mGenBtn').disabled = false;
     closeModal();
-    document.getElementById('apiKeyBar').style.display = 'block';
-    document.getElementById('apiKeyStatus').textContent = '⬆ Enter your API key above first';
+    showPage('upload');
+    const bar = document.getElementById('apiKeyBar');
+    bar.style.display = 'block';
+    bar.style.border = '1.5px solid var(--purple)';
+    bar.style.boxShadow = '0 0 0 3px rgba(139,92,246,0.2)';
+    bar.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    document.getElementById('apiKeyStatus').textContent = '⬆ Enter your API key to generate content';
     document.getElementById('apiKeyStatus').style.color = 'var(--amber)';
-    alert('Please enter your Anthropic API key in the setup panel first.');
+    document.getElementById('apiKeyInput').focus();
+    setTimeout(() => { bar.style.boxShadow = ''; bar.style.border = '1px solid rgba(139,92,246,0.25)'; }, 3000);
     return;
   }
 
@@ -1853,15 +1859,11 @@ function saveApiKey() {
   // Hide the panel after a moment and update the indicator
   setTimeout(() => {
     document.getElementById('apiKeyBar').style.display = 'none';
-    // Update or add the "key saved" indicator
     const existing = document.getElementById('keySavedIndicator');
-    if (existing) existing.remove();
-    const bar = document.getElementById('apiKeyBar');
-    const indicator = document.createElement('div');
-    indicator.id = 'keySavedIndicator';
-    indicator.style.cssText = 'font-size:0.75rem;color:var(--green);margin-top:0.5rem;text-align:center;';
-    indicator.innerHTML = '🔑 API key saved · <a href="#" onclick="document.getElementById(\'apiKeyBar\').style.display=\'block\';document.getElementById(\'apiKeyBar\').scrollIntoView({behavior:\'smooth\'});return false;" style="color:var(--muted);">Change</a>';
-    bar.parentNode.insertBefore(indicator, bar);
+    if (existing) {
+      existing.style.color = 'var(--green)';
+      existing.innerHTML = '🔑 API key saved &nbsp;·&nbsp; <a href="#" onclick="document.getElementById(\'apiKeyBar\').style.display=\'block\';document.getElementById(\'apiKeyBar\').scrollIntoView({behavior:\'smooth\'});return false;" style="color:var(--muted);text-decoration:underline;">Change</a>';
+    }
   }, 1500);
 }
 
@@ -2217,20 +2219,23 @@ document.getElementById('genModal').addEventListener('click', e => {
 // Restore API key bar state on page load
 document.addEventListener('DOMContentLoaded', () => {
   const hasKey = !!sessionStorage.getItem('anthropic_key');
+  // Panel always starts hidden — never auto-open it
+  // Just show a status line below the Process button
   const bar = document.getElementById('apiKeyBar');
-  if (bar) {
-    // Show the panel if no key saved yet — user needs to set it up
-    bar.style.display = hasKey ? 'none' : 'block';
-  }
-  // Show a small "key saved" indicator in the Process button area if key exists
-  if (hasKey) {
-    const btn = document.getElementById('processBtn');
-    if (btn) {
-      const indicator = document.createElement('div');
-      indicator.style.cssText = 'font-size:0.75rem;color:var(--green);margin-top:0.5rem;text-align:center;';
-      indicator.innerHTML = '🔑 API key saved · <a href="#" onclick="document.getElementById(\'apiKeyBar\').style.display=\'block\';document.getElementById(\'apiKeyBar\').scrollIntoView({behavior:\'smooth\'});return false;" style="color:var(--muted);">Change</a>';
-      btn.parentNode.insertBefore(indicator, bar);
+  const btn = document.getElementById('processBtn');
+  if (btn && btn.parentNode) {
+    const existing = document.getElementById('keySavedIndicator');
+    if (existing) existing.remove();
+    const indicator = document.createElement('div');
+    indicator.id = 'keySavedIndicator';
+    indicator.style.cssText = 'font-size:0.78rem;margin-top:0.65rem;text-align:center;';
+    if (hasKey) {
+      indicator.innerHTML = '🔑 API key saved &nbsp;·&nbsp; <a href="#" onclick="document.getElementById(\'apiKeyBar\').style.display=\'block\';document.getElementById(\'apiKeyBar\').scrollIntoView({behavior:\'smooth\'});return false;" style="color:var(--muted);text-decoration:underline;">Change</a>';
+      indicator.style.color = 'var(--green)';
+    } else {
+      indicator.innerHTML = '🔑 <a href="#" onclick="document.getElementById(\'apiKeyBar\').style.display=\'block\';document.getElementById(\'apiKeyBar\').scrollIntoView({behavior:\'smooth\'});document.getElementById(\'apiKeyInput\').focus();return false;" style="color:var(--purple);text-decoration:underline;font-weight:600;">Set up API key</a> <span style="color:var(--muted);">(required for AI clustering)</span>';
     }
+    btn.parentNode.insertBefore(indicator, bar);
   }
 });
 </script>
