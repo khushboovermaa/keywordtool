@@ -807,6 +807,7 @@ tbody tr:nth-child(even):hover { background: rgba(59,130,246,0.04); }
             <th onclick="sortBy('primary')">Primary Keyword <span class="sort-icon">⬍</span></th>
             <th onclick="sortBy('count')" style="text-align:center">Variants <span class="sort-icon">⬍</span></th>
             <th onclick="sortBy('category')">Category <span class="sort-icon">⬍</span></th>
+            <th style="min-width:280px">Suggested Title</th>
             <th onclick="sortBy('volume')" style="text-align:right">Volume <span class="sort-icon">⬍</span></th>
             <th>Intent Type</th>
             <th style="width:130px; cursor:default; text-align:center">Generate Content</th>
@@ -1383,13 +1384,52 @@ function toggleVariants(i) {
   btn.textContent = open ? `▼ All ${filteredData[i].keywords.length}` : `▲ Hide`;
 }
 
+function generateSuggestedTitle(keyword, category) {
+  const kw = keyword.trim();
+  const titleTemplates = {
+    blog: [
+      `Complete Guide to ${kw}`,
+      `${kw}: Everything You Need to Know`,
+      `Best Practices for ${kw}`,
+      `How to Master ${kw}`,
+      `${kw} for Beginners: A Complete Guide`,
+      `The Ultimate ${kw} Tutorial`,
+      `Top Tips for ${kw} Success`,
+      `Understanding ${kw}: Best Strategies`
+    ],
+    service: [
+      `${kw} Services | Professional Solutions`,
+      `Expert ${kw} Services for Your Business`,
+      `Get Started with ${kw} | We Help You Succeed`,
+      `${kw} Solutions | Transform Your Business`,
+      `Professional ${kw} Services | Trusted Experts`,
+      `${kw} Services | Quality & Results Guaranteed`,
+      `Affordable & Reliable ${kw} Services`,
+      `${kw} Specialists | Industry Leaders`
+    ],
+    case_study: [
+      `${kw}: Real Results & Success Story`,
+      `Case Study: How We Solved ${kw}`,
+      `${kw} Success: Client Results & Impact`,
+      `Real-World ${kw} Implementation: Results`,
+      `${kw} Case Study: Proven Results`,
+      `Success Story: ${kw} Transformation`,
+      `${kw} in Action: Results You Can See`,
+      `Client Success: ${kw} Implementation`
+    ]
+  };
+
+  const templates = titleTemplates[category] || titleTemplates.blog;
+  return templates[Math.floor(Math.random() * templates.length)];
+}
+
 function renderTable() {
   const tbody = document.getElementById('tableBody');
   const catColors = { blog:'blog', service:'service', case_study:'case_study' };
   const catLabels = { blog:'📝 Blog', service:'🛠 Service', case_study:'🏆 Case Study' };
 
   if (filteredData.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:3rem;color:var(--muted)">No keywords match your filter</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:3rem;color:var(--muted)">No keywords match your filter</td></tr>`;
     document.getElementById('tableInfo').textContent = '0 rows';
     return;
   }
@@ -1408,6 +1448,7 @@ function renderTable() {
         ${hasKws ? `<button onclick="toggleVariants(${i})" style="margin-top:4px;padding:2px 8px;background:var(--blue-dim);border:1px solid rgba(59,130,246,0.2);border-radius:4px;color:var(--blue);font-size:0.7rem;cursor:pointer;font-family:var(--sans);" id="vbtn-${i}">▼ All ${row.keywords.length}</button>` : ''}
       </td>
       <td><span class="cat-badge ${catColors[row.category]}">${catLabels[row.category]}</span></td>
+      <td style="min-width:280px;"><span style="background:var(--blue-dim);color:var(--blue);padding:0.4rem 0.7rem;border-radius:5px;font-size:0.82rem;border:1px solid rgba(59,130,246,0.3);" title="${generateSuggestedTitle(row.primary, row.category)}">${generateSuggestedTitle(row.primary, row.category)}</span></td>
       <td class="td-vol ${volClass}">${vol}</td>
       <td class="td-type">${row.type||'—'}</td>
       <td style="text-align:center">
@@ -1415,7 +1456,7 @@ function renderTable() {
       </td>
     </tr>
     ${hasKws ? `<tr id="variants-${i}" style="display:none;background:rgba(15,23,42,0.5);">
-      <td colspan="7" style="padding:0.75rem 1rem 1rem 2.5rem;">
+      <td colspan="8" style="padding:0.75rem 1rem 1rem 2.5rem;">
         <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);margin-bottom:0.5rem;">Secondary Keywords</div>
         <div style="display:flex;flex-wrap:wrap;gap:0.4rem;">
           ${row.keywords.map(k=>`<span style="background:var(--surface2);border:1px solid var(--border2);border-radius:4px;padding:0.25rem 0.6rem;font-size:0.78rem;color:var(--text);">${k}</span>`).join('')}
