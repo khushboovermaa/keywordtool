@@ -696,12 +696,67 @@ tbody tr:nth-child(even):hover { background: rgba(59,130,246,0.04); }
     </div>
   </div>
 
-  <!-- API Key notice bar -->
-  <div id="apiKeyBar" style="background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.3);border-radius:10px;padding:0.85rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
-    <span style="font-size:0.85rem;color:var(--purple);font-weight:600;">🔑 Content Generation needs your Anthropic API Key</span>
-    <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." style="flex:1;min-width:260px;padding:0.55rem 0.85rem;background:var(--bg);border:1px solid rgba(139,92,246,0.4);border-radius:7px;color:var(--text);font-size:0.85rem;font-family:var(--mono);">
-    <button onclick="saveApiKey()" style="padding:0.55rem 1rem;background:var(--purple);color:#fff;border:none;border-radius:7px;font-weight:700;font-size:0.82rem;cursor:pointer;font-family:var(--sans);white-space:nowrap;">Save Key</button>
-    <span id="apiKeyStatus" style="font-size:0.8rem;color:var(--muted);">Key stored in browser only — never sent anywhere except Anthropic</span>
+
+  <!-- API / Proxy Settings Panel -->
+  <div id="apiKeyBar" style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.25);border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1.5rem;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
+      <span style="font-size:0.9rem;color:var(--purple);font-weight:700;">🔑 Content Generation Setup</span>
+      <span style="font-size:0.75rem;color:var(--muted);">Keys stored in browser session only</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+      <div>
+        <label style="display:block;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);margin-bottom:0.4rem;">Anthropic API Key</label>
+        <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." style="width:100%;padding:0.6rem 0.85rem;background:var(--bg);border:1px solid rgba(139,92,246,0.35);border-radius:7px;color:var(--text);font-size:0.85rem;font-family:var(--mono);">
+        <div style="font-size:0.72rem;color:var(--muted);margin-top:0.3rem;">Get from <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--purple);">console.anthropic.com</a></div>
+      </div>
+      <div>
+        <label style="display:block;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);margin-bottom:0.4rem;">Proxy URL <span style="color:var(--red);font-weight:400;">(required for GitHub Pages)</span></label>
+        <input type="text" id="proxyUrlInput" placeholder="https://your-worker.your-name.workers.dev" style="width:100%;padding:0.6rem 0.85rem;background:var(--bg);border:1px solid rgba(239,68,68,0.35);border-radius:7px;color:var(--text);font-size:0.82rem;font-family:var(--mono);">
+        <div style="font-size:0.72rem;color:var(--muted);margin-top:0.3rem;"><a href="#" onclick="toggleCorsHelp()" style="color:var(--red);">▶ How to set up a free proxy (2 min)</a></div>
+      </div>
+    </div>
+    <button onclick="saveApiKey()" style="padding:0.6rem 1.5rem;background:var(--purple);color:#fff;border:none;border-radius:7px;font-weight:700;font-size:0.85rem;cursor:pointer;font-family:var(--sans);">Save Settings</button>
+    <span id="apiKeyStatus" style="font-size:0.8rem;color:var(--muted);margin-left:1rem;"></span>
+
+    <!-- CORS Help Panel -->
+    <div id="corsHelp" style="display:none;margin-top:1.25rem;padding:1.25rem;background:var(--bg);border:1px solid var(--border2);border-radius:10px;">
+      <div style="font-size:0.85rem;font-weight:700;color:var(--text);margin-bottom:0.75rem;">🚀 Free Cloudflare Worker Proxy — Setup in 2 minutes</div>
+      <div style="font-size:0.8rem;color:var(--muted);margin-bottom:0.75rem;">GitHub Pages cannot call the Anthropic API directly due to browser CORS restrictions. A free Cloudflare Worker acts as a relay — it's free (100,000 requests/day) and takes 2 minutes to set up.</div>
+      <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);margin-bottom:0.5rem;">Step 1 — Go to <a href="https://workers.cloudflare.com" target="_blank" style="color:var(--blue);">workers.cloudflare.com</a> → Sign up free → Create Worker → Paste this code:</div>
+      <pre id="workerCode" style="background:#0a0f1e;border:1px solid var(--border2);border-radius:8px;padding:1rem;font-family:var(--mono);font-size:0.78rem;color:#34d399;overflow-x:auto;white-space:pre;margin-bottom:0.75rem;">export default {
+  async fetch(request) {
+    if (request.method === 'OPTIONS') {
+      return new Response(null, { headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': '*',
+      }});
+    }
+    const body = await request.text();
+    const apiKey = request.headers.get('x-api-key');
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body
+    });
+    const data = await res.text();
+    return new Response(data, {
+      status: res.status,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      }
+    });
+  }
+};</pre>
+      <button onclick="copyWorkerCode()" style="padding:0.45rem 1rem;background:var(--blue-dim);border:1px solid rgba(59,130,246,0.3);border-radius:6px;color:var(--blue);font-size:0.8rem;font-weight:600;cursor:pointer;font-family:var(--sans);margin-bottom:0.75rem;">📋 Copy Worker Code</button>
+      <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);margin-bottom:0.35rem;">Step 2 — Click Deploy → copy your worker URL (e.g. <code style="color:var(--green);">https://my-proxy.yourname.workers.dev</code>)</div>
+      <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);">Step 3 — Paste that URL in the Proxy URL field above → Save Settings → Done!</div>
+    </div>
   </div>
 
   <!-- Stat Cards -->
@@ -1135,31 +1190,11 @@ function isIrrelevant(kw) {
 }
 
 // ════════════════════════════════════════════════
-// KEYWORD PROCESSING
+// KEYWORD PROCESSING  —  AI-Powered Clustering
 // ════════════════════════════════════════════════
-const levenshtein = (s1, s2) => {
-  const a = s1.toLowerCase(), b = s2.toLowerCase();
-  const arr = [];
-  for (let i = 0; i <= b.length; i++) arr[i] = [i];
-  for (let j = 0; j <= a.length; j++) arr[0][j] = j;
-  for (let i = 1; i <= b.length; i++)
-    for (let j = 1; j <= a.length; j++) {
-      const cost = a[j-1] === b[i-1] ? 0 : 1;
-      arr[i][j] = Math.min(arr[i][j-1]+1, arr[i-1][j]+1, arr[i-1][j-1]+cost);
-    }
-  return arr[b.length][a.length];
-};
-const isSimilar = (s1,s2,t=0.75) => {
-  const maxLen = Math.max(s1.length,s2.length);
-  return maxLen === 0 || (1 - levenshtein(s1,s2)/maxLen) >= t;
-};
-const clean = kw => kw.trim().toLowerCase().replace(/\s+/g,' ').replace(/[^a-z0-9\s]/g,'');
-const categorize = kw => {
-  const kl = kw.toLowerCase();
-  if (/how to|why |what is|guide|tips|tutorial|learn|beginner|best practices/.test(kl)) return 'blog';
-  if (/case study|results|success|client|portfolio|roi|before after/.test(kl)) return 'case_study';
-  return 'service';
-};
+
+// Keep original keywords exactly — only normalise for dedup comparison
+const normaliseForDedup = kw => kw.trim().toLowerCase().replace(/\s+/g,' ');
 
 let allData = [];
 let filteredData = [];
@@ -1167,87 +1202,259 @@ let currentCategory = 'all';
 let currentSort = { col: 'volume', dir: -1 };
 let activeRowIdx = null;
 let lastGenData = null;
+let _rawKeywordsForAI = [];   // store pre-filtered list for AI step
+let _metaMapForAI = {};       // store metadata map for AI step
 
-function processKeywords() {
-  const kwInput  = document.getElementById('kwInput').value;
+// ── Pre-filter: cheap local rules (no AI needed) ──
+const META_ONLY = new Set(['informational','commercial','transactional','navigational',
+  'mixed','blog','service','high','low','medium','unknown','branded','unbranded',
+  'yes','no','na','n a','none','other']);
+
+function localPreFilter(kw) {
+  const k = kw.trim();
+  if (k.length < 2) return false;
+  if (/^\d[\d\s,\.]*$/.test(k)) return false;   // pure numbers
+  if (META_ONLY.has(k.toLowerCase())) return false;
+  if (/https?:|wwwlinkedin|\.com\b|\.io\b/.test(k.toLowerCase())) return false; // URL fragments
+  if (isIrrelevant(k)) return false;
+  return true;
+}
+
+async function processKeywords() {
+  const kwInput   = document.getElementById('kwInput').value;
   const metaInput = document.getElementById('metaInput').value;
   if (!kwInput.trim()) { alert('Please enter at least one keyword'); return; }
 
+  const apiKey   = getApiKey();
+  const proxyUrl = getProxyUrl();
+  if (!apiKey) {
+    document.getElementById('apiKeyBar').style.display = 'block';
+    alert('Please enter your Anthropic API key in the setup panel first — it\'s needed for AI clustering.');
+    return;
+  }
+
   const btn = document.getElementById('processBtn');
-  btn.textContent = 'Processing…';
+  btn.textContent = '⏳ Processing…';
   btn.disabled = true;
 
-  setTimeout(() => {
-    // Split on newlines only — NOT commas (commas are CSV field separators, not keyword separators)
-    const raw = kwInput.split('\n').map(clean).filter(k => k.length > 1);
-    const unique = [...new Set(raw)];
+  // Show a progress indicator in the topbar area
+  showClusterProgress('Step 1/3: Deduplicating & pre-filtering…');
 
-    // ── Quality pre-filter: strip obvious non-keywords before relevance check ──
-    const META_ONLY = new Set(['informational','commercial','transactional','navigational',
-      'mixed','blog','service','high','low','medium','unknown','branded','unbranded',
-      'yes','no','na','n a','none','other']);
-    const relevant = unique.filter(k => {
-      if (k.length < 3) return false;                     // too short
-      if (/^\d[\d\s,\.]*$/.test(k)) return false;         // pure number / formatted number ("1,900")
-      if (META_ONLY.has(k.toLowerCase())) return false;   // lone metadata word
-      if (isIrrelevant(k)) return false;                  // relevance blacklist
-      return true;
+  await new Promise(r => setTimeout(r, 50));
+
+  // ── Step 1: Local dedup + pre-filter (keep originals) ──
+  const rawLines = kwInput.split('\n').map(l => l.trim()).filter(Boolean);
+  const seenNorm = new Set();
+  const deduped = [];
+  for (const kw of rawLines) {
+    const norm = normaliseForDedup(kw);
+    if (!seenNorm.has(norm)) {
+      seenNorm.add(norm);
+      deduped.push(kw); // keep ORIGINAL spelling
+    }
+  }
+  const afterDedup = deduped.filter(localPreFilter);
+  const removedCount = deduped.length - afterDedup.length;
+
+  // ── Parse metadata ──
+  const metaMap = {};
+  if (metaInput.trim()) {
+    metaInput.split('\n').forEach(line => {
+      if (!line.trim()) return;
+      const parts = line.split('|').map(x => x.trim());
+      const kw = parts[0]; const vol = parts[1]; const tp = parts[2]; const vars = parts[3] || '';
+      if (kw) metaMap[normaliseForDedup(kw)] = {
+        volume: parseInt((vol||'').replace(/[,\s]/g,'')) || 0,
+        type: tp || 'mixed',
+        variants: vars ? vars.split(/[;,]+/).map(v=>v.trim()).filter(Boolean) : []
+      };
     });
-    const filteredCount = unique.length - relevant.length;
+  }
 
-    const meta = {};
-    if (metaInput.trim()) {
-      metaInput.split('\n').forEach(line => {
-        if (!line.trim()) return;
-        const parts = line.split('|').map(x => x.trim());
-        const kw = parts[0]; const vol = parts[1]; const tp = parts[2]; const vars = parts[3] || '';
-        if (kw) meta[clean(kw)] = {
-          volume: parseInt((vol||'').replace(/[,\s]/g,'')) || 0,
-          type: tp || 'mixed',
-          variants: vars ? vars.split(/[;,]+/).map(v=>v.trim()).filter(Boolean) : []
-        };
-      });
-    }
+  _rawKeywordsForAI = afterDedup;
+  _metaMapForAI = metaMap;
 
-    const groups = [];
-    const processed = new Set();
-    for (const kw of relevant) {
-      if (processed.has(kw)) continue;
-      const group = [kw];
-      processed.add(kw);
-      for (const other of relevant) {
-        if (!processed.has(other) && isSimilar(kw, other)) {
-          group.push(other);
-          processed.add(other);
-        }
-      }
-      groups.push(group.sort((a,b) => b.length - a.length));
-    }
+  // ── Step 2: AI clustering in batches ──
+  showClusterProgress(`Step 2/3: AI clustering ${afterDedup.length} keywords…`);
+  await new Promise(r => setTimeout(r, 50));
 
-    allData = groups.map(group => {
-      const primary = group[0];
-      const m = meta[primary] || { volume:0, type:'mixed', variants:[] };
-      const allVariants = [...new Set([...group.slice(1), ...(m.variants||[])])];
-      return { primary, keywords: allVariants, category: categorize(primary), volume: m.volume, type: m.type };
-    }).sort((a,b) => (b.volume||0) - (a.volume||0));
+  try {
+    const groups = await aiCluster(afterDedup, metaMap, apiKey, proxyUrl);
+
+    // ── Step 3: Build allData ──
+    showClusterProgress('Step 3/3: Building results…');
+    await new Promise(r => setTimeout(r, 50));
+
+    allData = groups.map(g => {
+      const primary = g.primary;
+      const m = metaMap[normaliseForDedup(primary)] || { volume: 0, type: 'mixed' };
+      // Merge AI-assigned variants with any from metadata
+      const variantsSet = new Set([...g.secondary]);
+      (m.variants || []).forEach(v => variantsSet.add(v));
+      variantsSet.delete(primary);
+      return {
+        primary,
+        keywords: [...variantsSet],
+        category: g.intent,      // direct from AI
+        notes: g.notes || '',
+        groupName: g.groupName || primary,
+        volume: m.volume,
+        type: m.type
+      };
+    }).sort((a, b) => (b.volume || 0) - (a.volume || 0));
 
     // Stats
     document.getElementById('statTotal').textContent    = allData.length;
-    document.getElementById('statBlog').textContent     = allData.filter(d=>d.category==='blog').length;
-    document.getElementById('statService').textContent  = allData.filter(d=>d.category==='service').length;
-    document.getElementById('statCase').textContent     = allData.filter(d=>d.category==='case_study').length;
-    document.getElementById('statFiltered').textContent = filteredCount;
+    document.getElementById('statBlog').textContent     = allData.filter(d => d.category === 'blog').length;
+    document.getElementById('statService').textContent  = allData.filter(d => d.category === 'service').length;
+    document.getElementById('statCase').textContent     = allData.filter(d => d.category === 'case_study').length;
+    document.getElementById('statFiltered').textContent = removedCount;
     document.getElementById('dashSubtitle').textContent = `— ${allData.length.toLocaleString()} keyword groups`;
 
     filteredData = [...allData];
     renderTable();
 
     document.getElementById('dashNavBtn').disabled = false;
+    hideClusterProgress();
     showPage('dashboard');
 
-    btn.textContent = 'Process Keywords →';
-    btn.disabled = false;
-  }, 200);
+  } catch (err) {
+    hideClusterProgress();
+    const isCors = err.name === 'TypeError' && err.message.includes('fetch');
+    if (isCors) {
+      document.getElementById('apiKeyBar').style.display = 'block';
+      document.getElementById('corsHelp').style.display = 'block';
+      alert('❌ CORS error: GitHub Pages cannot call the Anthropic API directly.\n\nSee the proxy setup guide in the panel above.');
+    } else {
+      alert('❌ Clustering failed: ' + err.message);
+    }
+  }
+
+  btn.textContent = 'Process Keywords →';
+  btn.disabled = false;
+}
+
+// ────────────────────────────────────────────────
+// AI CLUSTERING  —  sends keywords in batches to Claude
+// Returns: Array of { groupName, primary, secondary[], intent, notes }
+// ────────────────────────────────────────────────
+async function aiCluster(keywords, metaMap, apiKey, proxyUrl) {
+  // Batch into chunks of 120 to fit in a single API call comfortably
+  const BATCH = 120;
+  const batches = [];
+  for (let i = 0; i < keywords.length; i += BATCH) batches.push(keywords.slice(i, i + BATCH));
+
+  const allGroups = [];
+
+  for (let bi = 0; bi < batches.length; bi++) {
+    showClusterProgress(`Step 2/3: AI clustering batch ${bi+1}/${batches.length}…`);
+
+    const batch = batches[bi];
+    // Attach volume hints so AI can pick best primary keyword
+    const kwLines = batch.map((kw, i) => {
+      const m = metaMap[normaliseForDedup(kw)];
+      const vol = m && m.volume ? ` [vol:${m.volume}]` : '';
+      return `${i+1}. ${kw}${vol}`;
+    }).join('\n');
+
+    const systemPrompt = `You are an expert SEO strategist. Your job is to cluster keywords into semantic groups for content planning.
+
+RULES (follow strictly):
+1. DO NOT change, rewrite, correct spelling, or modify any keyword. Keep them exactly as given.
+2. Group keywords by TOPIC SIMILARITY and SEARCH INTENT — not character similarity.
+   Example: "digital marketing company", "digital mrketing agency", "best digital marketing firm" → same group (same topic+intent even if misspelled)
+3. Each group = one piece of content (one page or one blog post).
+4. Pick the PRIMARY keyword with highest value/volume (hint: [vol:N] shown). If no volume, pick the cleanest/most representative.
+5. Assign INTENT:
+   - blog → informational, how-to, educational, research, tips, guides, comparisons
+   - service → commercial, transactional, hire/buy intent, agency/company/provider queries
+   - case_study → proof/results/ROI queries, "how X helped Y", portfolio queries
+   - navigational → brand-specific lookups, login, contact
+6. Remove / exclude keywords that are pure noise, random chars, meaningless, or zero-value.
+7. NOTES field: add a short insight (e.g. "High-conversion cluster", "Good TOF content", "Strong buying intent").
+
+Return ONLY valid JSON — no markdown, no preamble:
+{
+  "removed": ["keyword that was noise"],
+  "groups": [
+    {
+      "groupName": "Topic cluster label (3-5 words)",
+      "primary": "exact keyword string",
+      "secondary": ["exact keyword", "exact keyword"],
+      "intent": "blog|service|case_study|navigational",
+      "notes": "short insight"
+    }
+  ]
+}`;
+
+    const userPrompt = `Cluster these ${batch.length} keywords:\n\n${kwLines}`;
+
+    const endpoint = proxyUrl
+      ? (proxyUrl.replace(/\/$/, '') + (proxyUrl.includes('/messages') ? '' : '/v1/messages'))
+      : 'https://api.anthropic.com/v1/messages';
+
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        ...(!proxyUrl ? { 'anthropic-dangerous-allow-browser': 'true' } : {})
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 4096,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userPrompt }]
+      })
+    });
+
+    if (!res.ok) {
+      const e = await res.json().catch(() => ({}));
+      throw new Error(e.error?.message || `API returned ${res.status}`);
+    }
+
+    const data = await res.json();
+    const text = data.content.map(b => b.text || '').join('');
+    const clean = text.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/i,'').trim();
+
+    try {
+      const parsed = JSON.parse(clean);
+      const batchGroups = parsed.groups || [];
+      allGroups.push(...batchGroups);
+    } catch (e) {
+      console.error('JSON parse failed for batch', bi, e, '\nRaw:', text.slice(0, 500));
+      throw new Error(`AI response was not valid JSON on batch ${bi+1}. Check console for details.`);
+    }
+  }
+
+  return allGroups;
+}
+
+// ── Progress indicator helpers ──
+function showClusterProgress(msg) {
+  let el = document.getElementById('clusterProgress');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'clusterProgress';
+    el.style.cssText = `
+      position:fixed;bottom:24px;right:24px;z-index:9999;
+      background:var(--surface2);border:1px solid var(--border2);
+      border-radius:10px;padding:0.85rem 1.25rem;
+      display:flex;align-items:center;gap:0.75rem;
+      font-size:0.88rem;color:var(--text);
+      box-shadow:0 8px 32px rgba(0,0,0,0.4);
+      max-width:320px;`;
+    el.innerHTML = `<div class="gen-spinner" style="flex-shrink:0"></div><span id="clusterProgressText"></span>`;
+    document.body.appendChild(el);
+  }
+  document.getElementById('clusterProgressText').textContent = msg;
+  el.style.display = 'flex';
+}
+
+function hideClusterProgress() {
+  const el = document.getElementById('clusterProgress');
+  if (el) el.style.display = 'none';
 }
 
 // ════════════════════════════════════════════════
@@ -1264,8 +1471,8 @@ function toggleVariants(i) {
 
 function renderTable() {
   const tbody = document.getElementById('tableBody');
-  const catColors = { blog:'blog', service:'service', case_study:'case_study' };
-  const catLabels = { blog:'📝 Blog', service:'🛠 Service', case_study:'🏆 Case Study' };
+  const catColors = { blog:'blog', service:'service', case_study:'case_study', navigational:'navigational' };
+  const catLabels = { blog:'📝 Blog', service:'🛠 Service', case_study:'🏆 Case Study', navigational:'🧭 Nav' };
 
   if (filteredData.length === 0) {
     tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:3rem;color:var(--muted)">No keywords match your filter</td></tr>`;
@@ -1278,15 +1485,25 @@ function renderTable() {
     const volClass = row.volume > 0 ? '' : 'zero';
     const hasKws = row.keywords && row.keywords.length > 0;
     const kwPreview = hasKws ? row.keywords.slice(0,3).join(' · ') + (row.keywords.length > 3 ? ` +${row.keywords.length-3} more` : '') : '—';
+    const groupLabel = row.groupName && row.groupName !== row.primary
+      ? `<div style="font-size:0.7rem;color:var(--blue);font-weight:600;margin-bottom:2px;opacity:0.8;">📂 ${row.groupName}</div>`
+      : '';
+    const notesHtml = row.notes
+      ? `<div style="font-size:0.72rem;color:var(--amber);margin-top:3px;font-style:italic;">💡 ${row.notes}</div>`
+      : '';
     return `
     <tr id="row-${i}">
       <td class="row-num">${i+1}</td>
-      <td class="td-keyword"><span title="${row.primary}">${row.primary}</span></td>
-      <td style="max-width:320px;">
+      <td class="td-keyword">
+        ${groupLabel}
+        <span title="${row.primary}">${row.primary}</span>
+        ${notesHtml}
+      </td>
+      <td style="max-width:300px;">
         <div style="font-size:0.78rem;color:var(--muted);line-height:1.5;">${kwPreview}</div>
         ${hasKws ? `<button onclick="toggleVariants(${i})" style="margin-top:4px;padding:2px 8px;background:var(--blue-dim);border:1px solid rgba(59,130,246,0.2);border-radius:4px;color:var(--blue);font-size:0.7rem;cursor:pointer;font-family:var(--sans);" id="vbtn-${i}">▼ All ${row.keywords.length}</button>` : ''}
       </td>
-      <td><span class="cat-badge ${catColors[row.category]}">${catLabels[row.category]}</span></td>
+      <td><span class="cat-badge ${catColors[row.category] || 'service'}">${catLabels[row.category] || '🛠 Service'}</span></td>
       <td class="td-vol ${volClass}">${vol}</td>
       <td class="td-type">${row.type||'—'}</td>
       <td style="text-align:center">
@@ -1295,7 +1512,7 @@ function renderTable() {
     </tr>
     ${hasKws ? `<tr id="variants-${i}" style="display:none;background:rgba(15,23,42,0.5);">
       <td colspan="7" style="padding:0.75rem 1rem 1rem 2.5rem;">
-        <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);margin-bottom:0.5rem;">Secondary Keywords</div>
+        <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);margin-bottom:0.5rem;">Secondary Keywords (Original Spelling Preserved)</div>
         <div style="display:flex;flex-wrap:wrap;gap:0.4rem;">
           ${row.keywords.map(k=>`<span style="background:var(--surface2);border:1px solid var(--border2);border-radius:4px;padding:0.25rem 0.6rem;font-size:0.78rem;color:var(--text);">${k}</span>`).join('')}
         </div>
@@ -1396,16 +1613,17 @@ async function runGenerate() {
   document.getElementById('genLoadingState').classList.add('show');
 
   // Check API key
-  const apiKey = getApiKey();
+  const apiKey   = getApiKey();
+  const proxyUrl = getProxyUrl();
   if (!apiKey) {
     document.getElementById('genLoadingState').classList.remove('show');
     document.getElementById('configArea').style.display = 'block';
     document.getElementById('mGenBtn').disabled = false;
     closeModal();
-    document.getElementById('apiKeyBar').style.display = 'flex';
-    document.getElementById('apiKeyStatus').textContent = '⬆ Enter your key above, then try again';
+    document.getElementById('apiKeyBar').style.display = 'block';
+    document.getElementById('apiKeyStatus').textContent = '⬆ Enter your API key above first';
     document.getElementById('apiKeyStatus').style.color = 'var(--amber)';
-    alert('Enter your Anthropic API key first — see the purple bar at the top of the dashboard.');
+    alert('Please enter your Anthropic API key in the setup panel first.');
     return;
   }
 
@@ -1420,11 +1638,13 @@ async function runGenerate() {
   const prompt = `You are a senior SEO content strategist. Write a complete content brief for:
 
 PRIMARY KEYWORD: ${row.primary}
+KEYWORD CLUSTER: ${row.groupName || row.primary}
 RELATED KEYWORDS: ${row.keywords.slice(0,15).join(', ')}
 CONTENT TYPE: ${typeLabel}
 BRAND: ${brand}
 TARGET AUDIENCE: ${audience}
 TONE: ${tone}
+CLUSTER NOTES: ${row.notes || 'N/A'}
 INTERNAL LINKS:
 ${linkLines}
 
@@ -1457,23 +1677,31 @@ Use markdown ## for H2, ### for H3]
 Q: question
 A: 2-sentence answer]`;
 
+  // Endpoint: proxy required for GitHub Pages (CORS), direct works locally
+  const endpoint = proxyUrl
+    ? (proxyUrl.replace(/\/$/, '') + (proxyUrl.includes('/messages') ? '' : '/v1/messages'))
+    : 'https://api.anthropic.com/v1/messages';
+
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'x-api-key': apiKey,
         'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-allow-browser': 'true'
+        ...(!proxyUrl ? { 'anthropic-dangerous-allow-browser': 'true' } : {})
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         max_tokens: 4096,
         messages: [{ role:'user', content: prompt }]
       })
     });
 
-    if (!res.ok) { const e = await res.json(); throw new Error(e.error?.message||'API error'); }
+    if (!res.ok) {
+      const e = await res.json().catch(() => ({}));
+      throw new Error(e.error?.message || `API returned ${res.status}`);
+    }
     const data = await res.json();
     const text = data.content.map(b=>b.text||'').join('');
 
@@ -1513,12 +1741,19 @@ A: 2-sentence answer]`;
     document.getElementById('genLoadingState').classList.remove('show');
     document.getElementById('configArea').style.display = 'block';
     document.getElementById('mGenBtn').disabled = false;
-    if (genBtn) {
-      genBtn.classList.remove('generating');
-      genBtn.innerHTML = `✍️ Generate`;
-      genBtn.disabled = false;
+    if (genBtn) { genBtn.classList.remove('generating'); genBtn.innerHTML = `✍️ Generate`; genBtn.disabled = false; }
+
+    const isCors = err.name === 'TypeError' && (err.message === 'Failed to fetch' || err.message.includes('fetch'));
+    if (isCors) {
+      closeModal();
+      document.getElementById('apiKeyBar').style.display = 'block';
+      document.getElementById('corsHelp').style.display = 'block';
+      document.getElementById('apiKeyStatus').textContent = '⬆ CORS error — set up a proxy (see below)';
+      document.getElementById('apiKeyStatus').style.color = 'var(--red)';
+      alert('❌ CORS error: GitHub Pages cannot call the Anthropic API directly.\n\nSee the "How to set up a free proxy" guide in the setup panel above. It takes 2 minutes with a free Cloudflare account.');
+    } else {
+      alert('❌ Generation failed: ' + err.message);
     }
-    alert('❌ Generation failed: ' + err.message);
   }
 }
 
@@ -1533,21 +1768,47 @@ function extract(text, startTag, endTag) {
 // ════════════════════════════════════════════════
 // API KEY MANAGEMENT
 // ════════════════════════════════════════════════
-function saveApiKey() {
-  const key = document.getElementById('apiKeyInput').value.trim();
-  if (!key || !key.startsWith('sk-ant-')) {
-    document.getElementById('apiKeyStatus').textContent = '❌ Invalid — key must start with sk-ant-';
-    document.getElementById('apiKeyStatus').style.color = 'var(--red)';
-    return;
-  }
-  sessionStorage.setItem('anthropic_key', key);
-  document.getElementById('apiKeyStatus').textContent = '✅ Saved for this session';
-  document.getElementById('apiKeyStatus').style.color = 'var(--green)';
-  document.getElementById('apiKeyInput').value = '••••••••••••••••';
-  setTimeout(() => { document.getElementById('apiKeyBar').style.display = 'none'; }, 1800);
+function toggleCorsHelp() {
+  const p = document.getElementById('corsHelp');
+  p.style.display = p.style.display === 'none' ? 'block' : 'none';
+  return false;
 }
 
-function getApiKey() { return sessionStorage.getItem('anthropic_key') || ''; }
+function copyWorkerCode() {
+  const code = document.getElementById('workerCode').textContent;
+  navigator.clipboard.writeText(code).then(() => {
+    const btn = event.target;
+    btn.textContent = '✅ Copied!';
+    setTimeout(() => btn.textContent = '📋 Copy Worker Code', 2500);
+  });
+}
+
+function saveApiKey() {
+  const key   = document.getElementById('apiKeyInput').value.trim();
+  const proxy = document.getElementById('proxyUrlInput').value.trim();
+  const status = document.getElementById('apiKeyStatus');
+
+  if (!key && !proxy) {
+    status.textContent = '❌ Enter at least an API key'; status.style.color = 'var(--red)'; return;
+  }
+  if (key && !key.startsWith('sk-ant-')) {
+    status.textContent = '❌ Invalid key — must start with sk-ant-'; status.style.color = 'var(--red)'; return;
+  }
+  if (key) sessionStorage.setItem('anthropic_key', key);
+  if (proxy) sessionStorage.setItem('proxy_url', proxy);
+
+  status.textContent = '✅ Settings saved';
+  status.style.color = 'var(--green)';
+  if (key) document.getElementById('apiKeyInput').value = '••••••••••••••';
+  if (proxy) document.getElementById('proxyUrlInput').value = proxy; // keep visible
+
+  setTimeout(() => {
+    document.getElementById('apiKeyBar').style.display = 'none';
+  }, 2000);
+}
+
+function getApiKey()  { return sessionStorage.getItem('anthropic_key') || ''; }
+function getProxyUrl(){ return sessionStorage.getItem('proxy_url') || ''; }
 // ════════════════════════════════════════════════
 function downloadDoc() {
   if (!lastGenData) return;
