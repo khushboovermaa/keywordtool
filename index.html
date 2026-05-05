@@ -1182,6 +1182,7 @@ function run() {
     const intentFilter = selectedIntents.size > 0 ? selectedIntents : null;
 
     setTimeout(() => {
+        try {
         // Step 1: Near-duplicate removal
         const { unique: dedupedKw, dupeIndices } = deduplicateKeywords(allKw);
 
@@ -1269,6 +1270,12 @@ function run() {
         btn.innerHTML = '⚡ Analyze & Curate Keywords';
         btn.disabled = false;
         document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } catch(err) {
+            btn.innerHTML = '⚡ Analyze & Curate Keywords';
+            btn.disabled = false;
+            alert('Analysis error: ' + err.message + '\n\nOpen browser console (F12) for details.');
+            console.error('KeywordCurator error:', err);
+        }
     }, 300);
 }
 
@@ -1723,6 +1730,15 @@ function resetAll() {
     document.querySelectorAll('.pill.active').forEach(p=>p.classList.remove('active'));
     selectedIntents.clear();
 }
+
+// ── EXPOSE TO GLOBAL SCOPE ────────────────────────────────────
+// All onclick="fn()" attributes in HTML need fn to be on window.
+// Functions defined inside DOMContentLoaded are closures, not global.
+Object.assign(window, {
+    run, resetAll, switchTab,
+    filterClusters, toggleCluster,
+    exportCSV, exportClusters, exportJSON, exportText, exportPillarCSV
+});
 
 }); // end DOMContentLoaded
 </script>
