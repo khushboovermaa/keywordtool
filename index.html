@@ -202,6 +202,60 @@
         /* DUPE BADGE */
         .dupe-badge { font-family: var(--mono); font-size: 0.62rem; padding: 0.12rem 0.4rem; border-radius: 3px; background: rgba(236,72,153,0.12); color: var(--pink); border: 1px solid rgba(236,72,153,0.2); }
 
+        /* PILLAR PAGE STRUCTURE */
+        .pillar-tip { background: rgba(168,85,247,0.06); border: 1px solid rgba(168,85,247,0.18); border-left: 3px solid var(--purple); border-radius: 6px; padding: 0.9rem 1.1rem; font-family: var(--mono); font-size: 0.75rem; color: #94a3b8; line-height: 1.6; margin-bottom: 1.5rem; }
+        .pillar-tip strong { color: var(--purple); }
+        .pillar-section { margin-bottom: 2.5rem; }
+        .pillar-section-title { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .pillar-section-title span { background: var(--purple); color: #fff; border-radius: 3px; padding: 0.1rem 0.4rem; font-size: 0.6rem; }
+
+        /* PILLAR HUB CARD */
+        .pillar-hub { background: linear-gradient(135deg, rgba(168,85,247,0.12), rgba(59,130,246,0.08)); border: 1.5px solid rgba(168,85,247,0.35); border-radius: 12px; padding: 1.4rem 1.75rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 1.25rem; }
+        .pillar-hub-icon { font-size: 2rem; flex-shrink: 0; }
+        .pillar-hub-body { flex: 1; min-width: 0; }
+        .pillar-hub-label { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--purple); margin-bottom: 0.35rem; }
+        .pillar-hub-title { font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 0.25rem; word-break: break-word; }
+        .pillar-hub-meta { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); }
+        .pillar-hub-stats { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem; }
+        .pillar-stat-pill { font-family: var(--mono); font-size: 0.65rem; padding: 0.2rem 0.55rem; border-radius: 4px; background: rgba(168,85,247,0.12); color: var(--purple); border: 1px solid rgba(168,85,247,0.2); }
+
+        /* CONNECTOR LINE */
+        .pillar-connector { display: flex; justify-content: center; margin: 0.2rem 0; }
+        .pillar-connector-line { width: 2px; height: 28px; background: linear-gradient(to bottom, rgba(168,85,247,0.5), rgba(59,130,246,0.4)); border-radius: 2px; }
+
+        /* CLUSTER PAGES GRID */
+        .pillar-clusters-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
+        .pillar-cluster-card { background: var(--surface2); border: 1px solid rgba(59,130,246,0.2); border-radius: 10px; padding: 1.1rem; position: relative; overflow: hidden; transition: border-color 0.2s; }
+        .pillar-cluster-card:hover { border-color: rgba(59,130,246,0.45); }
+        .pillar-cluster-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+        .pc-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 0.75rem; gap: 0.5rem; }
+        .pc-label { font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--accent2); margin-bottom: 0.2rem; }
+        .pc-title { font-size: 0.85rem; font-weight: 700; color: #fff; word-break: break-word; line-height: 1.3; }
+        .pc-vol { font-family: var(--mono); font-size: 0.68rem; color: var(--muted); white-space: nowrap; }
+        .pc-intent-badge { font-family: var(--mono); font-size: 0.6rem; padding: 0.15rem 0.45rem; border-radius: 3px; margin-bottom: 0.65rem; display: inline-block; }
+        .pc-supporting { margin-top: 0.5rem; }
+        .pc-support-title { font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.4rem; }
+        .pc-kw-item { display: flex; align-items: center; gap: 0.4rem; padding: 0.28rem 0; border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: 0.72rem; color: #93c5fd; }
+        .pc-kw-item:last-child { border-bottom: none; }
+        .pc-kw-vol { margin-left: auto; color: var(--muted); font-size: 0.65rem; }
+        .pc-link-tag { font-family: var(--mono); font-size: 0.58rem; padding: 0.1rem 0.35rem; border-radius: 3px; background: rgba(6,182,212,0.1); color: var(--accent2); border: 1px solid rgba(6,182,212,0.2); flex-shrink: 0; }
+
+        /* PILLAR SUMMARY TABLE */
+        .pillar-summary-table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 0.78rem; }
+        .pillar-summary-table th { padding: 0.6rem 0.9rem; text-align: left; font-size: 0.62rem; color: var(--muted); letter-spacing: 0.07em; text-transform: uppercase; border-bottom: 1px solid var(--border); background: var(--surface2); }
+        .pillar-summary-table td { padding: 0.6rem 0.9rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        .pillar-summary-table tr:last-child td { border-bottom: none; }
+        .pillar-summary-table tr:hover td { background: rgba(59,130,246,0.04); }
+        .pst-pillar-kw { color: #c4b5fd; font-weight: 700; }
+        .pst-priority { display: inline-block; padding: 0.15rem 0.45rem; border-radius: 3px; font-size: 0.62rem; font-weight: 700; }
+        .pst-p1 { background: rgba(16,185,129,0.12); color: var(--green); }
+        .pst-p2 { background: rgba(245,158,11,0.12); color: var(--amber); }
+        .pst-p3 { background: rgba(100,116,139,0.12); color: var(--muted); }
+
+        /* EXPORT PILLAR BTN */
+        .btn-pillar { background: rgba(168,85,247,0.12); color: var(--purple); border: 1px solid rgba(168,85,247,0.2); }
+        .btn-pillar:hover { background: rgba(168,85,247,0.22); transform: translateY(-1px); }
+
         @media (max-width: 640px) {
             .wrap { padding: 1rem; }
             header { flex-direction: column; }
@@ -218,7 +272,7 @@
             <p>SEO Strategist-Grade Filtering Engine v2.0</p>
         </div>
         <div class="header-badges">
-            <span class="hbadge hbadge-green">✦ 7 PRO FEATURES</span>
+            <span class="hbadge hbadge-green">✦ 8 PRO FEATURES</span>
             <span class="hbadge hbadge-blue">⚡ CANNIBALIZATION DETECTION</span>
             <span class="hbadge hbadge-purple">🗂 TOPIC CLUSTERING</span>
         </div>
@@ -308,6 +362,44 @@
                 <strong>How to read this:</strong> Each cluster = one content pillar. The <span style="color:var(--green)">green keyword</span> is the primary (highest volume) — build your main page/post around it. Others = supporting content or internal links. Keywords in the same cluster targeting the same page = <span style="color:var(--red)">cannibalization risk</span>.
             </div>
             <div class="cluster-grid" id="clusterGrid"></div>
+        </div>
+
+        <!-- PILLAR PAGE STRUCTURE -->
+        <div class="panel" id="pillarPanel">
+            <div class="panel-title">04B — Pillar Page Structure</div>
+            <div class="pillar-tip">
+                <strong>What is a Pillar Page?</strong> A pillar page covers a broad topic in depth and links to multiple <strong>cluster content pages</strong> that explore sub-topics in detail. Each cluster page links back to the pillar — this hub-and-spoke architecture signals topical authority to Google. The structure below is auto-generated from your keyword clusters.
+            </div>
+
+            <!-- HUB & SPOKE VISUAL -->
+            <div id="pillarStructureEl"></div>
+
+            <!-- CONTENT PLAN TABLE -->
+            <div class="pillar-section" id="pillarTableSection" style="margin-top:2rem;">
+                <div class="pillar-section-title">Content Production Roadmap <span>Priority order</span></div>
+                <div class="tbl-wrap">
+                    <table class="pillar-summary-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Track</th>
+                                <th>Page / Article Title</th>
+                                <th>Target Keyword</th>
+                                <th>Type</th>
+                                <th>Intent</th>
+                                <th>Volume</th>
+                                <th>Priority</th>
+                                <th>Links To</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pillarTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div style="margin-top:1.25rem;">
+                <button class="btn btn-pillar" onclick="exportPillarCSV()">🏛 Export Pillar Plan CSV</button>
+            </div>
         </div>
 
         <!-- CURATED TABLE -->
@@ -846,6 +938,7 @@ function run() {
         activeTab = 'all';
         renderTable();
         renderClusters();
+        renderPillarStructure();
         renderRejected();
 
         document.getElementById('results').classList.add('show');
@@ -922,6 +1015,249 @@ function renderClusters() {
             <div style="margin-top:0.75rem">${kwRows}${more}</div>
         </div>`;
     }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER: PILLAR PAGE STRUCTURE (Feature 8)
+// ═══════════════════════════════════════════════════════════════
+function clusterDominantIntent(cluster) {
+    const counts = {};
+    cluster.keywords.forEach(k => { counts[k.intent] = (counts[k.intent] || 0) + 1; });
+    return Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'informational';
+}
+
+function clusterTotalVol(cluster) {
+    return cluster.keywords.reduce((s, k) => s + (k.volume || 0), 0);
+}
+
+function isMeaningfulCluster(cluster) {
+    // Filter out clusters whose primary keyword is a single word or looks like noise
+    const primary = cluster.keywords.find(k => k.isPrimary) || cluster.keywords[0];
+    if (!primary) return false;
+    const kw = primary.keyword.trim();
+    if (kw.split(/\s+/).length < 2) return false; // single word = skip
+    if (/^\d+$/.test(kw)) return false;           // pure numbers
+    if (kw.length < 5) return false;
+    return true;
+}
+
+function renderPillarHubBlock(pillar, clusterPages, pillarIndex, totalPillars, tableRows, rowNum, pillarTrack) {
+    const intentColors = { transactional: '#10b981', commercial: '#f59e0b', informational: '#3b82f6', navigational: '#a855f7' };
+    const intentBg = { transactional: 'rgba(16,185,129,0.12)', commercial: 'rgba(245,158,11,0.12)', informational: 'rgba(59,130,246,0.12)', navigational: 'rgba(168,85,247,0.12)' };
+
+    const pillarPrimary = pillar.keywords.find(k => k.isPrimary) || pillar.keywords[0];
+    const pillarVol = clusterTotalVol(pillar);
+    const pillarIntent = clusterDominantIntent(pillar);
+    const hubColor = pillarTrack === 'service' ? 'rgba(16,185,129' : 'rgba(59,130,246';
+
+    let html = `
+    <div class="pillar-section">
+        ${totalPillars > 1 ? `<div class="pillar-section-title">Sub-Pillar ${pillarIndex + 1} of ${totalPillars}</div>` : ''}
+        <div class="pillar-hub" style="background:linear-gradient(135deg,${hubColor},0.12),rgba(0,0,0,0));border-color:${hubColor},0.4)">
+            <div class="pillar-hub-icon">${pillarTrack === 'service' ? '🏢' : '✍️'}</div>
+            <div class="pillar-hub-body">
+                <div class="pillar-hub-label">★ Pillar Page — ${pillarTrack === 'service' ? 'Service Hub' : 'Blog Hub'}</div>
+                <div class="pillar-hub-title">${escHtml(pillarPrimary?.title || pillar.topic)}</div>
+                <div class="pillar-hub-meta">Primary keyword: <span style="color:${pillarTrack==='service'?'#6ee7b7':'#93c5fd'}">${escHtml(pillarPrimary?.keyword || pillar.topic)}</span></div>
+                <div class="pillar-hub-stats">
+                    <span class="pillar-stat-pill">🔑 ${pillar.keywords.length} keywords</span>
+                    <span class="pillar-stat-pill">📊 ${pillarVol.toLocaleString()} vol</span>
+                    <span class="pillar-stat-pill">🔗 ${clusterPages.length} supporting pages</span>
+                    ${pillar.hasCannibal ? '<span class="pillar-stat-pill" style="background:rgba(239,68,68,0.12);color:#ef4444;border-color:rgba(239,68,68,0.3)">⚠ Cannibal risk</span>' : ''}
+                </div>
+            </div>
+        </div>`;
+
+    tableRows.push({
+        num: rowNum++, track: pillarTrack === 'service' ? '🏢 Service' : '✍️ Blog',
+        title: pillarPrimary?.title || pillar.topic,
+        keyword: pillarPrimary?.keyword || pillar.topic,
+        type: 'Pillar Page', intent: pillarIntent, volume: pillarVol, priority: 'P1',
+        linksTo: clusterPages.slice(0,4).map(c => (c.keywords.find(k=>k.isPrimary)||c.keywords[0])?.keyword || c.topic).join(' | ') || '—'
+    });
+
+    if (clusterPages.length) {
+        html += `<div class="pillar-connector"><div class="pillar-connector-line" style="background:linear-gradient(to bottom,${hubColor},0.5),${hubColor},0.2))"></div></div>`;
+        html += `<div class="pillar-clusters-grid">`;
+
+        clusterPages.forEach(cluster => {
+            const primary = cluster.keywords.find(k => k.isPrimary) || cluster.keywords[0];
+            // Filter supporting keywords: skip single-word, too-short, or low-score ones
+            const supporting = cluster.keywords
+                .filter(k => !k.isPrimary && k.keyword.split(/\s+/).length >= 2 && (k.score || 0) >= 40)
+                .slice(0, 4);
+            const clusterVol = clusterTotalVol(cluster);
+            const intent = clusterDominantIntent(cluster);
+            const iColor = intentColors[intent] || '#64748b';
+            const iBg = intentBg[intent] || 'rgba(100,116,139,0.12)';
+            const pageLabel = pillarTrack === 'service' ? '📄 Service Page' : '📝 Blog Post';
+
+            html += `
+            <div class="pillar-cluster-card" style="border-color:${hubColor},0.18)">
+                <div class="pc-header">
+                    <div>
+                        <div class="pc-label">${pageLabel}</div>
+                        <div class="pc-title">${escHtml(primary?.title || cluster.topic)}</div>
+                    </div>
+                    <div class="pc-vol">${clusterVol ? clusterVol.toLocaleString() : '—'}<br><span style="font-size:0.6rem">vol</span></div>
+                </div>
+                <span class="pc-intent-badge" style="background:${iBg};color:${iColor};border:1px solid ${iColor}40">${intent}</span>
+                ${cluster.hasCannibal ? `<div style="font-family:var(--mono);font-size:0.64rem;color:var(--red);margin-bottom:0.4rem">⚠ Cannibalization risk — consolidate</div>` : ''}
+                <div style="font-family:var(--mono);font-size:0.7rem;color:${pillarTrack==='service'?'#6ee7b7':'#93c5fd'};margin-bottom:0.6rem">🎯 ${escHtml(primary?.keyword || cluster.topic)}</div>
+                ${supporting.length ? `
+                <div class="pc-supporting">
+                    <div class="pc-support-title">Supporting keywords</div>
+                    ${supporting.map(kw => `
+                    <div class="pc-kw-item">
+                        <span class="pc-link-tag">↗</span>
+                        <span>${escHtml(kw.keyword)}</span>
+                        <span class="pc-kw-vol">${kw.volume ? kw.volume.toLocaleString() : '—'}</span>
+                    </div>`).join('')}
+                    ${cluster.keywords.filter(k=>!k.isPrimary).length > 4 ? `<div style="font-family:var(--mono);font-size:0.6rem;color:var(--muted);padding-top:0.25rem">+${cluster.keywords.filter(k=>!k.isPrimary).length - 4} more</div>` : ''}
+                </div>` : ''}
+                <div style="margin-top:0.75rem;padding-top:0.6rem;border-top:1px solid var(--border);font-family:var(--mono);font-size:0.6rem;color:var(--muted)">
+                    🔗 Internal link → <span style="color:${pillarTrack==='service'?'#6ee7b7':'#93c5fd'}">${escHtml((pillarPrimary?.keyword || pillar.topic).slice(0,45))}${(pillarPrimary?.keyword||pillar.topic).length>45?'…':''}</span>
+                </div>
+            </div>`;
+
+            tableRows.push({
+                num: rowNum++, track: pillarTrack === 'service' ? '🏢 Service' : '✍️ Blog',
+                title: primary?.title || cluster.topic,
+                keyword: primary?.keyword || cluster.topic,
+                type: pillarTrack === 'service' ? 'Service Page' : 'Blog Post',
+                intent, volume: clusterVol, priority: pillarIndex === 0 ? 'P2' : 'P3',
+                linksTo: `Pillar: ${(pillarPrimary?.keyword || pillar.topic).slice(0, 40)}`
+            });
+        });
+
+        html += `</div>`;
+    }
+    html += `</div>`;
+    return { html, rowNum };
+}
+
+function renderPillarStructure() {
+    const el = document.getElementById('pillarStructureEl');
+    const tableBody = document.getElementById('pillarTableBody');
+
+    if (!clusters.length) {
+        el.innerHTML = `<div class="empty">Run the analysis first to generate your pillar structure.</div>`;
+        tableBody.innerHTML = '';
+        return;
+    }
+
+    // ── SPLIT CLUSTERS INTO SERVICE vs BLOG ──────────────────────
+    // Filter out meaningless clusters first
+    const meaningful = clusters.filter(isMeaningfulCluster);
+
+    const serviceClusters = meaningful
+        .filter(c => { const d = clusterDominantIntent(c); return d === 'transactional' || d === 'commercial'; })
+        .sort((a, b) => clusterTotalVol(b) - clusterTotalVol(a));
+
+    const blogClusters = meaningful
+        .filter(c => clusterDominantIntent(c) === 'informational')
+        .sort((a, b) => clusterTotalVol(b) - clusterTotalVol(a));
+
+    // Navigational clusters → ignored (they're brand/direct searches, not content pages)
+    const ignoredCount = clusters.length - meaningful.length +
+        meaningful.filter(c => clusterDominantIntent(c) === 'navigational').length;
+
+    const MAX_CLUSTER_PAGES = 7; // cluster pages per pillar hub
+    let html = '';
+    let tableRows = [];
+    let rowNum = 1;
+
+    // ── IGNORED NOTICE ────────────────────────────────────────────
+    if (ignoredCount > 0) {
+        html += `<div style="font-family:var(--mono);font-size:0.72rem;color:var(--muted);background:rgba(100,116,139,0.07);border:1px solid var(--border);border-radius:6px;padding:0.65rem 1rem;margin-bottom:1.25rem">
+            🚫 <strong style="color:var(--text)">${ignoredCount} cluster(s) ignored</strong> — single-word keywords, noise terms, or navigational searches with no content page value have been excluded from the pillar structure.
+        </div>`;
+    }
+
+    // ── SERVICE PAGE PILLAR ───────────────────────────────────────
+    if (serviceClusters.length) {
+        html += `
+        <div style="margin-bottom:0.5rem;padding:1rem 1.25rem;background:linear-gradient(135deg,rgba(16,185,129,0.08),rgba(6,182,212,0.04));border:1.5px solid rgba(16,185,129,0.25);border-radius:10px;display:flex;align-items:center;gap:1rem">
+            <div style="font-size:1.8rem">🏢</div>
+            <div>
+                <div style="font-family:var(--mono);font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--green);margin-bottom:0.2rem">Track A — Service Pages</div>
+                <div style="font-size:0.95rem;font-weight:700;color:#fff">Transactional &amp; Commercial Intent Keywords</div>
+                <div style="font-family:var(--mono);font-size:0.72rem;color:var(--muted);margin-top:0.2rem">${serviceClusters.length} clusters → ${serviceClusters.reduce((s,c)=>s+c.keywords.length,0)} keywords → use for service/landing pages</div>
+            </div>
+        </div>`;
+
+        // Chunk service clusters into sub-pillars if > MAX_CLUSTER_PAGES
+        for (let i = 0; i < serviceClusters.length; i += MAX_CLUSTER_PAGES) {
+            const group = serviceClusters.slice(i, i + MAX_CLUSTER_PAGES);
+            const pillar = group[0];
+            const clusterPages = group.slice(1);
+            const totalSubPillars = Math.ceil(serviceClusters.length / MAX_CLUSTER_PAGES);
+            const result = renderPillarHubBlock(pillar, clusterPages, Math.floor(i/MAX_CLUSTER_PAGES), totalSubPillars, tableRows, rowNum, 'service');
+            html += result.html;
+            rowNum = result.rowNum;
+        }
+    } else {
+        html += `<div style="font-family:var(--mono);font-size:0.78rem;color:var(--muted);padding:1.5rem;text-align:center;background:var(--surface2);border-radius:8px;margin-bottom:1rem">🏢 No transactional/commercial clusters found. Upload keywords with buying or comparison intent for service page pillars.</div>`;
+    }
+
+    // Spacer between tracks
+    html += `<div style="margin:2rem 0;border-top:1px dashed var(--border);display:flex;align-items:center;justify-content:center"><span style="background:var(--surface);padding:0 1rem;font-family:var(--mono);font-size:0.65rem;color:var(--muted);letter-spacing:0.08em">── BLOG PILLAR TRACK BELOW ──</span></div>`;
+
+    // ── BLOG PILLAR ───────────────────────────────────────────────
+    if (blogClusters.length) {
+        html += `
+        <div style="margin-bottom:0.5rem;padding:1rem 1.25rem;background:linear-gradient(135deg,rgba(59,130,246,0.08),rgba(168,85,247,0.04));border:1.5px solid rgba(59,130,246,0.25);border-radius:10px;display:flex;align-items:center;gap:1rem">
+            <div style="font-size:1.8rem">✍️</div>
+            <div>
+                <div style="font-family:var(--mono);font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:0.2rem">Track B — Blog Posts</div>
+                <div style="font-size:0.95rem;font-weight:700;color:#fff">Informational Intent Keywords</div>
+                <div style="font-family:var(--mono);font-size:0.72rem;color:var(--muted);margin-top:0.2rem">${blogClusters.length} clusters → ${blogClusters.reduce((s,c)=>s+c.keywords.length,0)} keywords → use for blog articles &amp; guides</div>
+            </div>
+        </div>`;
+
+        for (let i = 0; i < blogClusters.length; i += MAX_CLUSTER_PAGES) {
+            const group = blogClusters.slice(i, i + MAX_CLUSTER_PAGES);
+            const pillar = group[0];
+            const clusterPages = group.slice(1);
+            const totalSubPillars = Math.ceil(blogClusters.length / MAX_CLUSTER_PAGES);
+            const result = renderPillarHubBlock(pillar, clusterPages, Math.floor(i/MAX_CLUSTER_PAGES), totalSubPillars, tableRows, rowNum, 'blog');
+            html += result.html;
+            rowNum = result.rowNum;
+        }
+    } else {
+        html += `<div style="font-family:var(--mono);font-size:0.78rem;color:var(--muted);padding:1.5rem;text-align:center;background:var(--surface2);border-radius:8px;margin-bottom:1rem">✍️ No informational clusters found. Upload informational/how-to keywords for blog pillar structure.</div>`;
+    }
+
+    el.innerHTML = html;
+
+    // ── ROADMAP TABLE ─────────────────────────────────────────────
+    const intentBadge = { transactional:'badge-tx', commercial:'badge-cm', informational:'badge-in', navigational:'badge-nv' };
+    const priorityClass = { P1:'pst-p1', P2:'pst-p2', P3:'pst-p3' };
+
+    tableBody.innerHTML = tableRows.length ? tableRows.map(r => `
+        <tr>
+            <td style="color:var(--muted);font-size:0.72rem">${r.num}</td>
+            <td style="font-family:var(--mono);font-size:0.7rem;white-space:nowrap">${r.track}</td>
+            <td style="font-size:0.81rem;color:var(--text);max-width:240px;word-break:break-word;line-height:1.4">${escHtml(r.title)}</td>
+            <td class="pst-pillar-kw" style="max-width:180px;word-break:break-word">${escHtml(r.keyword)}</td>
+            <td><span style="font-family:var(--mono);font-size:0.66rem;padding:0.15rem 0.45rem;border-radius:3px;background:${r.type==='Pillar Page'?'rgba(168,85,247,0.12)':r.type==='Service Page'?'rgba(16,185,129,0.1)':'rgba(59,130,246,0.1)'};color:${r.type==='Pillar Page'?'var(--purple)':r.type==='Service Page'?'var(--green)':'var(--accent)'}">${r.type}</span></td>
+            <td><span class="badge ${intentBadge[r.intent]||'badge-in'}">${r.intent}</span></td>
+            <td style="font-family:var(--mono);font-size:0.78rem">${r.volume ? r.volume.toLocaleString() : '—'}</td>
+            <td><span class="pst-priority ${priorityClass[r.priority]||'pst-p3'}">${r.priority}</span></td>
+            <td style="font-family:var(--mono);font-size:0.66rem;color:var(--muted);max-width:200px;word-break:break-word">${escHtml(r.linksTo)}</td>
+        </tr>`).join('')
+    : `<tr><td colspan="9"><div class="empty">No pillar pages generated yet.</div></td></tr>`;
+
+    window._pillarTableRows = tableRows;
+}
+
+function exportPillarCSV() {
+    if (!window._pillarTableRows || !window._pillarTableRows.length) { alert('Run analysis first.'); return; }
+    let csv = 'Priority,#,Track,Page Title,Target Keyword,Type,Intent,Total Volume,Links To\n';
+    window._pillarTableRows.forEach(r => {
+        csv += `"${r.priority}","${r.num}","${r.track}","${r.title}","${r.keyword}","${r.type}","${r.intent}","${r.volume}","${r.linksTo}"\n`;
+    });
+    dl(csv, 'pillar-page-structure.csv', 'text/csv');
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1005,15 +1341,6 @@ function resetAll() {
     selectedIntents.clear();
 }
 
-const REJECTION_REASONS = {
-    junk_pattern: 'Junk / noise pattern detected',
-    vague_seed: 'Single vague seed — no content potential',
-    low_score: 'Quality score below threshold',
-    low_volume: 'Search volume below minimum',
-    too_many_words: 'Exceeds max word count',
-    intent_filtered: 'Filtered by intent selection',
-    near_duplicate: 'Near-duplicate of higher-volume keyword',
-};
 </script>
 </body>
 </html>
