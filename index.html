@@ -1,1282 +1,2053 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Keyword Manager Pro</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            color: #e2e8f0;
-            min-height: 100vh;
-            padding: 2rem;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(135deg, #60a5fa, #34d399);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .subtitle {
-            font-size: 1rem;
-            color: #94a3b8;
-        }
-
-        .input-section {
-            background: linear-gradient(135deg, rgba(51, 65, 85, 0.5), rgba(30, 41, 59, 0.5));
-            border: 1px solid rgba(148, 163, 184, 0.2);
-            border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            backdrop-filter: blur(10px);
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        label {
-            display: block;
-            font-size: 0.95rem;
-            font-weight: 600;
-            margin-bottom: 0.75rem;
-            color: #cbd5e1;
-        }
-
-        textarea {
-            width: 100%;
-            padding: 1rem;
-            background: rgba(15, 23, 42, 0.8);
-            border: 1px solid rgba(148, 163, 184, 0.3);
-            border-radius: 8px;
-            color: #e2e8f0;
-            font-family: 'Monaco', 'Menlo', monospace;
-            font-size: 0.9rem;
-            line-height: 1.6;
-            resize: vertical;
-            min-height: 120px;
-            transition: all 0.3s ease;
-        }
-
-        textarea:focus {
-            outline: none;
-            border-color: rgba(96, 165, 250, 0.5);
-            background: rgba(15, 23, 42, 1);
-            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
-        }
-
-        .input-hint {
-            font-size: 0.85rem;
-            color: #64748b;
-            margin-top: 0.5rem;
-        }
-
-        .file-upload-area {
-            border: 2px dashed rgba(96, 165, 250, 0.5);
-            border-radius: 8px;
-            padding: 2rem;
-            text-align: center;
-            background: rgba(96, 165, 250, 0.05);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 1.5rem;
-        }
-
-        .file-upload-area:hover {
-            border-color: rgba(96, 165, 250, 0.8);
-            background: rgba(96, 165, 250, 0.1);
-        }
-
-        .file-upload-area.dragover {
-            border-color: #60a5fa;
-            background: rgba(96, 165, 250, 0.15);
-            transform: scale(1.02);
-        }
-
-        .upload-icon {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .upload-text {
-            color: #cbd5e1;
-            margin-bottom: 0.25rem;
-        }
-
-        .upload-subtext {
-            color: #94a3b8;
-            font-size: 0.85rem;
-        }
-
-        #fileInput {
-            display: none;
-        }
-
-        .file-info {
-            background: rgba(52, 211, 153, 0.1);
-            border: 1px solid rgba(52, 211, 153, 0.3);
-            color: #34d399;
-            padding: 0.75rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            display: none;
-            font-size: 0.9rem;
-        }
-
-        .file-info.show {
-            display: block;
-        }
-
-        .tab-btn {
-            transition: all 0.3s ease;
-        }
-
-        .tab-btn.active {
-            color: #60a5fa;
-            border-bottom-color: #60a5fa !important;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .button-group {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        button {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #60a5fa, #3b82f6);
-            color: white;
-            flex: 1;
-            min-width: 150px;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(96, 165, 250, 0.3);
-        }
-
-        .btn-secondary {
-            background: rgba(148, 163, 184, 0.2);
-            color: #cbd5e1;
-            border: 1px solid rgba(148, 163, 184, 0.3);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(148, 163, 184, 0.3);
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, #34d399, #10b981);
-            color: white;
-        }
-
-        .btn-success:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(52, 211, 153, 0.3);
-        }
-
-        .results-section {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 2rem;
-        }
-
-        .card {
-            background: linear-gradient(135deg, rgba(51, 65, 85, 0.3), rgba(30, 41, 59, 0.3));
-            border: 1px solid rgba(148, 163, 184, 0.2);
-            border-radius: 12px;
-            padding: 1.5rem;
-            backdrop-filter: blur(10px);
-        }
-
-        .card h2 {
-            font-size: 1.3rem;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            color: #e2e8f0;
-        }
-
-        .card h2::before {
-            content: '';
-            width: 4px;
-            height: 24px;
-            background: linear-gradient(135deg, #60a5fa, #34d399);
-            border-radius: 2px;
-        }
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .stat-box {
-            background: rgba(15, 23, 42, 0.8);
-            padding: 1rem;
-            border-radius: 8px;
-            border-left: 3px solid #60a5fa;
-        }
-
-        .stat-label {
-            font-size: 0.85rem;
-            color: #94a3b8;
-            margin-bottom: 0.25rem;
-        }
-
-        .stat-value {
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: #34d399;
-        }
-
-        .keyword-group {
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(148, 163, 184, 0.15);
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .group-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            margin-bottom: 0.75rem;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-
-        .group-title {
-            font-weight: 600;
-            color: #cbd5e1;
-            font-size: 1rem;
-        }
-
-        .group-meta {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 0.35rem 0.75rem;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .badge-primary {
-            background: rgba(96, 165, 250, 0.2);
-            color: #60a5fa;
-        }
-
-        .badge-success {
-            background: rgba(52, 211, 153, 0.2);
-            color: #34d399;
-        }
-
-        .badge-warning {
-            background: rgba(251, 146, 60, 0.2);
-            color: #fb923c;
-        }
-
-        .badge-info {
-            background: rgba(168, 85, 247, 0.2);
-            color: #a855f7;
-        }
-
-        .keywords-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-
-        .keyword-tag {
-            background: rgba(71, 85, 105, 0.5);
-            color: #cbd5e1;
-            padding: 0.4rem 0.85rem;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            border: 1px solid rgba(148, 163, 184, 0.2);
-        }
-
-        .keyword-tag.primary {
-            background: rgba(96, 165, 250, 0.15);
-            color: #60a5fa;
-            border-color: rgba(96, 165, 250, 0.3);
-            font-weight: 600;
-        }
-
-        .category-icon {
-            display: inline-block;
-            margin-right: 0.3rem;
-        }
-
-        .export-buttons {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1.5rem;
-            flex-wrap: wrap;
-        }
-
-        .export-btn {
-            padding: 0.75rem 1.25rem;
-            background: linear-gradient(135deg, #a855f7, #7c3aed);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .export-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(168, 85, 247, 0.3);
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 2rem;
-            color: #94a3b8;
-        }
-
-        .loader {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(96, 165, 250, 0.3);
-            border-top-color: #60a5fa;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 2rem;
-            }
-
-            .button-group {
-                flex-direction: column;
-            }
-
-            .btn-primary {
-                flex: 1;
-            }
-
-            .stats {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            th, td {
-                padding: 0.5rem;
-                font-size: 0.8rem;
-            }
-
-            .primary-keyword {
-                min-width: 120px;
-            }
-
-            .variants-list {
-                max-height: 100px;
-                font-size: 0.75rem;
-            }
-
-            .category-badge {
-                font-size: 0.7rem;
-                padding: 0.3rem 0.6rem;
-            }
-
-            .table-container {
-                font-size: 0.85rem;
-            }
-        }
-
-        .scroll-container {
-            max-height: 600px;
-            overflow-y: auto;
-            padding-right: 0.5rem;
-        }
-
-        .scroll-container::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .scroll-container::-webkit-scrollbar-track {
-            background: rgba(148, 163, 184, 0.1);
-            border-radius: 3px;
-        }
-
-        .scroll-container::-webkit-scrollbar-thumb {
-            background: rgba(96, 165, 250, 0.3);
-            border-radius: 3px;
-        }
-
-        .table-container {
-            overflow-x: auto;
-            margin-bottom: 1.5rem;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: rgba(15, 23, 42, 0.6);
-        }
-
-        thead {
-            background: rgba(51, 65, 85, 0.8);
-            border-bottom: 2px solid rgba(96, 165, 250, 0.3);
-        }
-
-        th {
-            padding: 1rem;
-            text-align: left;
-            font-weight: 600;
-            color: #cbd5e1;
-            white-space: nowrap;
-            border-right: 1px solid rgba(148, 163, 184, 0.1);
-        }
-
-        th:last-child {
-            border-right: none;
-        }
-
-        tbody tr {
-            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
-            transition: background 0.2s ease;
-        }
-
-        tbody tr:hover {
-            background: rgba(96, 165, 250, 0.1);
-        }
-
-        td {
-            padding: 0.75rem 1rem;
-            color: #e2e8f0;
-            font-size: 0.9rem;
-            border-right: 1px solid rgba(148, 163, 184, 0.05);
-        }
-
-        td:last-child {
-            border-right: none;
-        }
-
-        .primary-keyword {
-            font-weight: 600;
-            color: #60a5fa;
-        }
-
-        .variants-list {
-            max-height: 150px;
-            overflow-y: auto;
-            padding: 0.5rem;
-            background: rgba(15, 23, 42, 0.8);
-            border-radius: 4px;
-            font-size: 0.85rem;
-        }
-
-        .variants-list div {
-            padding: 0.25rem 0;
-            color: #cbd5e1;
-            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
-        }
-
-        .variants-list div:last-child {
-            border-bottom: none;
-        }
-
-        .category-badge {
-            display: inline-block;
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            background: rgba(96, 165, 250, 0.2);
-            color: #60a5fa;
-        }
-
-        .category-badge.blog {
-            background: rgba(168, 85, 247, 0.2);
-            color: #a855f7;
-        }
-
-        .category-badge.service {
-            background: rgba(34, 197, 94, 0.2);
-            color: #22c55e;
-        }
-
-        .category-badge.case_study {
-            background: rgba(251, 146, 60, 0.2);
-            color: #fb923c;
-        }
-
-        .volume-cell {
-            text-align: right;
-            font-weight: 600;
-            color: #34d399;
-        }
-
-        .count-cell {
-            text-align: center;
-            background: rgba(96, 165, 250, 0.1);
-            font-weight: 600;
-            color: #60a5fa;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Keyword Manager Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #0a0f1e;
+  --surface:  #111827;
+  --surface2: #1a2235;
+  --border:   #1e2d45;
+  --border2:  #2a3f5a;
+  --text:     #e2e8f0;
+  --muted:    #64748b;
+  --blue:     #3b82f6;
+  --blue-dim: rgba(59,130,246,0.12);
+  --green:    #10b981;
+  --green-dim:rgba(16,185,129,0.12);
+  --purple:   #8b5cf6;
+  --purple-dim:rgba(139,92,246,0.12);
+  --amber:    #f59e0b;
+  --amber-dim:rgba(245,158,11,0.12);
+  --red:      #ef4444;
+  --red-dim:  rgba(239,68,68,0.12);
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'DM Sans', sans-serif;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ── Top Bar ── */
+.topbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  height: 56px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.logo {
+  font-family: var(--mono);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--blue);
+  letter-spacing: -0.5px;
+  white-space: nowrap;
+}
+.logo span { color: var(--green); }
+.topbar-nav {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg);
+}
+.nav-btn {
+  padding: 0.45rem 1.1rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: var(--sans);
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.2px;
+}
+.nav-btn:not(:last-child) { border-right: 1px solid var(--border2); }
+.nav-btn.active { background: var(--blue); color: #fff; }
+.nav-btn:hover:not(.active) { background: var(--surface2); color: var(--text); }
+.topbar-right { margin-left: auto; display: flex; gap: 0.75rem; align-items: center; }
+
+/* ── Page Sections ── */
+.page { display: none; padding: 2rem; max-width: 1600px; margin: 0 auto; }
+.page.active { display: block; }
+
+/* ── Upload Card ── */
+.upload-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+.upload-card h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.4rem; }
+.upload-card p { color: var(--muted); font-size: 0.9rem; margin-bottom: 2rem; }
+
+.input-tabs {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  background: var(--bg);
+  width: fit-content;
+}
+.itab {
+  padding: 0.5rem 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: var(--sans);
+}
+.itab.active { background: var(--surface2); color: var(--text); }
+.itab:not(:last-child) { border-right: 1px solid var(--border2); }
+
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+.drop-zone {
+  border: 2px dashed var(--border2);
+  border-radius: 10px;
+  padding: 3rem 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s;
+  background: var(--bg);
+  margin-bottom: 1rem;
+}
+.drop-zone:hover, .drop-zone.over {
+  border-color: var(--blue);
+  background: var(--blue-dim);
+}
+.drop-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+.drop-zone p { color: var(--muted); font-size: 0.9rem; }
+.drop-zone strong { color: var(--text); }
+#fileInput { display: none; }
+.file-badge {
+  display: none;
+  background: var(--green-dim);
+  border: 1px solid rgba(16,185,129,0.3);
+  color: var(--green);
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+.file-badge.show { display: block; }
+
+.field-label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--muted);
+  margin-bottom: 0.5rem;
+}
+textarea.kw-input {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  resize: vertical;
+  min-height: 120px;
+  line-height: 1.7;
+  margin-bottom: 1rem;
+}
+textarea.kw-input:focus { outline: none; border-color: var(--blue); }
+
+.hint { font-size: 0.8rem; color: var(--muted); margin-top: -0.5rem; margin-bottom: 1rem; }
+
+.btn-process {
+  width: 100%;
+  padding: 0.9rem;
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: 9px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--sans);
+  transition: all 0.25s;
+  letter-spacing: 0.3px;
+}
+.btn-process:hover { background: #2563eb; box-shadow: 0 8px 20px rgba(59,130,246,0.3); }
+.btn-process:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Dashboard ── */
+.dash-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.dash-title { font-size: 1.25rem; font-weight: 700; }
+.dash-title span { color: var(--muted); font-size: 0.85rem; font-weight: 400; margin-left: 0.5rem; }
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+@media(max-width:900px){ .stats-row { grid-template-columns: repeat(3,1fr); } }
+@media(max-width:600px){ .stats-row { grid-template-columns: 1fr 1fr; } }
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.1rem 1.25rem;
+  border-left: 3px solid var(--blue);
+}
+.stat-card.green  { border-left-color: var(--green); }
+.stat-card.purple { border-left-color: var(--purple); }
+.stat-card.amber  { border-left-color: var(--amber); }
+.stat-card.red    { border-left-color: var(--red); }
+.stat-card .label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.7px; font-weight: 600; margin-bottom: 0.3rem; }
+.stat-card .value { font-size: 2rem; font-weight: 700; font-family: var(--mono); line-height: 1; }
+.stat-card.blue   .value { color: var(--blue); }
+.stat-card.green  .value { color: var(--green); }
+.stat-card.purple .value { color: var(--purple); }
+.stat-card.amber  .value { color: var(--amber); }
+.stat-card.red    .value { color: var(--red); }
+
+/* ── Table Controls ── */
+.table-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+.search-wrap {
+  flex: 1;
+  min-width: 200px;
+  position: relative;
+}
+.search-wrap svg { position: absolute; left: 0.85rem; top: 50%; transform: translateY(-50%); opacity: 0.4; pointer-events: none; }
+#searchInput {
+  width: 100%;
+  padding: 0.65rem 0.85rem 0.65rem 2.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 0.9rem;
+  font-family: var(--sans);
+}
+#searchInput:focus { outline: none; border-color: var(--blue); }
+
+.filter-pills { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.pill {
+  padding: 0.45rem 1rem;
+  border-radius: 20px;
+  border: 1px solid var(--border2);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: var(--sans);
+}
+.pill:hover { border-color: var(--blue); color: var(--text); }
+.pill.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+.pill.green.active  { background: var(--green); border-color: var(--green); }
+.pill.purple.active { background: var(--purple); border-color: var(--purple); }
+.pill.amber.active  { background: var(--amber); border-color: var(--amber); }
+
+.export-group { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.btn-sm {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border2);
+  border-radius: 7px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: var(--sans);
+}
+.btn-sm:hover { border-color: var(--blue); color: var(--text); }
+
+/* ── Excel Table ── */
+.table-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.table-scroll { overflow-x: auto; max-height: 70vh; overflow-y: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+thead { position: sticky; top: 0; z-index: 10; }
+thead tr { background: var(--surface2); }
+th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--muted);
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  border-right: 1px solid var(--border);
+}
+th:last-child { border-right: none; cursor: default; }
+th:hover:not(:last-child) { color: var(--text); background: rgba(255,255,255,0.03); }
+th .sort-icon { margin-left: 0.3rem; opacity: 0.4; font-size: 0.7rem; }
+th.sorted .sort-icon { opacity: 1; color: var(--blue); }
+
+td {
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  vertical-align: middle;
+}
+td:last-child { border-right: none; }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr { transition: background 0.12s; }
+tbody tr:hover { background: rgba(59,130,246,0.04); }
+tbody tr:nth-child(even) { background: rgba(255,255,255,0.015); }
+tbody tr:nth-child(even):hover { background: rgba(59,130,246,0.04); }
+
+.row-num { color: var(--muted); font-family: var(--mono); font-size: 0.78rem; text-align: right; }
+.td-keyword { font-weight: 600; color: var(--blue); font-size: 0.88rem; max-width: 260px; }
+.td-keyword span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.td-variants { text-align: center; }
+.count-badge {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  border-radius: 20px;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: var(--blue-dim);
+  color: var(--blue);
+  border: 1px solid rgba(59,130,246,0.2);
+}
+.cat-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.cat-badge.blog       { background:var(--purple-dim); color:var(--purple); border:1px solid rgba(139,92,246,0.2); }
+.cat-badge.service    { background:var(--green-dim);  color:var(--green);  border:1px solid rgba(16,185,129,0.2); }
+.cat-badge.case_study { background:var(--amber-dim);  color:var(--amber);  border:1px solid rgba(245,158,11,0.2); }
+
+.td-vol { font-family: var(--mono); font-size: 0.85rem; font-weight: 600; color: var(--green); text-align: right; }
+.td-vol.zero { color: var(--muted); }
+.td-type { font-size: 0.78rem; color: var(--muted); max-width: 120px; }
+
+.btn-gen {
+  padding: 0.45rem 1rem;
+  background: var(--purple);
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--sans);
+  transition: all 0.2s;
+  white-space: nowrap;
+  letter-spacing: 0.2px;
+}
+.btn-gen:hover { background: #7c3aed; box-shadow: 0 4px 12px rgba(139,92,246,0.35); }
+.btn-gen:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
+.btn-gen.generating {
+  background: var(--surface2);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+.btn-gen.done { background: var(--green); }
+.btn-gen.done:hover { background: #059669; }
+
+.gen-spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 5px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.table-footer {
+  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.8rem;
+  color: var(--muted);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--surface2);
+}
+
+/* ── Modal ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 780px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+  animation: modalIn 0.25s ease;
+}
+@keyframes modalIn { from { opacity:0; transform: translateY(20px) scale(0.97); } }
+
+.modal-head {
+  padding: 1.5rem 1.75rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  z-index: 2;
+}
+.modal-kw { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--purple); margin-bottom: 0.3rem; }
+.modal-title { font-size: 1.15rem; font-weight: 700; line-height: 1.3; }
+.modal-close { background: none; border: none; color: var(--muted); font-size: 1.4rem; cursor: pointer; padding: 0.2rem; transition: color 0.2s; flex-shrink: 0; }
+.modal-close:hover { color: var(--text); }
+
+.modal-body { padding: 1.5rem 1.75rem; }
+
+.modal-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+@media(max-width:600px){ .modal-fields { grid-template-columns: 1fr; } }
+
+.m-field label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: var(--muted);
+  margin-bottom: 0.4rem;
+}
+.m-field select,
+.m-field input {
+  width: 100%;
+  padding: 0.65rem 0.9rem;
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 0.88rem;
+  font-family: var(--sans);
+  transition: border-color 0.2s;
+}
+.m-field select:focus, .m-field input:focus { outline: none; border-color: var(--blue); }
+.m-field select option { background: var(--surface); }
+
+.btn-generate-modal {
+  width: 100%;
+  padding: 0.9rem;
+  background: var(--purple);
+  color: #fff;
+  border: none;
+  border-radius: 9px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--sans);
+  transition: all 0.25s;
+  letter-spacing: 0.3px;
+  margin-bottom: 1.5rem;
+}
+.btn-generate-modal:hover:not(:disabled) { background: #7c3aed; box-shadow: 0 8px 20px rgba(139,92,246,0.35); }
+.btn-generate-modal:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Loading state */
+.gen-loading-state {
+  display: none;
+  text-align: center;
+  padding: 2rem;
+}
+.gen-loading-state.show { display: block; }
+.big-spinner {
+  width: 44px; height: 44px;
+  border: 4px solid rgba(139,92,246,0.2);
+  border-top-color: var(--purple);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 1rem;
+}
+.gen-loading-state p { color: var(--muted); font-size: 0.9rem; }
+.gen-loading-state small { color: #334155; font-size: 0.8rem; }
+
+/* Output sections */
+.output-area { display: none; }
+.output-area.show { display: block; }
+
+.output-section {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 0.85rem;
+  overflow: hidden;
+}
+.output-section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 1rem;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+}
+.output-section-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--blue);
+}
+.copy-small {
+  padding: 0.25rem 0.65rem;
+  background: var(--blue-dim);
+  border: 1px solid rgba(59,130,246,0.25);
+  border-radius: 5px;
+  color: var(--blue);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--sans);
+  transition: all 0.15s;
+}
+.copy-small:hover { background: rgba(59,130,246,0.2); }
+.output-section-body {
+  padding: 0.9rem 1rem;
+  font-size: 0.875rem;
+  line-height: 1.75;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: var(--bg);
+}
+.output-section-body.tall { max-height: 340px; overflow-y: auto; }
+
+.modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+}
+.modal-actions button { flex: 1; min-width: 120px; }
+
+.btn-dl {
+  padding: 0.75rem;
+  background: var(--green);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--sans);
+  transition: all 0.2s;
+}
+.btn-dl:hover { background: #059669; box-shadow: 0 4px 12px rgba(16,185,129,0.3); }
+
+.btn-reset-modal {
+  padding: 0.75rem;
+  background: none;
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--sans);
+  transition: all 0.2s;
+}
+.btn-reset-modal:hover { border-color: var(--blue); color: var(--text); }
+
+/* ── Empty / States ── */
+.empty-state {
+  text-align: center;
+  padding: 5rem 2rem;
+  color: var(--muted);
+}
+.empty-state .icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
+.empty-state p { font-size: 1rem; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+</style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🎯 Keyword Manager Pro</h1>
-            <p class="subtitle">Smart keyword grouping, deduplication, and SEO categorization</p>
-        </header>
 
-        <div class="input-section">
-            <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 2px solid rgba(148, 163, 184, 0.2); padding-bottom: 1rem;">
-                <button class="tab-btn active" onclick="switchTab('upload')" style="padding: 0.75rem 1.5rem; background: none; border: none; color: #cbd5e1; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -1rem; transition: all 0.3s ease;">
-                    📁 Upload File (Easy)
-                </button>
-                <button class="tab-btn" onclick="switchTab('paste')" style="padding: 0.75rem 1.5rem; background: none; border: none; color: #94a3b8; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -1rem; transition: all 0.3s ease;">
-                    📝 Paste Keywords (Manual)
-                </button>
-            </div>
+<!-- Top Bar -->
+<div class="topbar">
+  <div class="logo">KW<span>·</span>PRO</div>
+  <div class="topbar-nav">
+    <button class="nav-btn active" onclick="showPage('upload')">⬆ Import</button>
+    <button class="nav-btn" id="dashNavBtn" onclick="showPage('dashboard')" disabled>📊 Dashboard</button>
+  </div>
+  <div class="topbar-right">
+    <button class="btn-sm" onclick="exportToCSV()">CSV</button>
+    <button class="btn-sm" onclick="exportToExcel()">Excel</button>
+    <button class="btn-sm" onclick="exportJSON()">JSON</button>
+  </div>
+</div>
 
-            <!-- UPLOAD TAB -->
-            <div id="uploadTab" class="tab-content active">
-                <div class="form-group">
-                    <label>Step 1️⃣: Upload Your File</label>
-                    <div class="file-upload-area" id="dropZone">
-                        <div class="upload-icon">📁</div>
-                        <div class="upload-text">Drag & drop your CSV or Excel file here</div>
-                        <div class="upload-subtext">or click to browse</div>
-                    </div>
-                    <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" />
-                    <div class="file-info" id="fileInfo"></div>
-                    <p class="input-hint">✅ Supported formats: CSV, XLSX, XLS</p>
-                    <p class="input-hint">💡 Format: Column A = Keywords, Column B = Volume, Column C = Type</p>
-                </div>
+<!-- ══ IMPORT PAGE ══ -->
+<div class="page active" id="page-upload">
+  <div class="upload-card">
+    <h2>Import Your Keywords</h2>
+    <p>Upload a CSV / Excel file or paste your keywords directly. The tool will group, deduplicate, and filter irrelevant keywords automatically.</p>
 
-                <div class="button-group">
-                    <button class="btn-primary" onclick="processKeywords()">
-                        <span id="processBtn">Process Keywords</span>
-                    </button>
-                    <button class="btn-secondary" onclick="clearAll()">Clear All</button>
-                </div>
-            </div>
-
-            <!-- PASTE TAB -->
-            <div id="pasteTab" class="tab-content hidden">
-                <div class="form-group">
-                    <label for="keywords">Step 1️⃣: Paste Keywords</label>
-                    <textarea id="keywords" placeholder="digital marketing&#10;digital marketing agency&#10;social media marketing&#10;SEO services"></textarea>
-                    <p class="input-hint">📝 One keyword per line OR comma-separated</p>
-                </div>
-
-                <div class="form-group">
-                    <label for="metadata">Step 2️⃣: Paste Volume & Type (Optional)</label>
-                    <textarea id="metadata" placeholder="digital marketing | 5000 | commercial&#10;SEO services | 3000 | informational&#10;how to start blog | 1000 | informational"></textarea>
-                    <p class="input-hint">📊 Format: Keyword | Volume | Type (one per line, pipe-separated)</p>
-                </div>
-
-                <div class="button-group">
-                    <button class="btn-primary" onclick="processKeywords()">
-                        <span id="processBtn">Process Keywords</span>
-                    </button>
-                    <button class="btn-secondary" onclick="clearAll()">Clear All</button>
-                </div>
-            </div>
-        </div>
-
-        <div id="resultsContainer" class="hidden results-section">
-            <div class="card">
-                <h2>📊 Analysis Summary</h2>
-                <div class="stats">
-                    <div class="stat-box">
-                        <div class="stat-label">Total Keywords</div>
-                        <div class="stat-value" id="totalKeywords">0</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-label">After Deduplication</div>
-                        <div class="stat-value" id="deduplicatedCount">0</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-label">Keyword Groups</div>
-                        <div class="stat-value" id="groupCount">0</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-label">Duplicates Removed</div>
-                        <div class="stat-value" id="duplicatesRemoved">0</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h2>🔗 Grouped Keywords Table</h2>
-                
-                <div class="form-group" style="margin-bottom: 1rem;">
-                    <input type="text" id="searchInput" placeholder="🔍 Search keywords..." style="width: 100%; padding: 0.75rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(148, 163, 184, 0.3); border-radius: 8px; color: #e2e8f0; font-size: 0.95rem;">
-                </div>
-
-                <div style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
-                    <button onclick="filterByCategory('all')" class="btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;">📊 All Categories</button>
-                    <button onclick="filterByCategory('service')" class="btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;">🛠️ Service Pages</button>
-                    <button onclick="filterByCategory('blog')" class="btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;">📝 Blog Posts</button>
-                    <button onclick="filterByCategory('case_study')" class="btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;">🏆 Case Studies</button>
-                </div>
-                
-                <div class="table-container">
-                    <table id="keywordTable">
-                        <thead>
-                            <tr>
-                                <th onclick="sortTable(0)">Primary Keyword ⬍</th>
-                                <th>Variants</th>
-                                <th onclick="sortTable(2)">Count ⬍</th>
-                                <th onclick="sortTable(3)">Category ⬍</th>
-                                <th onclick="sortTable(4)">Volume ⬍</th>
-                                <th>Type</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableBody">
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="card">
-                <h2>📑 Content Type Recommendations</h2>
-                <div id="recommendations"></div>
-            </div>
-
-            <div class="card">
-                <h2>💾 Export Data</h2>
-                <div class="export-buttons">
-                    <button class="export-btn" onclick="exportToCSV()">📥 Export CSV</button>
-                    <button class="export-btn" onclick="exportToExcel()">📊 Export Excel</button>
-                    <button class="export-btn" onclick="exportJSON()">📋 Export JSON</button>
-                    <button class="export-btn" onclick="copyToClipboard()">📋 Copy Table</button>
-                </div>
-            </div>
-        </div>
-
-        <div id="emptyState" class="card">
-            <div class="empty-state">
-                <p>👆 Enter keywords above to get started</p>
-            </div>
-        </div>
+    <div class="input-tabs">
+      <button class="itab active" onclick="switchTab('upload')">📁 Upload File</button>
+      <button class="itab" onclick="switchTab('paste')">📝 Paste Keywords</button>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
-    <script>
-        // Wait for DOM to be fully loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            const dropZone = document.getElementById('dropZone');
-            const fileInput = document.getElementById('fileInput');
+    <!-- Upload Tab -->
+    <div class="tab-pane active" id="tab-upload">
+      <div class="drop-zone" id="dropZone">
+        <div class="drop-icon">📂</div>
+        <p><strong>Drag & drop</strong> your CSV or Excel file here</p>
+        <p style="margin-top:0.4rem">or click to browse</p>
+      </div>
+      <input type="file" id="fileInput" accept=".csv,.xlsx,.xls">
+      <div class="file-badge" id="fileBadge"></div>
+      <p class="hint" id="xlsxHint">⏳ Loading Excel support…</p>
+    </div>
 
-            if (!dropZone || !fileInput) {
-                console.error('Upload elements not found!');
-                return;
-            }
+    <!-- Paste Tab -->
+    <div class="tab-pane" id="tab-paste">
+      <label class="field-label">Keywords (one per line)</label>
+      <textarea class="kw-input" id="kwInput" placeholder="linkedin lead generation&#10;b2b lead gen linkedin&#10;how to generate leads on linkedin"></textarea>
+      <label class="field-label">Volume & Type (optional)</label>
+      <textarea class="kw-input" id="metaInput" placeholder="linkedin lead generation | 480 | Informational&#10;b2b lead gen linkedin | 30 | Mixed" style="min-height:80px"></textarea>
+      <p class="hint">📊 Format: Keyword | Volume | Type  (pipe-separated)</p>
+    </div>
 
-            // Click to browse
-            dropZone.addEventListener('click', function(e) {
-                e.preventDefault();
-                fileInput.click();
-            });
+    <button class="btn-process" id="processBtn" onclick="processKeywords()">
+      Process Keywords →
+    </button>
+  </div>
+</div>
 
-            // Drag over
-            dropZone.addEventListener('dragover', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                dropZone.classList.add('dragover');
-            });
+<!-- ══ DASHBOARD PAGE ══ -->
+<div class="page" id="page-dashboard">
 
-            // Drag leave
-            dropZone.addEventListener('dragleave', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                dropZone.classList.remove('dragover');
-            });
+  <div class="dash-header">
+    <div class="dash-title">Keyword Dashboard <span id="dashSubtitle"></span></div>
+    <!-- Download bar -->
+    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
+      <button onclick="exportToCSV()" style="padding:0.55rem 1.1rem;background:var(--green);color:#fff;border:none;border-radius:8px;font-weight:700;font-size:0.85rem;cursor:pointer;font-family:var(--sans);">⬇️ Download CSV</button>
+      <button onclick="exportToExcel()" style="padding:0.55rem 1.1rem;background:var(--blue);color:#fff;border:none;border-radius:8px;font-weight:700;font-size:0.85rem;cursor:pointer;font-family:var(--sans);">⬇️ Download Excel</button>
+      <button onclick="exportJSON()" style="padding:0.55rem 1.1rem;background:var(--surface2);color:var(--muted);border:1px solid var(--border2);border-radius:8px;font-weight:600;font-size:0.85rem;cursor:pointer;font-family:var(--sans);">⬇️ JSON</button>
+    </div>
+  </div>
 
-            // Drop
-            dropZone.addEventListener('drop', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                dropZone.classList.remove('dragover');
-                const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    handleFile(files[0]);
-                }
-            });
 
-            // File input change
-            fileInput.addEventListener('change', function(e) {
-                if (e.target.files.length > 0) {
-                    handleFile(e.target.files[0]);
-                }
-            });
+  <!-- API / Proxy Settings Panel -->
+  <div id="apiKeyBar" style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.25);border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1.5rem;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
+      <span style="font-size:0.9rem;color:var(--purple);font-weight:700;">🔑 Content Generation Setup</span>
+      <span style="font-size:0.75rem;color:var(--muted);">Keys stored in browser session only</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+      <div>
+        <label style="display:block;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);margin-bottom:0.4rem;">Anthropic API Key</label>
+        <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." style="width:100%;padding:0.6rem 0.85rem;background:var(--bg);border:1px solid rgba(139,92,246,0.35);border-radius:7px;color:var(--text);font-size:0.85rem;font-family:var(--mono);">
+        <div style="font-size:0.72rem;color:var(--muted);margin-top:0.3rem;">Get from <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--purple);">console.anthropic.com</a></div>
+      </div>
+      <div>
+        <label style="display:block;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);margin-bottom:0.4rem;">Proxy URL <span style="color:var(--red);font-weight:400;">(required for GitHub Pages)</span></label>
+        <input type="text" id="proxyUrlInput" placeholder="https://your-worker.your-name.workers.dev" style="width:100%;padding:0.6rem 0.85rem;background:var(--bg);border:1px solid rgba(239,68,68,0.35);border-radius:7px;color:var(--text);font-size:0.82rem;font-family:var(--mono);">
+        <div style="font-size:0.72rem;color:var(--muted);margin-top:0.3rem;"><a href="#" onclick="toggleCorsHelp()" style="color:var(--red);">▶ How to set up a free proxy (2 min)</a></div>
+      </div>
+    </div>
+    <button onclick="saveApiKey()" style="padding:0.6rem 1.5rem;background:var(--purple);color:#fff;border:none;border-radius:7px;font-weight:700;font-size:0.85rem;cursor:pointer;font-family:var(--sans);">Save Settings</button>
+    <span id="apiKeyStatus" style="font-size:0.8rem;color:var(--muted);margin-left:1rem;"></span>
 
-            function handleFile(file) {
-                const fileName = file.name;
-                const fileExt = fileName.split('.').pop().toLowerCase();
+    <!-- CORS Help Panel -->
+    <div id="corsHelp" style="display:none;margin-top:1.25rem;padding:1.25rem;background:var(--bg);border:1px solid var(--border2);border-radius:10px;">
+      <div style="font-size:0.85rem;font-weight:700;color:var(--text);margin-bottom:0.75rem;">🚀 Free Cloudflare Worker Proxy — Setup in 2 minutes</div>
+      <div style="font-size:0.8rem;color:var(--muted);margin-bottom:0.75rem;">GitHub Pages cannot call the Anthropic API directly due to browser CORS restrictions. A free Cloudflare Worker acts as a relay — it's free (100,000 requests/day) and takes 2 minutes to set up.</div>
+      <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);margin-bottom:0.5rem;">Step 1 — Go to <a href="https://workers.cloudflare.com" target="_blank" style="color:var(--blue);">workers.cloudflare.com</a> → Sign up free → Create Worker → Paste this code:</div>
+      <pre id="workerCode" style="background:#0a0f1e;border:1px solid var(--border2);border-radius:8px;padding:1rem;font-family:var(--mono);font-size:0.78rem;color:#34d399;overflow-x:auto;white-space:pre;margin-bottom:0.75rem;">export default {
+  async fetch(request) {
+    if (request.method === 'OPTIONS') {
+      return new Response(null, { headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': '*',
+      }});
+    }
+    const body = await request.text();
+    const apiKey = request.headers.get('x-api-key');
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body
+    });
+    const data = await res.text();
+    return new Response(data, {
+      status: res.status,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      }
+    });
+  }
+};</pre>
+      <button onclick="copyWorkerCode()" style="padding:0.45rem 1rem;background:var(--blue-dim);border:1px solid rgba(59,130,246,0.3);border-radius:6px;color:var(--blue);font-size:0.8rem;font-weight:600;cursor:pointer;font-family:var(--sans);margin-bottom:0.75rem;">📋 Copy Worker Code</button>
+      <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);margin-bottom:0.35rem;">Step 2 — Click Deploy → copy your worker URL (e.g. <code style="color:var(--green);">https://my-proxy.yourname.workers.dev</code>)</div>
+      <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);">Step 3 — Paste that URL in the Proxy URL field above → Save Settings → Done!</div>
+    </div>
+  </div>
 
-                if (fileExt === 'csv') {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        parseCSV(e.target.result, fileName);
-                    };
-                    reader.readAsText(file);
-                } else if (['xlsx', 'xls'].includes(fileExt)) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        parseExcel(e.target.result, fileName);
-                    };
-                    reader.readAsArrayBuffer(file);
-                } else {
-                    alert('❌ Please upload a CSV or Excel file (.csv, .xlsx, .xls)');
-                    fileInput.value = '';
-                }
-            }
+  <!-- Stat Cards -->
+  <div class="stats-row">
+    <div class="stat-card blue">
+      <div class="label">Total Keywords</div>
+      <div class="value blue" id="statTotal">0</div>
+    </div>
+    <div class="stat-card green">
+      <div class="label">Blog Posts</div>
+      <div class="value" id="statBlog">0</div>
+    </div>
+    <div class="stat-card purple">
+      <div class="label">Service Pages</div>
+      <div class="value" id="statService">0</div>
+    </div>
+    <div class="stat-card amber">
+      <div class="label">Case Studies</div>
+      <div class="value" id="statCase">0</div>
+    </div>
+    <div class="stat-card red">
+      <div class="label">Filtered Out</div>
+      <div class="value" id="statFiltered">0</div>
+    </div>
+  </div>
 
-            function parseCSV(content, fileName) {
-                try {
-                    const lines = content.trim().split('\n');
-                    let keywords = [];
-                    let metadata = [];
+  <!-- Controls -->
+  <div class="table-controls">
+    <div class="search-wrap">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="searchInput" placeholder="Search keywords…" oninput="filterTable()">
+    </div>
+    <div class="filter-pills">
+      <button class="pill active" onclick="filterCategory('all', this)">All</button>
+      <button class="pill green" onclick="filterCategory('blog', this)">📝 Blog</button>
+      <button class="pill purple" onclick="filterCategory('service', this)">🛠 Service</button>
+      <button class="pill amber" onclick="filterCategory('case_study', this)">🏆 Case Study</button>
+    </div>
+  </div>
 
-                    lines.forEach((line, index) => {
-                        if (line.trim()) {
-                            if (line.includes('|')) {
-                                // Has pipe separator - treat as metadata
-                                metadata.push(line);
-                            } else {
-                                keywords.push(line.trim());
-                            }
-                        }
-                    });
+  <!-- Table -->
+  <div class="table-wrap">
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:46px; cursor:default">#</th>
+            <th onclick="sortBy('primary')">Primary Keyword <span class="sort-icon">⬍</span></th>
+            <th onclick="sortBy('count')" style="text-align:center">Variants <span class="sort-icon">⬍</span></th>
+            <th onclick="sortBy('category')">Category <span class="sort-icon">⬍</span></th>
+            <th onclick="sortBy('volume')" style="text-align:right">Volume <span class="sort-icon">⬍</span></th>
+            <th>Intent Type</th>
+            <th style="width:130px; cursor:default; text-align:center">Generate Content</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+    <div class="table-footer">
+      <span id="tableInfo">0 rows</span>
+      <span style="color:var(--purple); font-size:0.78rem; font-weight:600;">✍️ Click Generate to create full content + download .doc</span>
+    </div>
+  </div>
 
-                    if (keywords.length === 0) {
-                        alert('❌ No keywords found in file');
-                        return;
-                    }
+</div>
 
-                    populateTextareas(keywords, metadata, fileName);
-                } catch (error) {
-                    alert('❌ Error reading CSV: ' + error.message);
-                }
-            }
+<!-- ══ CONTENT GENERATOR MODAL ══ -->
+<div class="modal-overlay" id="genModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <div class="modal-kw" id="modalKwLabel"></div>
+        <div class="modal-title" id="modalKwTitle"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
 
-            function parseExcel(arrayBuffer, fileName) {
-                try {
-                    const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const data = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+    <div class="modal-body">
+      <!-- Config fields -->
+      <div id="configArea">
+        <div class="modal-fields">
+          <div class="m-field">
+            <label>Content Type</label>
+            <select id="mContentType">
+              <option value="blog">📝 Blog Post</option>
+              <option value="case_study">🏆 Case Study</option>
+              <option value="service">🛠️ Service Page</option>
+            </select>
+          </div>
+          <div class="m-field">
+            <label>Brand / Website Name</label>
+            <input type="text" id="mBrand" placeholder="e.g. Wildnet Technologies">
+          </div>
+          <div class="m-field">
+            <label>Target Audience</label>
+            <input type="text" id="mAudience" placeholder="e.g. B2B SaaS marketers">
+          </div>
+          <div class="m-field">
+            <label>Tone</label>
+            <select id="mTone">
+              <option value="professional">Professional</option>
+              <option value="conversational">Conversational</option>
+              <option value="authoritative">Authoritative</option>
+              <option value="friendly">Friendly & Approachable</option>
+            </select>
+          </div>
+          <div class="m-field">
+            <label>Internal Link URL 1 (optional)</label>
+            <input type="text" id="mLink1" placeholder="https://yoursite.com/services">
+          </div>
+          <div class="m-field">
+            <label>Internal Link URL 2 (optional)</label>
+            <input type="text" id="mLink2" placeholder="https://yoursite.com/blog/topic">
+          </div>
+        </div>
+        <button class="btn-generate-modal" id="mGenBtn" onclick="runGenerate()">
+          ✨ Generate Content
+        </button>
+      </div>
 
-                    let keywords = [];
-                    let metadata = [];
+      <!-- Loading -->
+      <div class="gen-loading-state" id="genLoadingState">
+        <div class="big-spinner"></div>
+        <p>Generating your content…</p>
+        <small>Takes about 20–30 seconds</small>
+      </div>
 
-                    data.forEach((row, index) => {
-                        if (index === 0) return; // Skip header
-                        
-                        if (row && row.length > 0) {
-                            const keyword = row[0]?.toString().trim();
-                            const volume = row[1]?.toString().trim();
-                            const type = row[2]?.toString().trim();
-                            
-                            if (keyword) {
-                                keywords.push(keyword);
-                                if (volume || type) {
-                                    metadata.push(`${keyword} | ${volume || 0} | ${type || 'mixed'}`);
-                                }
-                            }
-                        }
-                    });
+      <!-- Output -->
+      <div class="output-area" id="outputArea">
 
-                    if (keywords.length === 0) {
-                        alert('❌ No keywords found in Excel file');
-                        return;
-                    }
+        <div class="output-section">
+          <div class="output-section-head">
+            <span class="output-section-label">🏷️ Meta Description</span>
+            <button class="copy-small" onclick="copySection('outMeta')">Copy</button>
+          </div>
+          <div class="output-section-body" id="outMeta"></div>
+        </div>
 
-                    populateTextareas(keywords, metadata, fileName);
-                } catch (error) {
-                    alert('❌ Error reading Excel: ' + error.message);
-                }
-            }
+        <div class="output-section">
+          <div class="output-section-head">
+            <span class="output-section-label">🔗 URL Slug</span>
+            <button class="copy-small" onclick="copySection('outUrl')">Copy</button>
+          </div>
+          <div class="output-section-body" id="outUrl"></div>
+        </div>
 
-            function populateTextareas(keywords, metadata, fileName) {
-                const keywordCount = keywords.length;
-                const metadataCount = metadata.length;
+        <div class="output-section">
+          <div class="output-section-head">
+            <span class="output-section-label">📌 Page Title (H1)</span>
+            <button class="copy-small" onclick="copySection('outTitle')">Copy</button>
+          </div>
+          <div class="output-section-body" id="outTitle"></div>
+        </div>
 
-                document.getElementById('keywords').value = keywords.join('\n');
-                if (metadata.length > 0) {
-                    document.getElementById('metadata').value = metadata.join('\n');
-                }
+        <div class="output-section">
+          <div class="output-section-head">
+            <span class="output-section-label">📄 Full Content</span>
+            <button class="copy-small" onclick="copySection('outBody')">Copy</button>
+          </div>
+          <div class="output-section-body tall" id="outBody"></div>
+        </div>
 
-                const fileInfo = document.getElementById('fileInfo');
-                fileInfo.innerHTML = `✅ <strong>File Loaded!</strong> ${fileName} | ${keywordCount} keywords | ${metadataCount} with data`;
-                fileInfo.classList.add('show');
-            }
-        });
+        <div class="output-section">
+          <div class="output-section-head">
+            <span class="output-section-label">🔑 Target Keywords</span>
+            <button class="copy-small" onclick="copySection('outKws')">Copy</button>
+          </div>
+          <div class="output-section-body" id="outKws"></div>
+        </div>
 
-        const levenshteinDistance = (s1, s2) => {
-            const a = s1.toLowerCase();
-            const b = s2.toLowerCase();
-            const arr = [];
-            for (let i = 0; i <= b.length; i++) arr[i] = [i];
-            for (let j = 0; j <= a.length; j++) arr[0][j] = j;
-            for (let i = 1; i <= b.length; i++) {
-                for (let j = 1; j <= a.length; j++) {
-                    const cost = a[j - 1] === b[i - 1] ? 0 : 1;
-                    arr[i][j] = Math.min(arr[i][j - 1] + 1, arr[i - 1][j] + 1, arr[i - 1][j - 1] + cost);
-                }
-            }
-            return arr[b.length][a.length];
+        <div class="output-section">
+          <div class="output-section-head">
+            <span class="output-section-label">🔗 Internal Linking Suggestions</span>
+            <button class="copy-small" onclick="copySection('outLinks')">Copy</button>
+          </div>
+          <div class="output-section-body" id="outLinks"></div>
+        </div>
+
+        <div class="output-section">
+          <div class="output-section-head">
+            <span class="output-section-label">❓ FAQs</span>
+            <button class="copy-small" onclick="copySection('outFaqs')">Copy</button>
+          </div>
+          <div class="output-section-body" id="outFaqs"></div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn-dl" onclick="downloadDoc()">⬇️ Download .doc</button>
+          <button class="btn-sm" onclick="copyAllSections()" style="background:var(--blue-dim);color:var(--blue);border-color:rgba(59,130,246,0.3)">📋 Copy All</button>
+          <button class="btn-reset-modal" onclick="resetModal()">↩ Generate Again</button>
+          <button class="btn-reset-modal" onclick="closeModal()">✕ Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── XLSX Loader: tries 4 CDNs in sequence, locks UI until ready ──
+(function() {
+  var SRCS = [
+    'https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js',
+    'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js',
+    'https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js'
+  ];
+  var i = 0;
+  function next() {
+    if (i >= SRCS.length) {
+      // All failed — mark unavailable, show message on drop zone
+      window.__xlsxOK = false;
+      var dz = document.getElementById('dropZone');
+      if (dz) dz.querySelector('p') && (dz.querySelector('p').textContent = 'Excel unavailable — please use CSV');
+      return;
+    }
+    var s = document.createElement('script');
+    s.src = SRCS[i++];
+    s.onload = function() {
+      window.__xlsxOK = true;
+      // Unlock drop zone
+      var dz = document.getElementById('dropZone');
+      if (dz) { dz.style.opacity = '1'; dz.style.pointerEvents = ''; }
+      var hint = document.getElementById('xlsxHint');
+      if (hint) hint.textContent = '✅ Supported: CSV, XLSX, XLS — Column A = Keyword, B = Volume, C = Type';
+    };
+    s.onerror = next;
+    document.head.appendChild(s);
+  }
+  // Lock drop zone while loading
+  document.addEventListener('DOMContentLoaded', function() {
+    var dz = document.getElementById('dropZone');
+    if (dz && !window.__xlsxOK) { dz.style.opacity = '0.6'; dz.style.pointerEvents = 'none'; }
+    var hint = document.getElementById('xlsxHint');
+    if (hint) hint.textContent = '⏳ Loading Excel support…';
+  });
+  next();
+})();
+</script>
+<script>
+
+// ════════════════════════════════════════════════
+// RELEVANCE FILTER  —  Human-level SEO targeting
+// ════════════════════════════════════════════════
+
+// 1. PERSONAL NAMES — not targetable as content
+const PERSON_NAMES = [
+  'chris lingenfelter','keith abass','jeffrey barlow','mitchell green',
+  'ryan leader','jeff leader','wolf leader','amy leader','tom leader','herb leader',
+  'kathy clark','justin welsh','lauren leader chivee','aron linkedin',
+  'jimmy coleman','grace roberts','victoria gillete','jason smith linked',
+  'misty leads','herb leader','edm leads',
+];
+
+// 2. BRAND / COMPANY NAMES — product lookups, not writable content topics
+const BRAND_NAMES = [
+  // Fake/example companies
+  'examplecorp','example com','examplecom',
+  // Lead gen product brands
+  'levelup leads','cleverly linkedin','cleverly lead',
+  'all web leads inc','all web leads',
+  'lead edge capital','lead forensics','lead onion',
+  'find that lead','lead bounty','lead angels',
+  'lead builder linkedin',
+  // Marketing tool brands (integration-specific lookups)
+  'sharpspring',       // B2B marketing automation — catches "connect google sheets linkedin lead gen forms sharpspring"
+  'fuel rollup',       // brand name — catches "fuel rollup custom emerging niche partnerships"
+  'blitzleadmanager','leadhealthstaff','preciseleads',
+  'dux soup','octopus crm','expandi','meet alfred','zopto','phantombuster','wiza',
+  'lusha linkedin',    // catches "use lusha on linkedin" type queries
+  // Specific companies not relevant as content
+  'ag leader technology','stanford lead linkedin',
+  'newell brands','stitch fix','asbury automotive',
+  'parasol insurance','media matters agency',
+  'project lead the way','the female lead linkedin',
+  'the tech lead linkedin','female lead linkedin',
+  'leading edge energy linkedin','the leading hotels of the world',
+  'converge using linkedin','oktopost',
+  'franchise linkedin leads advertising agency',
+  'lead by example marketing linkedin',
+  'mitchell green lead edge','is it leading linkedin automation',
+];
+
+// 3. INTEGRATION-SPECIFIC QUERIES — "connect Tool_A to Tool_B" lookups (not content targets)
+//    e.g. "connect google sheets linkedin lead gen forms sharpspring"
+//    e.g. "linkedin lead gen forms mailchimp integration"
+const INTEGRATION_BRANDS = [
+  'sharpspring','rd station','livestorm','gotowebinar','sql server',
+  'act on integration','autopilot journeys','mailgun',
+];
+// These are caught via BRAND_NAMES above + the pattern check below
+
+// 4. LINKEDIN COURSE / EXAM / DOWNLOAD — not content topics
+const LINKEDIN_LEARNING = [
+  'download linkedin navigating','download linkedin leading','download linkedin tips',
+  'download linkedin learning','download linkedin performance marketing',
+  'watch linkedin navigating','watch linkedin leading',
+  'linkedin exam answers','linkedin answers',
+  'leading with emotional intelligence linkedin answers',
+  'leading without formal authority linkedin exam',
+  'leading without formal authority linkedin answers',
+  'linkedin learning design thinking lead change',
+  'linkedin learning leadingwithemotionalintelligence',
+  'linkedin learning leadingwithoutformalauthority',
+  'linkedin leading and working in teams',
+  'linkedin leading at a distance',
+  'linkedin leading effectively',
+  'linkedin leading in government',
+  'linkedin leading responsible ai',
+  'linkedin leading the organization',
+  'linkedin leading with a heavy heart',
+  'linkedin leading with fearless',
+  'linkedin leading with intelligent disobedience',
+  'linkedin navigating politics as a senior leader',
+  'linkedin performance marketing using video ads',
+  'linkedin tips for leading yourself',
+];
+
+// 5. URL / DOMAIN DUMPS — raw URLs in keyword data
+const URL_PATTERNS = [
+  'https wwwlinkedincom','wwwlinkedincom','https www',
+  'wwwlinkedincom in','wwwlinkedincom company','wwwlinkedincom pulse',
+  'wwwlinkedincom learning',
+];
+
+// 6. COMPLETELY OFF-TOPIC / NONSENSICAL
+const OFF_TOPIC = [
+  'linkedin park lead singer',             // Linkin Park (band)
+  'linkedin banner servant leader',
+  'first lead second company twitter facebook instagram',
+  'linkedin kudos inspirational leader','linkedin kudos',
+  'linkedin host leader interview',
+  'x handle',                              // Twitter/X handle — catches "lead x handle linkedin"
+  'lead x handle',
+  'niche partnerships lead x',
+  'fuel rollup custom emerging niche',     // nonsensical brand combo
+];
+
+// 7. LINKEDIN UI / PROFILE NAVIGATION — people looking at someone's profile, not content
+const LINKEDIN_UI = [
+  'product leader titles linkedin search terms',
+  'linkedin profile senior leader examplecorp',
+  'linkedin senior leader profile examplecorp',
+  'examplecorp com linkedin senior leader',
+  'senior leader who shares your job function linkedin meaning',
+  'business leader linkedin profile',
+  'linkedin member people leader',
+  'thought leader linkedin profile',
+  'linkedin profile senior leader example',
+  'linkedin profile of a senior leader',
+  'linkedin profile for lead',
+  'linkedin banner servant',
+  'inspirational leader linkedin',
+  'leading seo experts linkedin',
+  'leading linkedin communities us',
+  'health leads linkedin',
+  'analytical lead google linkedin',
+  'b2b leads generation expert via linkedin  sales prospecting',
+  'b2b leads generation expert via linkedin sales prospecting',
+  'linkedin marketing lead generation b2b sales for linkedin coupon',
+  'linkedin marketing b2b sales  lead generation from scratch',
+];
+
+// 8. NON-ENGLISH KEYWORDS — French, German, Dutch, Spanish, Portuguese, Italian
+const NON_ENGLISH = [
+  // German
+  'leads generieren','leads generierung','leadgenerierung','leadgenerierung linkedin',
+  'leads agentur','linkedin lead generierung','linkedin leads generieren',
+  // Dutch
+  'leads genereren','leads generering','leads uit linkedin','leads genereren via linkedin',
+  'leads uit linkedin halen','leads werven','linkedin leads vinden','linkedin leads werven',
+  // French
+  'formulaire lead','generer des leads','gnrer des leads','gnration de leads',
+  'crer des leads','astuces pour gnrer','utiliser linkedin pour gnrer',
+  'comment generer des leads','des leads sur linkedin','formulaire lead gen linkedin',
+  'formulaire lead gen linkedin cest quoi',
+  // Spanish
+  'cmo generar leads','generar leads','anuncios linkedin para generar',
+  'generar leads inmobiliarios','optimizacin de perfiles',
+  'generar leads en linkedin','generacin de leads en linkedin',
+  // Portuguese
+  'ferramenta leads','gerar leads','gnrer des leads immobiliiers',
+  'gnrer des leads immobiliers','gnrer des leads sur linkedin',
+  // Italian
+  'leads met linkedin',
+  // Generic non-English markers
+  'leads generacin','leads generierung',
+];
+
+// Combine all patterns into one flat list
+const ALL_PATTERNS = [
+  ...PERSON_NAMES, ...BRAND_NAMES, ...LINKEDIN_LEARNING,
+  ...URL_PATTERNS, ...OFF_TOPIC, ...LINKEDIN_UI, ...NON_ENGLISH,
+];
+
+// Pattern-based rules (catches things a flat blacklist misses)
+function failsPatternCheck(k) {
+  const words = k.split(' ');
+
+  // Rule 1: "connect [tool_A] [platform] [feature]... [tool_B]" — integration documentation query
+  // e.g. "connect google sheets linkedin lead gen forms sharpspring"
+  // e.g. "connect email google sheets linkedin lead gen forms"
+  if (words[0] === 'connect' && words.length >= 5) return true;
+
+  // Rule 2: URL fragments leaked into keyword data
+  if (/https?|wwwlinkedin|\.com\b|\.io\b/.test(k)) return true;
+
+  // Rule 3: "[First] [Last] linkedin" — person name + linkedin (2-word proper noun before linkedin)
+  // Heuristic: short keywords (3-4 words) ending in "linkedin" where first words look like a name
+  // Approximate: 2-3 word combo + linkedin with no generic SEO words
+  const genericWords = /lead|generation|marketing|sales|b2b|content|how|tips|strategy|service|agency|tool|ads|cost|best|guide/;
+  if (words.length <= 4 && words[words.length - 1] === 'linkedin' && !genericWords.test(k)) return true;
+
+  // Rule 4: Nonsensical keyword — too many words (9+) with known noise markers
+  const noiseMarkers = ['x handle','niche partnerships','custom emerging','rollup custom'];
+  if (words.length >= 8 && noiseMarkers.some(m => k.includes(m))) return true;
+
+  // Rule 5: Keywords that are clearly looking up a specific LinkedIn profile page
+  // Pattern: "linkedin profile [role] [company]" or "[name] linkedin profile"
+  if (/linkedin profile .{3,} leader .{3,}/.test(k)) return true;
+
+  return false;
+}
+
+function isIrrelevant(kw) {
+  const k = kw.toLowerCase().trim();
+  // Flat blacklist check
+  if (ALL_PATTERNS.some(p => k.includes(p.toLowerCase()))) return true;
+  // Pattern-based check
+  if (failsPatternCheck(k)) return true;
+  return false;
+}
+
+// ════════════════════════════════════════════════
+// KEYWORD PROCESSING
+// ════════════════════════════════════════════════
+const levenshtein = (s1, s2) => {
+  const a = s1.toLowerCase(), b = s2.toLowerCase();
+  const arr = [];
+  for (let i = 0; i <= b.length; i++) arr[i] = [i];
+  for (let j = 0; j <= a.length; j++) arr[0][j] = j;
+  for (let i = 1; i <= b.length; i++)
+    for (let j = 1; j <= a.length; j++) {
+      const cost = a[j-1] === b[i-1] ? 0 : 1;
+      arr[i][j] = Math.min(arr[i][j-1]+1, arr[i-1][j]+1, arr[i-1][j-1]+cost);
+    }
+  return arr[b.length][a.length];
+};
+const isSimilar = (s1,s2,t=0.75) => {
+  const maxLen = Math.max(s1.length,s2.length);
+  return maxLen === 0 || (1 - levenshtein(s1,s2)/maxLen) >= t;
+};
+const clean = kw => kw.trim().toLowerCase().replace(/\s+/g,' ').replace(/[^a-z0-9\s]/g,'');
+// ════════════════════════════════════════════════
+// SEO INTENT CLASSIFICATION ENGINE
+// Implements: Blog / Service Page / Case Study / Navigational
+// Rules: question starters, modifier words, commercial signals
+// ════════════════════════════════════════════════
+const categorize = kw => {
+  const k = kw.toLowerCase().trim();
+
+  // ── Navigational (brand lookups) ──
+  if (/\b(login|log in|sign in|sign up|contact us|careers at|jobs at)\b/.test(k)) return 'navigational';
+
+  // ── Case Study (proof / results based) ──
+  if (/\bcase stud(y|ies)\b/.test(k)) return 'case_study';
+  if (/\b(success stor(y|ies)|before.?after|client result|proven result|roi result)\b/.test(k)) return 'case_study';
+  if (/\b(how .+ (helped|grew|increased|generated|scaled|boosted))\b/.test(k)) return 'case_study';
+
+  // ── Blog — Question starters (highest confidence) ──
+  if (/^how (to|do|does|can|should|is|are)\b/.test(k)) return 'blog';
+  if (/^what (is|are|does|do|should|can|to)\b/.test(k)) return 'blog';
+  if (/^why (is|are|do|should|use|choose|does)\b/.test(k)) return 'blog';
+  if (/^when (to|should|is|are|do|does)\b/.test(k)) return 'blog';
+  if (/^where (to|can|should|is|are)\b/.test(k)) return 'blog';
+  if (/^(is it|are there|can you|should you|do you|does it)\b/.test(k)) return 'blog';
+  if (/^(which|who|will|would)\b/.test(k)) return 'blog';
+
+  // ── Blog — Informational modifier words ──
+  // Research & examples
+  if (/\b(examples?|sample|template|checklist|worksheet|framework|playbook)\b/.test(k)) return 'blog';
+  // Learning intent
+  if (/\b(guide|tutorial|learn|course|certification|training|how-?to)\b/.test(k)) return 'blog';
+  // Tips & strategy research
+  if (/\b(tips|hacks|tricks|ideas|strategies|tactics|methods|approaches|techniques)\b/.test(k)) return 'blog';
+  // Comparison intent
+  if (/\bvs\.?\b|\bversus\b|\bcompare\b|\bcomparison\b|\balternatives?\b|\bdifference between\b/.test(k)) return 'blog';
+  // Definition / meaning intent
+  if (/\b(meaning|definition|criteria|explained?|overview|introduction|basics|101|fundamentals)\b/.test(k)) return 'blog';
+  // Data / research intent
+  if (/\b(statistics?|stats|data|trends?|insights?|research|report|study|benchmark)\b/.test(k)) return 'blog';
+  // Benefits & analysis intent
+  if (/\b(benefits?|advantages?|disadvantages?|pros? (and|&) cons?|importance of|why use)\b/.test(k)) return 'blog';
+  // Best practices  
+  if (/\b(best practices?|proven (method|strategy|framework|approach)|effective ways?|top ways?)\b/.test(k)) return 'blog';
+  // Mistakes / challenges (informational)
+  if (/\b(mistakes?|challenges?|problems?|issues?|pitfalls?|errors?)\b/.test(k)) return 'blog';
+  // Year-tagged keywords are usually informational research
+  if (/\b(202[3-9]|203[0-9])\b/.test(k)) return 'blog';
+  // Cost research (informational — "what does it cost" vs buying)
+  if (/\b(cost (per|of)|average cost|cpl|cpc|ctr|price breakdown|pricing guide|how much)\b/.test(k)) return 'blog';
+  // Validation, scoring, criteria = research
+  if (/\b(validation|scoring|criteria|grading|assessment|evaluation)\b/.test(k)) return 'blog';
+  // Content strategy research terms
+  if (/\b(content (ideas?|strategy|calendar|plan|creation|format|type))\b/.test(k)) return 'blog';
+  // Generating / optimizing = informational "how to" context
+  if (/^(generating|optimizing|creating|building|growing|improving|increasing)\b/.test(k)) return 'blog';
+  // Steps / ways / types (list articles)
+  if (/\b(\d+\s)?(steps?|ways?|types?|kinds?|methods?) (to|for|of)\b/.test(k)) return 'blog';
+
+  // ── Service Page — Commercial / Transactional ──
+  if (/\b(agency|service|company|provider|firm|vendors?)\b/.test(k)) return 'service';
+  if (/\b(consultant(s|cy|ing)?|specialist|expert|professional|managed)\b/.test(k)) return 'service';
+  if (/\b(solution|platform|software|tool|app|extension|plugin|saas)\b/.test(k)) return 'service';
+  if (/\b(hire|outsource|packages?|plans?|quote|pricing(?! guide)|affordable|cheap|cost-effective)\b/.test(k)) return 'service';
+  if (/\b(integration|connect|sync|webhook|api|automate|automation)\b/.test(k)) return 'service';
+  if (/\b(b2b (lead|sales|marketing|linkedin))\b/.test(k)) return 'service';
+  if (/\b(lead generation (service|agency|company|for|from|via|with|on|through))\b/.test(k)) return 'service';
+  if (/\b(download|export|extract|scrape|collect|build) (leads?|list|data)\b/.test(k)) return 'service';
+  if (/\b(get (leads?|started|a demo|a quote|results?))\b/.test(k)) return 'service';
+  if (/\b(linkedin (ads?|advertising|campaigns?|outreach|automation|messages?))\b/.test(k)) return 'service';
+
+  // Default: service
+  return 'service';
+};
+
+let allData = [];
+let filteredData = [];
+let currentCategory = 'all';
+let currentSort = { col: 'volume', dir: -1 };
+let activeRowIdx = null;
+let lastGenData = null;
+
+function processKeywords() {
+  const kwInput  = document.getElementById('kwInput').value;
+  const metaInput = document.getElementById('metaInput').value;
+  if (!kwInput.trim()) { alert('Please enter at least one keyword'); return; }
+
+  const btn = document.getElementById('processBtn');
+  btn.textContent = 'Processing…';
+  btn.disabled = true;
+
+  setTimeout(() => {
+    // Split on newlines only — NOT commas (commas are CSV field separators, not keyword separators)
+    const raw = kwInput.split('\n').map(clean).filter(k => k.length > 1);
+    const unique = [...new Set(raw)];
+
+    // ── Quality pre-filter: strip obvious non-keywords before relevance check ──
+    const META_ONLY = new Set(['informational','commercial','transactional','navigational',
+      'mixed','blog','service','high','low','medium','unknown','branded','unbranded',
+      'yes','no','na','n a','none','other']);
+    const relevant = unique.filter(k => {
+      if (k.length < 3) return false;                     // too short
+      if (/^\d[\d\s,\.]*$/.test(k)) return false;         // pure number / formatted number ("1,900")
+      if (META_ONLY.has(k.toLowerCase())) return false;   // lone metadata word
+      if (isIrrelevant(k)) return false;                  // relevance blacklist
+      return true;
+    });
+    const filteredCount = unique.length - relevant.length;
+
+    const meta = {};
+    if (metaInput.trim()) {
+      metaInput.split('\n').forEach(line => {
+        if (!line.trim()) return;
+        const parts = line.split('|').map(x => x.trim());
+        const kw = parts[0]; const vol = parts[1]; const tp = parts[2]; const vars = parts[3] || '';
+        if (kw) meta[clean(kw)] = {
+          volume: parseInt((vol||'').replace(/[,\s]/g,'')) || 0,
+          type: tp || 'mixed',
+          variants: vars ? vars.split(/[;,]+/).map(v=>v.trim()).filter(Boolean) : []
         };
+      });
+    }
 
-        const isSimilar = (s1, s2, threshold = 0.75) => {
-            const maxLen = Math.max(s1.length, s2.length);
-            if (maxLen === 0) return true;
-            const distance = levenshteinDistance(s1, s2);
-            const similarity = 1 - distance / maxLen;
-            return similarity >= threshold;
-        };
-
-        const cleanKeyword = (keyword) => {
-            return keyword.trim().toLowerCase().replace(/\s+/g, ' ').replace(/[^a-z0-9\s]/g, '');
-        };
-
-        const categorizeKeyword = (keyword) => {
-            const content_keywords = {
-                'blog': ['how to', 'why', 'what is', 'guide', 'tutorial', 'tips', 'best practices', 'beginner', 'learn'],
-                'service': ['services', 'solutions', 'agency', 'company', 'provider', 'help', 'professional', 'hire', 'get'],
-                'case_study': ['case study', 'results', 'success', 'before after', 'portfolio', 'project', 'client', 'accomplished']
-            };
-
-            let scores = { blog: 0, service: 0, case_study: 0 };
-
-            for (const word of keyword.toLowerCase().split(/\s+/)) {
-                for (const [type, triggers] of Object.entries(content_keywords)) {
-                    if (triggers.some(trigger => trigger.includes(word) || word.includes(trigger))) {
-                        scores[type]++;
-                    }
-                }
-            }
-
-            const maxScore = Math.max(...Object.values(scores));
-            if (maxScore === 0) return 'service';
-            return Object.keys(scores).find(k => scores[k] === maxScore);
-        };
-
-        function switchTab(tab) {
-            // Hide all tabs
-            document.getElementById('uploadTab').classList.remove('active');
-            document.getElementById('pasteTab').classList.remove('active');
-            
-            // Remove active class from all buttons
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            
-            // Show selected tab
-            if (tab === 'upload') {
-                document.getElementById('uploadTab').classList.add('active');
-                document.querySelectorAll('.tab-btn')[0].classList.add('active');
-            } else {
-                document.getElementById('pasteTab').classList.add('active');
-                document.querySelectorAll('.tab-btn')[1].classList.add('active');
-            }
-            
-            // Clear previous inputs
-            clearAll();
+    const groups = [];
+    const processed = new Set();
+    for (const kw of relevant) {
+      if (processed.has(kw)) continue;
+      const group = [kw];
+      processed.add(kw);
+      for (const other of relevant) {
+        if (!processed.has(other) && isSimilar(kw, other)) {
+          group.push(other);
+          processed.add(other);
         }
+      }
+      groups.push(group.sort((a,b) => b.length - a.length));
+    }
 
-        function processKeywords() {
-            const keywordInput = document.getElementById('keywords').value;
-            const metadataInput = document.getElementById('metadata').value;
+    allData = groups.map(group => {
+      const primary = group[0];
+      const m = meta[primary] || { volume:0, type:'mixed', variants:[] };
+      const allVariants = [...new Set([...group.slice(1), ...(m.variants||[])])];
+      return { primary, keywords: allVariants, category: categorize(primary), volume: m.volume, type: m.type };
+    }).sort((a,b) => (b.volume||0) - (a.volume||0));
 
-            if (!keywordInput.trim()) {
-                alert('Please enter at least one keyword');
-                return;
-            }
+    // Stats
+    document.getElementById('statTotal').textContent    = allData.length;
+    document.getElementById('statBlog').textContent     = allData.filter(d=>d.category==='blog').length;
+    document.getElementById('statService').textContent  = allData.filter(d=>d.category==='service').length;
+    document.getElementById('statCase').textContent     = allData.filter(d=>d.category==='case_study').length;
+    document.getElementById('statFiltered').textContent = filteredCount;
+    document.getElementById('dashSubtitle').textContent = `— ${allData.length.toLocaleString()} keyword groups`;
 
-            document.getElementById('processBtn').textContent = 'Processing...';
+    filteredData = [...allData];
+    renderTable();
 
-            setTimeout(() => {
-                const keywords = keywordInput
-                    .split(/[,\n]+/)
-                    .map(k => cleanKeyword(k))
-                    .filter(k => k.length > 0);
+    document.getElementById('dashNavBtn').disabled = false;
+    showPage('dashboard');
 
-                const originalCount = keywords.length;
-                const uniqueKeywords = [...new Set(keywords)];
-                const duplicatesCount = originalCount - uniqueKeywords.length;
+    btn.textContent = 'Process Keywords →';
+    btn.disabled = false;
+  }, 200);
+}
 
-                const metadata = {};
-                if (metadataInput.trim()) {
-                    metadataInput.split('\n').forEach(line => {
-                        const [keyword, volume, type] = line.split('|').map(x => x.trim());
-                        if (keyword) {
-                            metadata[cleanKeyword(keyword)] = { volume: parseInt(volume) || 0, type: type || 'mixed' };
-                        }
-                    });
-                }
+// ════════════════════════════════════════════════
+// TABLE RENDERING
+// ════════════════════════════════════════════════
+function toggleVariants(i) {
+  const row = document.getElementById(`variants-${i}`);
+  const btn = document.getElementById(`vbtn-${i}`);
+  if (!row) return;
+  const open = row.style.display !== 'none';
+  row.style.display = open ? 'none' : 'table-row';
+  btn.textContent = open ? `▼ All ${filteredData[i].keywords.length}` : `▲ Hide`;
+}
 
-                const groups = [];
-                const processed = new Set();
+function renderTable() {
+  const tbody = document.getElementById('tableBody');
+  const catColors = { blog:'blog', service:'service', case_study:'case_study' };
+  const catLabels = { blog:'📝 Blog', service:'🛠 Service', case_study:'🏆 Case Study' };
 
-                for (const keyword of uniqueKeywords) {
-                    if (processed.has(keyword)) continue;
+  if (filteredData.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:3rem;color:var(--muted)">No keywords match your filter</td></tr>`;
+    document.getElementById('tableInfo').textContent = '0 rows';
+    return;
+  }
 
-                    const group = [keyword];
-                    processed.add(keyword);
+  tbody.innerHTML = filteredData.map((row, i) => {
+    const vol = row.volume > 0 ? row.volume.toLocaleString() : '—';
+    const volClass = row.volume > 0 ? '' : 'zero';
+    const hasKws = row.keywords && row.keywords.length > 0;
+    const kwPreview = hasKws ? row.keywords.slice(0,3).join(' · ') + (row.keywords.length > 3 ? ` +${row.keywords.length-3} more` : '') : '—';
+    return `
+    <tr id="row-${i}">
+      <td class="row-num">${i+1}</td>
+      <td class="td-keyword"><span title="${row.primary}">${row.primary}</span></td>
+      <td style="max-width:320px;">
+        <div style="font-size:0.78rem;color:var(--muted);line-height:1.5;">${kwPreview}</div>
+        ${hasKws ? `<button onclick="toggleVariants(${i})" style="margin-top:4px;padding:2px 8px;background:var(--blue-dim);border:1px solid rgba(59,130,246,0.2);border-radius:4px;color:var(--blue);font-size:0.7rem;cursor:pointer;font-family:var(--sans);" id="vbtn-${i}">▼ All ${row.keywords.length}</button>` : ''}
+      </td>
+      <td><span class="cat-badge ${catColors[row.category]}">${catLabels[row.category]}</span></td>
+      <td class="td-vol ${volClass}">${vol}</td>
+      <td class="td-type">${row.type||'—'}</td>
+      <td style="text-align:center">
+        <button class="btn-gen" id="genBtn-${i}" onclick="openModal(${i})">✍️ Generate</button>
+      </td>
+    </tr>
+    ${hasKws ? `<tr id="variants-${i}" style="display:none;background:rgba(15,23,42,0.5);">
+      <td colspan="7" style="padding:0.75rem 1rem 1rem 2.5rem;">
+        <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);margin-bottom:0.5rem;">Secondary Keywords</div>
+        <div style="display:flex;flex-wrap:wrap;gap:0.4rem;">
+          ${row.keywords.map(k=>`<span style="background:var(--surface2);border:1px solid var(--border2);border-radius:4px;padding:0.25rem 0.6rem;font-size:0.78rem;color:var(--text);">${k}</span>`).join('')}
+        </div>
+      </td>
+    </tr>` : ''}`;
+  }).join('');
 
-                    for (const otherKeyword of uniqueKeywords) {
-                        if (!processed.has(otherKeyword) && isSimilar(keyword, otherKeyword)) {
-                            group.push(otherKeyword);
-                            processed.add(otherKeyword);
-                        }
-                    }
+  document.getElementById('tableInfo').textContent =
+    `${filteredData.length.toLocaleString()} of ${allData.length.toLocaleString()} rows`;
+}
 
-                    groups.push(group.sort((a, b) => b.length - a.length));
-                }
+function filterTable() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  filteredData = allData.filter(row => {
+    const catMatch = currentCategory === 'all' || row.category === currentCategory;
+    const kwMatch  = !q || row.primary.includes(q) || row.keywords.some(k => k.includes(q));
+    return catMatch && kwMatch;
+  });
+  applySort();
+  renderTable();
+}
 
-                const groupedData = groups.map(group => {
-                    const primary = group[0];
-                    const category = categorizeKeyword(primary);
-                    const meta = metadata[primary] || { volume: 0, type: 'mixed' };
-                    
-                    return {
-                        primary,
-                        keywords: group,
-                        category,
-                        volume: meta.volume,
-                        type: meta.type,
-                        count: group.length
-                    };
-                }).sort((a, b) => (b.volume || 0) - (a.volume || 0));
+function filterCategory(cat, el) {
+  currentCategory = cat;
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  filterTable();
+}
 
-                displayResults(originalCount, uniqueKeywords.length, duplicatesCount, groupedData);
-                document.getElementById('processBtn').textContent = 'Process Keywords';
-            }, 300);
+function sortBy(col) {
+  if (currentSort.col === col) currentSort.dir *= -1;
+  else { currentSort.col = col; currentSort.dir = -1; }
+  document.querySelectorAll('th .sort-icon').forEach(s => s.style.color = '');
+  applySort();
+  renderTable();
+}
+
+function applySort() {
+  const { col, dir } = currentSort;
+  filteredData.sort((a,b) => {
+    let av, bv;
+    if (col === 'primary')  { av=a.primary;  bv=b.primary;  return av.localeCompare(bv)*dir; }
+    if (col === 'count')    { av=a.keywords.length; bv=b.keywords.length; }
+    if (col === 'category') { av=a.category; bv=b.category; return av.localeCompare(bv)*dir; }
+    if (col === 'volume')   { av=a.volume||0; bv=b.volume||0; }
+    return (av - bv) * dir;
+  });
+}
+
+// ════════════════════════════════════════════════
+// MODAL
+// ════════════════════════════════════════════════
+function openModal(rowIdx) {
+  activeRowIdx = rowIdx;
+  const row = filteredData[rowIdx];
+  document.getElementById('modalKwLabel').textContent = 'Keyword Group';
+  document.getElementById('modalKwTitle').textContent = row.primary;
+  document.getElementById('mContentType').value = row.category === 'case_study' ? 'case_study' : row.category;
+
+  // Reset UI state
+  document.getElementById('configArea').style.display = 'block';
+  document.getElementById('genLoadingState').classList.remove('show');
+  document.getElementById('outputArea').classList.remove('show');
+  document.getElementById('mGenBtn').disabled = false;
+
+  document.getElementById('genModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('genModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function resetModal() {
+  document.getElementById('configArea').style.display = 'block';
+  document.getElementById('genLoadingState').classList.remove('show');
+  document.getElementById('outputArea').classList.remove('show');
+  document.getElementById('mGenBtn').disabled = false;
+}
+
+// ════════════════════════════════════════════════
+// AI CONTENT GENERATION
+// ════════════════════════════════════════════════
+async function runGenerate() {
+  const row      = filteredData[activeRowIdx];
+  const type     = document.getElementById('mContentType').value;
+  const brand    = document.getElementById('mBrand').value.trim()    || 'our company';
+  const audience = document.getElementById('mAudience').value.trim() || 'business professionals';
+  const tone     = document.getElementById('mTone').value;
+  const link1    = document.getElementById('mLink1').value.trim();
+  const link2    = document.getElementById('mLink2').value.trim();
+  const typeLabel = { blog:'Blog Post', case_study:'Case Study', service:'Service Page' }[type];
+  const linkLines = [link1,link2].filter(Boolean).map(l=>`- ${l}`).join('\n') || 'None';
+
+  document.getElementById('mGenBtn').disabled = true;
+  document.getElementById('configArea').style.display = 'none';
+  document.getElementById('genLoadingState').classList.add('show');
+
+  // Check API key
+  const apiKey   = getApiKey();
+  const proxyUrl = getProxyUrl();
+  if (!apiKey) {
+    document.getElementById('genLoadingState').classList.remove('show');
+    document.getElementById('configArea').style.display = 'block';
+    document.getElementById('mGenBtn').disabled = false;
+    closeModal();
+    document.getElementById('apiKeyBar').style.display = 'block';
+    document.getElementById('apiKeyStatus').textContent = '⬆ Enter your API key above first';
+    document.getElementById('apiKeyStatus').style.color = 'var(--amber)';
+    alert('Please enter your Anthropic API key in the setup panel first.');
+    return;
+  }
+
+  // Update the row button
+  const genBtn = document.getElementById(`genBtn-${activeRowIdx}`);
+  if (genBtn) {
+    genBtn.classList.add('generating');
+    genBtn.innerHTML = `<span class="gen-spinner"></span>Writing…`;
+    genBtn.disabled = true;
+  }
+
+  const prompt = `You are a senior SEO content strategist. Write a complete content brief for:
+
+PRIMARY KEYWORD: ${row.primary}
+RELATED KEYWORDS: ${row.keywords.slice(0,15).join(', ')}
+CONTENT TYPE: ${typeLabel}
+BRAND: ${brand}
+TARGET AUDIENCE: ${audience}
+TONE: ${tone}
+INTERNAL LINKS:
+${linkLines}
+
+Return EXACTLY these sections with these exact markers (nothing else, no preamble):
+
+##META_DESCRIPTION##
+[150–160 character meta description with primary keyword]
+
+##URL_SLUG##
+[lowercase hyphen-separated slug, max 7 words, no stop words]
+
+##PAGE_TITLE##
+[H1 title with primary keyword, under 65 characters, compelling]
+
+##FULL_CONTENT##
+[Write the complete ${typeLabel}:
+- Blog Post: 900–1200 words, H2/H3 headings, weave in related keywords naturally, embed internal links with descriptive anchor text, ${tone} tone
+- Case Study: Challenge → Solution → Results → Key Takeaways format, include metrics/numbers
+- Service Page: Overview → Benefits (3–5) → How It Works → Why Choose Us → CTA
+Use markdown ## for H2, ### for H3]
+
+##TARGET_KEYWORDS##
+[10 keywords, one per line: keyword | search intent | suggested placement]
+
+##INTERNAL_LINKING##
+[4 suggestions: Anchor Text → URL → Where in Content → Why]
+
+##FAQS##
+[5 Q&As:
+Q: question
+A: 2-sentence answer]`;
+
+  // Endpoint: proxy required for GitHub Pages (CORS), direct works locally
+  const endpoint = proxyUrl
+    ? (proxyUrl.replace(/\/$/, '') + (proxyUrl.includes('/messages') ? '' : '/v1/messages'))
+    : 'https://api.anthropic.com/v1/messages';
+
+  try {
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        ...(!proxyUrl ? { 'anthropic-dangerous-allow-browser': 'true' } : {})
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 4096,
+        messages: [{ role:'user', content: prompt }]
+      })
+    });
+
+    if (!res.ok) {
+      const e = await res.json().catch(() => ({}));
+      throw new Error(e.error?.message || `API returned ${res.status}`);
+    }
+    const data = await res.json();
+    const text = data.content.map(b=>b.text||'').join('');
+
+    lastGenData = {
+      primary: row.primary,
+      type: typeLabel,
+      meta:    extract(text, 'META_DESCRIPTION', 'URL_SLUG'),
+      url:     extract(text, 'URL_SLUG',         'PAGE_TITLE'),
+      title:   extract(text, 'PAGE_TITLE',       'FULL_CONTENT'),
+      body:    extract(text, 'FULL_CONTENT',      'TARGET_KEYWORDS'),
+      kws:     extract(text, 'TARGET_KEYWORDS',   'INTERNAL_LINKING'),
+      links:   extract(text, 'INTERNAL_LINKING',  'FAQS'),
+      faqs:    extract(text, 'FAQS',              null),
+    };
+
+    document.getElementById('outMeta').textContent  = lastGenData.meta.trim();
+    document.getElementById('outUrl').textContent   = lastGenData.url.trim();
+    document.getElementById('outTitle').textContent = lastGenData.title.trim();
+    document.getElementById('outBody').textContent  = lastGenData.body.trim();
+    document.getElementById('outKws').textContent   = lastGenData.kws.trim();
+    document.getElementById('outLinks').textContent = lastGenData.links.trim();
+    document.getElementById('outFaqs').textContent  = lastGenData.faqs.trim();
+
+    document.getElementById('genLoadingState').classList.remove('show');
+    document.getElementById('outputArea').classList.add('show');
+
+    // Update row button to Done
+    if (genBtn) {
+      genBtn.classList.remove('generating');
+      genBtn.classList.add('done');
+      genBtn.innerHTML = `✅ Done`;
+      genBtn.disabled = false;
+      genBtn.onclick = () => openModal(activeRowIdx);
+    }
+
+  } catch (err) {
+    document.getElementById('genLoadingState').classList.remove('show');
+    document.getElementById('configArea').style.display = 'block';
+    document.getElementById('mGenBtn').disabled = false;
+    if (genBtn) { genBtn.classList.remove('generating'); genBtn.innerHTML = `✍️ Generate`; genBtn.disabled = false; }
+
+    const isCors = err.name === 'TypeError' && (err.message === 'Failed to fetch' || err.message.includes('fetch'));
+    if (isCors) {
+      closeModal();
+      document.getElementById('apiKeyBar').style.display = 'block';
+      document.getElementById('corsHelp').style.display = 'block';
+      document.getElementById('apiKeyStatus').textContent = '⬆ CORS error — set up a proxy (see below)';
+      document.getElementById('apiKeyStatus').style.color = 'var(--red)';
+      alert('❌ CORS error: GitHub Pages cannot call the Anthropic API directly.\n\nSee the "How to set up a free proxy" guide in the setup panel above. It takes 2 minutes with a free Cloudflare account.');
+    } else {
+      alert('❌ Generation failed: ' + err.message);
+    }
+  }
+}
+
+function extract(text, startTag, endTag) {
+  const s = text.indexOf(`##${startTag}##`);
+  if (s === -1) return '';
+  const cs = s + startTag.length + 4;
+  const e = endTag ? text.indexOf(`##${endTag}##`) : text.length;
+  return e === -1 ? text.slice(cs) : text.slice(cs, e);
+}
+
+// ════════════════════════════════════════════════
+// API KEY MANAGEMENT
+// ════════════════════════════════════════════════
+function toggleCorsHelp() {
+  const p = document.getElementById('corsHelp');
+  p.style.display = p.style.display === 'none' ? 'block' : 'none';
+  return false;
+}
+
+function copyWorkerCode() {
+  const code = document.getElementById('workerCode').textContent;
+  navigator.clipboard.writeText(code).then(() => {
+    const btn = event.target;
+    btn.textContent = '✅ Copied!';
+    setTimeout(() => btn.textContent = '📋 Copy Worker Code', 2500);
+  });
+}
+
+function saveApiKey() {
+  const key   = document.getElementById('apiKeyInput').value.trim();
+  const proxy = document.getElementById('proxyUrlInput').value.trim();
+  const status = document.getElementById('apiKeyStatus');
+
+  if (!key && !proxy) {
+    status.textContent = '❌ Enter at least an API key'; status.style.color = 'var(--red)'; return;
+  }
+  if (key && !key.startsWith('sk-ant-')) {
+    status.textContent = '❌ Invalid key — must start with sk-ant-'; status.style.color = 'var(--red)'; return;
+  }
+  if (key) sessionStorage.setItem('anthropic_key', key);
+  if (proxy) sessionStorage.setItem('proxy_url', proxy);
+
+  status.textContent = '✅ Settings saved';
+  status.style.color = 'var(--green)';
+  if (key) document.getElementById('apiKeyInput').value = '••••••••••••••';
+  if (proxy) document.getElementById('proxyUrlInput').value = proxy; // keep visible
+
+  setTimeout(() => {
+    document.getElementById('apiKeyBar').style.display = 'none';
+  }, 2000);
+}
+
+function getApiKey()  { return sessionStorage.getItem('anthropic_key') || ''; }
+function getProxyUrl(){ return sessionStorage.getItem('proxy_url') || ''; }
+// ════════════════════════════════════════════════
+function downloadDoc() {
+  if (!lastGenData) return;
+  const d = lastGenData;
+
+  // Convert markdown-ish body to HTML
+  const bodyHtml = d.body
+    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n\n/g, '</p><p>')
+    .replace(/\n/g, '<br>')
+    .replace(/^/, '<p>').replace(/$/, '</p>');
+
+  const kwRows = d.kws.trim().split('\n').filter(Boolean).map(l => {
+    const [kw, intent, place] = l.split('|').map(s=>s.trim());
+    return `<tr><td>${kw||''}</td><td>${intent||''}</td><td>${place||''}</td></tr>`;
+  }).join('');
+
+  const faqHtml = d.faqs.trim().split('\n').filter(Boolean).map(l => {
+    if (l.startsWith('Q:')) return `<p class="faq-q">${l}</p>`;
+    if (l.startsWith('A:')) return `<p class="faq-a">${l}</p>`;
+    return `<p>${l}</p>`;
+  }).join('');
+
+  const html = `
+<html xmlns:o='urn:schemas-microsoft-com:office:office'
+      xmlns:w='urn:schemas-microsoft-com:office:word'
+      xmlns='http://www.w3.org/TR/REC-html40'>
+<head><meta charset='utf-8'><title>${d.title}</title>
+<style>
+  body { font-family: Calibri, sans-serif; font-size: 11pt; color: #1a202c; margin: 40px; }
+  h1 { font-size: 20pt; color: #1a365d; border-bottom: 3px solid #2b6cb0; padding-bottom: 10px; margin-bottom: 20px; }
+  h2 { font-size: 15pt; color: #2b6cb0; margin-top: 24px; margin-bottom: 8px; }
+  h3 { font-size: 12pt; color: #2c5282; margin-top: 16px; }
+  p  { margin: 8px 0; line-height: 1.7; }
+  .section-box { background: #ebf8ff; border-left: 4px solid #2b6cb0; padding: 10px 14px; margin: 14px 0; border-radius: 4px; }
+  .label { font-size: 9pt; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #2b6cb0; margin-bottom: 4px; }
+  .value { color: #2d3748; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; }
+  th { background: #2b6cb0; color: white; padding: 8px 12px; font-size: 10pt; text-align: left; }
+  td { border: 1px solid #bee3f8; padding: 7px 12px; font-size: 10pt; }
+  tr:nth-child(even) td { background: #ebf8ff; }
+  .faq-q { font-weight: bold; color: #1a365d; margin-top: 14px; }
+  .faq-a { margin-left: 16px; color: #4a5568; }
+  hr { border: none; border-top: 1px solid #bee3f8; margin: 24px 0; }
+  .footer { color: #a0aec0; font-size: 9pt; margin-top: 40px; border-top: 1px solid #e2e8f0; padding-top: 10px; }
+</style>
+</head>
+<body>
+  <h1>${d.title.trim()}</h1>
+
+  <div class="section-box">
+    <div class="label">Meta Description</div>
+    <div class="value">${d.meta.trim()}</div>
+  </div>
+
+  <div class="section-box">
+    <div class="label">URL Slug</div>
+    <div class="value">${d.url.trim()}</div>
+  </div>
+
+  <div class="section-box">
+    <div class="label">Content Type</div>
+    <div class="value">${d.type}</div>
+  </div>
+
+  <hr>
+  <h2>Full Content</h2>
+  ${bodyHtml}
+
+  <hr>
+  <h2>Target Keywords</h2>
+  <table>
+    <tr><th>Keyword</th><th>Search Intent</th><th>Suggested Placement</th></tr>
+    ${kwRows}
+  </table>
+
+  <hr>
+  <h2>Internal Linking Suggestions</h2>
+  ${d.links.trim().split('\n').filter(Boolean).map(l=>`<p>${l}</p>`).join('')}
+
+  <hr>
+  <h2>FAQs</h2>
+  ${faqHtml}
+
+  <div class="footer">Generated by Keyword Manager Pro · ${new Date().toLocaleDateString()}</div>
+</body>
+</html>`;
+
+  const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${d.url.trim().replace(/\s+/g,'-') || 'content'}.doc`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ════════════════════════════════════════════════
+// COPY HELPERS
+// ════════════════════════════════════════════════
+function copySection(id) {
+  navigator.clipboard.writeText(document.getElementById(id).textContent).then(() => {
+    const btn = event.target;
+    const orig = btn.textContent;
+    btn.textContent = '✅';
+    setTimeout(() => btn.textContent = orig, 2000);
+  });
+}
+
+function copyAllSections() {
+  const ids = ['outMeta','outUrl','outTitle','outBody','outKws','outLinks','outFaqs'];
+  const labels = ['META DESCRIPTION','URL SLUG','PAGE TITLE','FULL CONTENT','TARGET KEYWORDS','INTERNAL LINKING','FAQS'];
+  const text = ids.map((id,i) => `\n\n=== ${labels[i]} ===\n${document.getElementById(id).textContent.trim()}`).join('');
+  navigator.clipboard.writeText(text.trim()).then(() => {
+    const btn = event.target;
+    const orig = btn.innerHTML;
+    btn.innerHTML = '✅ Copied!';
+    setTimeout(() => btn.innerHTML = orig, 2500);
+  });
+}
+
+// ════════════════════════════════════════════════
+// EXPORTS
+// ════════════════════════════════════════════════
+function exportToCSV() {
+  if (!allData.length) return;
+  const headers = ['Primary Keyword','Variants','Count','Category','Volume','Type'];
+  const rows = allData.map(g => [g.primary, g.keywords.join('; '), g.keywords.length, g.category, g.volume||0, g.type||'mixed']);
+  let csv = headers.join(',') + '\n';
+  rows.forEach(r => { csv += r.map(c => typeof c==='string'&&c.includes(',') ? `"${c}"` : c).join(',') + '\n'; });
+  dlFile(csv, 'keywords.csv', 'text/csv');
+}
+
+function exportToExcel() {
+  if (!allData.length) return;
+  if (!window.__xlsxOK || !window.XLSX) { alert('Excel library not loaded — please use CSV export instead.'); return; }
+  const data = [['Primary Keyword','Variants','Count','Category','Volume','Type']];
+  allData.forEach(g => data.push([g.primary, g.keywords.join('; '), g.keywords.length, g.category, g.volume||0, g.type||'mixed']));
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  ws['!cols'] = [{wch:35},{wch:50},{wch:8},{wch:15},{wch:10},{wch:20}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Keywords');
+  XLSX.writeFile(wb, 'keywords.xlsx');
+}
+
+function exportJSON() {
+  if (!allData.length) return;
+  dlFile(JSON.stringify({ generated: new Date().toISOString(), total: allData.length, groups: allData }, null, 2), 'keywords.json', 'application/json');
+}
+
+function dlFile(content, name, type) {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = name; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ════════════════════════════════════════════════
+// FILE UPLOAD  —  Proper CSV + Excel parsing
+// ════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  const dz = document.getElementById('dropZone');
+  const fi = document.getElementById('fileInput');
+
+  dz.addEventListener('click', () => fi.click());
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('over'));
+  dz.addEventListener('drop', e => {
+    e.preventDefault(); dz.classList.remove('over');
+    if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+  });
+  fi.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); });
+
+  function handleFile(file) {
+    const ext = file.name.split('.').pop().toLowerCase();
+    const reader = new FileReader();
+    if (ext === 'csv') {
+      reader.onload = e => parseCSV(e.target.result, file.name);
+      reader.readAsText(file);
+    } else if (['xlsx','xls'].includes(ext)) {
+      if (!window.__xlsxOK || !window.XLSX) {
+        alert('Excel support is still loading — please wait a moment, or save as CSV and upload that instead.');
+        return;
+      }
+      reader.onload = e => parseExcel(e.target.result, file.name);
+      reader.readAsArrayBuffer(file);
+    } else { alert('Please upload a CSV or Excel (.xlsx/.xls) file.'); }
+  }
+
+  // ── Parse a single CSV line correctly (handles quoted commas) ──
+  function splitCSVLine(line) {
+    const cols = [];
+    let cur = '', inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      if (line[i] === '"') { inQ = !inQ; }
+      else if (line[i] === ',' && !inQ) { cols.push(cur.trim().replace(/^"|"$/g,'')); cur = ''; }
+      else { cur += line[i]; }
+    }
+    cols.push(cur.trim().replace(/^"|"$/g,''));
+    return cols;
+  }
+
+  // ── CSV parser: reads keyword, volume, type per row ──
+  function parseCSV(content, name) {
+    const lines = content.trim().split(/\r?\n/);
+    const kws = [], metas = [];
+    let kwCol=0, volCol=1, typeCol=2;
+    let headerRow = true;
+
+    lines.forEach((line, i) => {
+      if (!line.trim()) return;
+      const cols = splitCSVLine(line);
+
+      // Auto-detect header row
+      if (i === 0) {
+        const lc = cols.map(c => c.toLowerCase().trim());
+        if (lc.some(c => c.includes('keyword') || c === 'kw' || c === 'primary keyword')) {
+          lc.forEach((h, idx) => {
+            if ((h.includes('primary') && h.includes('keyword')) || h === 'keyword' || h === 'kw') kwCol = idx;
+            if (h === 'volume' || h === 'search volume' || h === 'vol' || h === 'avg. monthly searches') volCol = idx;
+            if (h === 'type' || h === 'intent' || h === 'keyword intent') typeCol = idx;
+          });
+          return; // skip header
         }
+        headerRow = false; // no header — start from row 0
+      }
 
-        function displayResults(original, deduplicated, removed, groups) {
-            document.getElementById('emptyState').classList.add('hidden');
-            document.getElementById('resultsContainer').classList.remove('hidden');
+      const kw = cols[kwCol] || '';
+      if (!kw || kw.length < 2) return;
 
-            document.getElementById('totalKeywords').textContent = original;
-            document.getElementById('deduplicatedCount').textContent = deduplicated;
-            document.getElementById('duplicatesRemoved').textContent = removed;
-            document.getElementById('groupCount').textContent = groups.length;
+      kws.push(kw);
+      const vol = cols[volCol] || '';
+      const tp  = cols[typeCol] || 'mixed';
+      metas.push(`${kw} | ${vol || 0} | ${tp}`);
+    });
 
-            // Store data globally for export
-            window.currentGroupData = groups;
+    populate(kws, metas, name);
+  }
 
-            // Render table
-            renderTable(groups);
+  // ── Excel parser: auto-detects column layout ──
+  function parseExcel(buf, name) {
+    if (!window.__xlsxOK || !window.XLSX) { alert('Excel library not loaded. Please use CSV instead.'); return; }
+    try {
+      const wb   = XLSX.read(buf, { type:'array' });
+      const data = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header:1, raw:false, defval:'' });
+      if (!data.length) { alert('No data found in file'); return; }
 
-            // Setup search
-            setTimeout(setupSearch, 100);
+      const kws = [], metas = [];
 
-            // Recommendations section
-            const categoryStats = {};
-            groups.forEach(g => {
-                if (!categoryStats[g.category]) categoryStats[g.category] = [];
-                categoryStats[g.category].push(g);
-            });
+      // Detect column indices from header row
+      const hdr = (data[0] || []).map(h => (h||'').toString().toLowerCase().trim());
+      let kwCol=0, volCol=-1, typeCol=-1, varCol=-1;
 
-            const recommendationsHtml = Object.entries(categoryStats).map(([category, items]) => `
-                <div class="keyword-group">
-                    <div class="group-header">
-                        <div class="group-title">${getCategoryEmoji(category)} ${category.replace('_', ' ').toUpperCase()}</div>
-                        <span class="badge badge-primary">${items.length} keywords</span>
-                    </div>
-                    <div class="keywords-list">
-                        ${items.slice(0, 10).map(item => `<span class="keyword-tag">${item.primary}</span>`).join('')}
-                        ${items.length > 10 ? `<span class="keyword-tag">+${items.length - 10} more</span>` : ''}
-                    </div>
-                </div>
-            `).join('');
+      hdr.forEach((h, i) => {
+        if (h === 'primary keyword' || h === 'keyword' || h === 'kw') kwCol = i;
+        if (h === 'volume' || h === 'search volume' || h === 'avg. monthly searches') volCol = i;
+        if (h === 'type' || h === 'intent' || h === 'keyword intent') typeCol = i;
+        if (h === 'variants' || h === 'secondary keywords' || h === 'related keywords') varCol = i;
+      });
 
-            document.getElementById('recommendations').innerHTML = recommendationsHtml;
+      // Fallback column guessing if no named headers found
+      if (volCol === -1) {
+        // Look for a column that's mostly numbers
+        for (let c = 1; c < Math.min(hdr.length, 6); c++) {
+          const vals = data.slice(1,10).map(r => r[c]).filter(v=>v!=='');
+          const nums = vals.filter(v => !isNaN(parseInt(v)));
+          if (nums.length > vals.length * 0.5) { volCol = c; break; }
         }
+      }
+      if (typeCol === -1 && hdr.length > 2) typeCol = hdr.length - 1;
 
-        function getCategoryEmoji(category) {
-            const emojis = { blog: '📝', service: '🛠️', case_study: '🏆' };
-            return emojis[category] || '📄';
-        }
+      const hasHeader = hdr.some(h => h.includes('keyword') || h.includes('volume') || h.includes('type'));
+      const startRow  = hasHeader ? 1 : 0;
 
-        function renderTable(groups) {
-            const tableBody = document.getElementById('tableBody');
-            const tableRows = groups.map(group => `
-                <tr>
-                    <td class="primary-keyword">${group.primary}</td>
-                    <td>
-                        <div class="variants-list">
-                            ${group.keywords.map(kw => `<div>${kw}</div>`).join('')}
-                        </div>
-                    </td>
-                    <td class="count-cell">${group.keywords.length}</td>
-                    <td>
-                        <span class="category-badge ${group.category}">
-                            ${getCategoryEmoji(group.category)} ${group.category.replace('_', ' ')}
-                        </span>
-                    </td>
-                    <td class="volume-cell">${group.volume ? group.volume.toLocaleString() : '—'}</td>
-                    <td>${group.type || '—'}</td>
-                </tr>
-            `).join('');
+      for (let i = startRow; i < data.length; i++) {
+        const row = data[i];
+        if (!row || !row[kwCol]) continue;
+        const kw = row[kwCol].toString().trim();
+        if (!kw || kw.length < 2) continue;
 
-            tableBody.innerHTML = tableRows || '<tr><td colspan="6" style="text-align: center; color: #94a3b8;">No data found</td></tr>';
-        }
+        kws.push(kw);
 
-        function filterByCategory(category) {
-            if (!window.currentGroupData) return;
-            
-            if (category === 'all') {
-                renderTable(window.currentGroupData);
-            } else {
-                const filtered = window.currentGroupData.filter(g => g.category === category);
-                renderTable(filtered);
-            }
-            document.getElementById('searchInput').value = '';
-        }
+        const vol = volCol >= 0 ? (row[volCol]||'').toString().trim() : '';
+        const tp  = typeCol >= 0 ? (row[typeCol]||'mixed').toString().trim() : 'mixed';
+        const variants = varCol >= 0 ? (row[varCol]||'').toString().trim() : '';
 
-        function sortTable(columnIndex) {
-            if (!window.currentGroupData) return;
+        metas.push(`${kw} | ${vol || 0} | ${tp}${variants ? ' | ' + variants : ''}`);
+      }
 
-            const sorted = [...window.currentGroupData].sort((a, b) => {
-                let aVal, bVal;
+      populate(kws, metas, name);
+    } catch (err) { alert('Error reading Excel: ' + err.message); }
+  }
 
-                switch(columnIndex) {
-                    case 0: // Primary Keyword
-                        aVal = a.primary.toLowerCase();
-                        bVal = b.primary.toLowerCase();
-                        return aVal.localeCompare(bVal);
-                    case 2: // Count
-                        aVal = a.keywords.length;
-                        bVal = b.keywords.length;
-                        return bVal - aVal;
-                    case 3: // Category
-                        aVal = a.category;
-                        bVal = b.category;
-                        return aVal.localeCompare(bVal);
-                    case 4: // Volume
-                        aVal = a.volume || 0;
-                        bVal = b.volume || 0;
-                        return bVal - aVal;
-                    default:
-                        return 0;
-                }
-            });
+  function populate(kws, metas, name) {
+    document.getElementById('kwInput').value   = kws.join('\n');
+    document.getElementById('metaInput').value = metas.join('\n');
+    const badge = document.getElementById('fileBadge');
+    badge.innerHTML = `✅ <strong>${name}</strong> — ${kws.length} keywords loaded`;
+    badge.classList.add('show');
+    switchTab('paste');
+  }
+});
 
-            window.currentGroupData = sorted;
-            renderTable(sorted);
-            document.getElementById('searchInput').value = '';
-        }
+// ════════════════════════════════════════════════
+// UI HELPERS
+// ════════════════════════════════════════════════
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(`page-${id}`).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const map = { upload: 0, dashboard: 1 };
+  document.querySelectorAll('.nav-btn')[map[id]]?.classList.add('active');
+}
 
-        function setupSearch() {
-            const searchInput = document.getElementById('searchInput');
-            if (!searchInput) return;
+function switchTab(tab) {
+  document.querySelectorAll('.itab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  const idx = tab === 'upload' ? 0 : 1;
+  document.querySelectorAll('.itab')[idx].classList.add('active');
+  document.getElementById(`tab-${tab}`).classList.add('active');
+}
 
-            searchInput.addEventListener('keyup', (e) => {
-                if (!window.currentGroupData) return;
-                
-                const query = e.target.value.toLowerCase();
-                const filtered = window.currentGroupData.filter(group => 
-                    group.primary.toLowerCase().includes(query) ||
-                    group.keywords.some(kw => kw.toLowerCase().includes(query))
-                );
+// Close modal on overlay click
+document.getElementById('genModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('genModal')) closeModal();
+});
 
-                renderTable(filtered);
-            });
-        }
-
-        function exportToCSV() {
-            if (!window.currentGroupData) return;
-            
-            const headers = ['Primary Keyword', 'Variants', 'Count', 'Category', 'Volume', 'Type'];
-            const rows = window.currentGroupData.map(group => [
-                group.primary,
-                group.keywords.join('; '),
-                group.keywords.length,
-                group.category.replace('_', ' '),
-                group.volume || 0,
-                group.type || 'mixed'
-            ]);
-
-            let csv = headers.join(',') + '\n';
-            rows.forEach(row => {
-                csv += row.map(cell => {
-                    if (typeof cell === 'string' && cell.includes(',')) {
-                        return `"${cell}"`;
-                    }
-                    return cell;
-                }).join(',') + '\n';
-            });
-
-            downloadFile(csv, 'keywords-grouped.csv', 'text/csv');
-        }
-
-        function exportToExcel() {
-            if (!window.currentGroupData) return;
-
-            const data = [['Primary Keyword', 'Variants', 'Count', 'Category', 'Volume', 'Type']];
-            
-            window.currentGroupData.forEach(group => {
-                data.push([
-                    group.primary,
-                    group.keywords.join('; '),
-                    group.keywords.length,
-                    group.category.replace('_', ' '),
-                    group.volume || 0,
-                    group.type || 'mixed'
-                ]);
-            });
-
-            const worksheet = XLSX.utils.aoa_to_sheet(data);
-            
-            // Set column widths
-            worksheet['!cols'] = [
-                { wch: 30 },
-                { wch: 40 },
-                { wch: 8 },
-                { wch: 15 },
-                { wch: 12 },
-                { wch: 15 }
-            ];
-
-            // Style header row
-            for (let i = 0; i < 6; i++) {
-                const cell = worksheet[XLSX.utils.encode_col(i) + '1'];
-                if (cell) {
-                    cell.s = {
-                        font: { bold: true, color: { rgb: 'FFFFFF' } },
-                        fill: { fgColor: { rgb: '334155' } },
-                        alignment: { horizontal: 'left', vertical: 'center' }
-                    };
-                }
-            }
-
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, 'Keywords');
-            XLSX.writeFile(workbook, 'keywords-grouped.xlsx');
-        }
-
-        function exportJSON() {
-            if (!window.currentGroupData) return;
-            
-            const data = {
-                exportDate: new Date().toISOString(),
-                summary: {
-                    totalGroups: window.currentGroupData.length,
-                    totalKeywords: window.currentGroupData.reduce((sum, g) => sum + g.keywords.length, 0)
-                },
-                groups: window.currentGroupData.map(group => ({
-                    primary: group.primary,
-                    variants: group.keywords,
-                    count: group.keywords.length,
-                    category: group.category,
-                    volume: group.volume,
-                    type: group.type
-                }))
-            };
-            
-            downloadFile(JSON.stringify(data, null, 2), 'keywords-grouped.json', 'application/json');
-        }
-
-        function downloadFile(content, filename, type) {
-            const blob = new Blob([content], { type });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
-        function copyToClipboard() {
-            if (!window.currentGroupData) return;
-
-            let text = 'Primary Keyword\tVariants\tCount\tCategory\tVolume\tType\n';
-            window.currentGroupData.forEach(group => {
-                text += `${group.primary}\t${group.keywords.join('; ')}\t${group.keywords.length}\t${group.category.replace('_', ' ')}\t${group.volume || 0}\t${group.type || 'mixed'}\n`;
-            });
-
-            navigator.clipboard.writeText(text).then(() => {
-                const btn = event.target;
-                const originalText = btn.innerHTML;
-                btn.innerHTML = '✅ Copied!';
-                setTimeout(() => {
-                    btn.innerHTML = originalText;
-                }, 2000);
-            }).catch(() => {
-                alert('Failed to copy to clipboard');
-            });
-        }
-
-        function clearAll() {
-            document.getElementById('keywords').value = '';
-            document.getElementById('metadata').value = '';
-            document.getElementById('resultsContainer').classList.add('hidden');
-            document.getElementById('emptyState').classList.remove('hidden');
-        }
-    </script>
+// Restore API key bar state
+document.addEventListener('DOMContentLoaded', () => {
+  if (sessionStorage.getItem('anthropic_key')) {
+    const bar = document.getElementById('apiKeyBar');
+    if (bar) bar.style.display = 'none';
+  }
+});
+</script>
 </body>
 </html>
