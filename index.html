@@ -256,6 +256,44 @@
         .btn-pillar { background: rgba(168,85,247,0.12); color: var(--purple); border: 1px solid rgba(168,85,247,0.2); }
         .btn-pillar:hover { background: rgba(168,85,247,0.22); transform: translateY(-1px); }
 
+        /* CLUSTER DASHBOARD (v4 redesign) */
+        .cd-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+        .cd-filters { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+        .cd-filter { font-family: var(--mono); font-size: 0.68rem; padding: 0.35rem 0.75rem; border-radius: 5px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; transition: all 0.2s; }
+        .cd-filter:hover, .cd-filter.active { border-color: var(--accent); color: var(--accent); background: rgba(59,130,246,0.08); }
+        .cd-filter.active-red { border-color: var(--red); color: var(--red); background: rgba(239,68,68,0.08); }
+        .cd-meta { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); }
+
+        .cd-table { width: 100%; border-collapse: collapse; }
+        .cd-head th { padding: 0.55rem 1rem; text-align: left; font-family: var(--mono); font-size: 0.63rem; color: var(--muted); letter-spacing: 0.07em; text-transform: uppercase; border-bottom: 1px solid var(--border); background: var(--surface2); white-space: nowrap; }
+        .cd-row { border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
+        .cd-row:hover { background: rgba(59,130,246,0.04); }
+        .cd-row.expanded { background: rgba(59,130,246,0.06); }
+        .cd-row td { padding: 0.75rem 1rem; vertical-align: middle; }
+        .cd-topic { font-size: 0.84rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 0.5rem; }
+        .cd-primary-kw { font-family: var(--mono); font-size: 0.7rem; color: #93c5fd; margin-top: 0.2rem; }
+        .cd-count { font-family: var(--mono); font-size: 0.72rem; padding: 0.2rem 0.55rem; border-radius: 4px; background: rgba(59,130,246,0.1); color: var(--accent); border: 1px solid rgba(59,130,246,0.2); white-space: nowrap; }
+        .cd-vol { font-family: var(--mono); font-size: 0.78rem; color: var(--text); text-align: right; }
+        .cd-cannibal { font-family: var(--mono); font-size: 0.65rem; padding: 0.18rem 0.5rem; border-radius: 3px; background: rgba(239,68,68,0.1); color: var(--red); border: 1px solid rgba(239,68,68,0.2); white-space: nowrap; }
+        .cd-ok { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); }
+        .cd-chevron { font-size: 0.75rem; color: var(--muted); transition: transform 0.2s; flex-shrink: 0; }
+        .cd-row.expanded .cd-chevron { transform: rotate(90deg); }
+
+        /* Expanded keyword list */
+        .cd-expand-row { display: none; }
+        .cd-expand-row.open { display: table-row; }
+        .cd-expand-row td { padding: 0; border-bottom: 2px solid var(--border-bright); }
+        .cd-kw-list { padding: 0.75rem 1rem 1rem 2.5rem; display: flex; flex-direction: column; gap: 0; background: rgba(59,130,246,0.03); }
+        .cd-kw-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.38rem 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-family: var(--mono); font-size: 0.75rem; }
+        .cd-kw-item:last-child { border-bottom: none; }
+        .cd-kw-star { color: var(--green); font-size: 0.7rem; width: 14px; flex-shrink: 0; }
+        .cd-kw-text { color: #93c5fd; flex: 1; min-width: 0; word-break: break-word; }
+        .cd-kw-text.primary { color: var(--green); font-weight: 700; }
+        .cd-kw-intent { font-size: 0.6rem; padding: 0.1rem 0.35rem; border-radius: 3px; flex-shrink: 0; }
+        .cd-kw-diff { font-size: 0.65rem; color: var(--muted); flex-shrink: 0; }
+        .cd-kw-vol { color: var(--muted); font-size: 0.7rem; min-width: 50px; text-align: right; flex-shrink: 0; }
+        .cd-qw { font-size: 0.62rem; color: var(--green); flex-shrink: 0; }
+
         @media (max-width: 640px) {
             .wrap { padding: 1rem; }
             header { flex-direction: column; }
@@ -358,11 +396,35 @@
 
         <!-- TOPIC CLUSTERS -->
         <div class="panel" id="clusterPanel">
-            <div class="panel-title">04 — Topic Clusters & Content Pillars</div>
-            <div class="tip-box" style="margin-bottom:1rem;">
-                <strong>How to read this:</strong> Each cluster = one content pillar. The <span style="color:var(--green)">green keyword</span> is the primary (highest volume) — build your main page/post around it. Others = supporting content or internal links. Keywords in the same cluster targeting the same page = <span style="color:var(--red)">cannibalization risk</span>.
+            <div class="panel-title">04 — Topic Clusters Dashboard</div>
+            <div class="cd-toolbar">
+                <div class="cd-filters">
+                    <button class="cd-filter active" onclick="filterClusters('all',this)">All Clusters</button>
+                    <button class="cd-filter" onclick="filterClusters('cannibal',this)" style="border-color:rgba(239,68,68,0.3);color:var(--red)">⚠ Cannibal Risk</button>
+                    <button class="cd-filter" onclick="filterClusters('large',this)">★ 4+ Keywords</button>
+                    <button class="cd-filter" onclick="filterClusters('quickwins',this)" style="border-color:rgba(16,185,129,0.3);color:var(--green)">⚡ Has Quick Wins</button>
+                </div>
+                <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap">
+                    <span class="cd-meta" id="clusterMeta"></span>
+                    <button class="btn btn-export" style="padding:0.45rem 1rem;font-size:0.8rem" onclick="exportClusters()">⬇ Download Clusters CSV</button>
+                </div>
             </div>
-            <div class="cluster-grid" id="clusterGrid"></div>
+            <div class="tbl-wrap">
+                <table class="cd-table" id="clusterTable">
+                    <thead class="cd-head">
+                        <tr>
+                            <th style="width:36px"></th>
+                            <th>Cluster Topic</th>
+                            <th>Keywords</th>
+                            <th>Total Volume</th>
+                            <th>Intent</th>
+                            <th>Quick Wins</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="clusterGrid"></tbody>
+                </table>
+            </div>
         </div>
 
         <!-- PILLAR PAGE STRUCTURE -->
@@ -1199,32 +1261,84 @@ function renderTable() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// RENDER: CLUSTERS
+// RENDER: CLUSTERS DASHBOARD (v4 accordion table)
 // ═══════════════════════════════════════════════════════════════
+let clusterFilter = 'all';
+
+function filterClusters(f, el) {
+    clusterFilter = f;
+    document.querySelectorAll('.cd-filter').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    renderClusters();
+}
+
 function renderClusters() {
-    if (!clusters.length) { document.getElementById('clusterGrid').innerHTML = '<div class="empty">No clusters generated.</div>'; return; }
+    const grid = document.getElementById('clusterGrid');
+    const meta = document.getElementById('clusterMeta');
+    if (!clusters.length) { grid.innerHTML = `<tr><td colspan="7"><div class="empty">No clusters generated.</div></td></tr>`; return; }
 
-    const intentColors = { transactional:'var(--green)', commercial:'var(--amber)', informational:'var(--accent)', navigational:'var(--purple)' };
+    const iB = { transactional:'badge-tx', commercial:'badge-cm', informational:'badge-in', navigational:'badge-nv' };
+    const iLabel = { transactional:'💳 TX', commercial:'🔍 CM', informational:'📖 INFO', navigational:'🧭 NAV' };
+    const diffLabel2 = d => d >= 80 ? { l:'VH', c:'#ef4444' } : d >= 60 ? { l:'H', c:'#f59e0b' } : d >= 40 ? { l:'M', c:'#3b82f6' } : d >= 20 ? { l:'L', c:'#10b981' } : { l:'VL', c:'#34d399' };
 
-    document.getElementById('clusterGrid').innerHTML = clusters.map(c => {
-        const primaryIntent = c.keywords[0]?.intent || 'informational';
-        const cannibalWarn = c.hasCannibal ? `<div class="cannibal-warn">⚠ Cannibalization risk — ${c.cannibalGroups.map(g => g.length + ' keywords targeting same ' + g[0].ctype).join(', ')}. Consolidate into one page.</div>` : '';
-        const kwRows = c.keywords.slice(0, 6).map(kw => `
-            <div class="cluster-kw ${kw.isPrimary ? 'cluster-kw-primary' : ''}">
-                <span>${kw.isPrimary ? '★ ' : ''}${escHtml(kw.keyword)}</span>
-                <span class="cluster-vol">${kw.volume ? kw.volume.toLocaleString() : '—'}</span>
-            </div>`).join('');
-        const more = c.keywords.length > 6 ? `<div style="font-family:var(--mono);font-size:0.68rem;color:var(--muted);padding-top:0.4rem;">+${c.keywords.length - 6} more</div>` : '';
-        return `<div class="cluster-card">
-            <div class="cluster-header">
-                <span class="cluster-name">${escHtml(c.topic)}</span>
-                <span class="cluster-count">${c.keywords.length} kw</span>
-            </div>
-            <span class="cluster-pill" style="background:rgba(59,130,246,0.1);color:${intentColors[primaryIntent]};border:1px solid currentColor">${primaryIntent}</span>
-            ${cannibalWarn}
-            <div style="margin-top:0.75rem">${kwRows}${more}</div>
-        </div>`;
+    let visible = clusters;
+    if (clusterFilter === 'cannibal')   visible = clusters.filter(c => c.hasCannibal);
+    if (clusterFilter === 'large')      visible = clusters.filter(c => c.keywords.length >= 4);
+    if (clusterFilter === 'quickwins')  visible = clusters.filter(c => c.keywords.some(k => k.quickWin));
+
+    meta.textContent = `${visible.length} of ${clusters.length} clusters`;
+
+    if (!visible.length) { grid.innerHTML = `<tr><td colspan="7"><div class="empty">No clusters match this filter.</div></td></tr>`; return; }
+
+    grid.innerHTML = visible.map((c, idx) => {
+        const primary = c.keywords.find(k => k.isPrimary) || c.keywords[0];
+        const totalVol = c.keywords.reduce((s, k) => s + (k.volume || 0), 0);
+        const domIntent = clusterDominantIntent(c);
+        const qwCount = c.keywords.filter(k => k.quickWin).length;
+
+        // Keyword rows inside the accordion
+        const kwRows = c.keywords.map(kw => {
+            const { l, c: dc } = diffLabel2(kw.diff);
+            return `<div class="cd-kw-item">
+                <span class="cd-kw-star">${kw.isPrimary ? '★' : ''}</span>
+                <span class="cd-kw-text ${kw.isPrimary ? 'primary' : ''}">${escHtml(kw.keyword)}</span>
+                <span class="badge ${iB[kw.intent]||'badge-in'}" style="font-size:0.58rem;padding:0.1rem 0.4rem">${iLabel[kw.intent]||kw.intent}</span>
+                <span class="cd-kw-diff" style="color:${dc}">KD ${l}</span>
+                ${kw.quickWin ? '<span class="cd-qw">⚡</span>' : ''}
+                <span class="cd-kw-vol">${kw.volume ? kw.volume.toLocaleString() : '—'}</span>
+            </div>`;
+        }).join('');
+
+        return `
+        <tr class="cd-row" id="crow-${idx}" onclick="toggleCluster(${idx})">
+            <td><span class="cd-chevron">▶</span></td>
+            <td>
+                <div class="cd-topic">${escHtml(c.topic)}</div>
+                <div class="cd-primary-kw">★ ${escHtml(primary?.keyword || '—')}</div>
+            </td>
+            <td><span class="cd-count">${c.keywords.length} kw</span></td>
+            <td class="cd-vol">${totalVol ? totalVol.toLocaleString() : '—'}</td>
+            <td><span class="badge ${iB[domIntent]||'badge-in'}">${iLabel[domIntent]||domIntent}</span></td>
+            <td>${qwCount > 0 ? `<span style="color:#10b981;font-family:var(--mono);font-size:0.72rem">⚡ ${qwCount}</span>` : '<span class="cd-ok">—</span>'}</td>
+            <td>${c.hasCannibal ? `<span class="cd-cannibal">⚠ Cannibal Risk</span>` : `<span class="cd-ok">✓ Clean</span>`}</td>
+        </tr>
+        <tr class="cd-expand-row" id="cexp-${idx}">
+            <td colspan="7">
+                <div class="cd-kw-list">
+                    ${c.hasCannibal ? `<div style="font-family:var(--mono);font-size:0.7rem;color:var(--red);padding:0.4rem 0 0.6rem;border-bottom:1px solid rgba(239,68,68,0.15);margin-bottom:0.4rem">⚠ ${c.cannibalGroups.map(g => g.length + ' keywords competing for the same ' + g[0].ctype + ' — consolidate into one page').join(' · ')}</div>` : ''}
+                    ${kwRows}
+                </div>
+            </td>
+        </tr>`;
     }).join('');
+}
+
+function toggleCluster(idx) {
+    const row = document.getElementById('crow-' + idx);
+    const exp = document.getElementById('cexp-' + idx);
+    const isOpen = exp.classList.contains('open');
+    row.classList.toggle('expanded', !isOpen);
+    exp.classList.toggle('open', !isOpen);
 }
 
 // ═══════════════════════════════════════════════════════════════
