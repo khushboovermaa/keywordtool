@@ -840,7 +840,13 @@ function diffLabel(d) {
 const JUNK_PATTERNS = [
     /\s{2,}/, /\|{2,}/, /\[.*\[/, /\(.*\(/, /[^\w\s'\-&.,()\/+%#@!?:]{2,}/,
     /^\d+$/, /^[a-z]{1,2}$/, /webhook|api key|json\b|xml\b|html tag|css class|onclick/i,
-    /\btest\b|\bdemo\b|\bsample\b|\bfoo\b|\bbar\b/i, /(.)\1{4,}/, /\b(xxx|nsfw)\b/i
+    /\btest\b|\bdemo\b|\bsample\b|\bfoo\b|\bbar\b/i, /(.)\1{4,}/, /\b(xxx|nsfw)\b/i,
+    // URL fragments scraped as keywords
+    /^https?[\s:\/]/, /^www\./i, /\.com\/|\.org\/|\.net\//i,
+    // Piracy / warez / blackhat tool keywords
+    /\b(feedurbrain|nitroflare|rapidshare|blackhat|torrent|warez|cracked|nulled|piracy)\b/i,
+    // Typos with doubled/transposed consonants common in scraper exports
+    /\bgenration\b|\bgernator\b|\bstratgies\b|\bautomted\b|\bprofessinal\b/i,
 ];
 
 const EMPTY_SEEDS = new Set(['software','tool','tools','app','website','service','services','platform','solution','solutions','product','products','company','business','management','system','data','marketing','digital','online','web','content','media','technology','tech','process','strategy','information','work','job','jobs','career']);
@@ -900,6 +906,19 @@ function scoreKeyword(kw, volume) {
 
     const modifiers = ['best','top','cheap','affordable','free','easy','fast','quick','complete','ultimate','full','simple'];
     if (modifiers.some(m => k.includes(m))) score += 8;
+
+    // ── PATTERN-LESS PENALTY ─────────────────────────────────────
+    // Keywords like "linkedin lead ninja" / "linkedin lead gibbon" have
+    // no question, no modifier, no intent signal, no comparison — they're
+    // just 2-3 random nouns strung together. An SEO strategist would skip these.
+    const allSignals = Object.values(SIGNALS).flat();
+    const hasAnySignal = allSignals.some(s => k.includes(s));
+    const hasQuestion = /^(how|what|why|when|where|which|who|is|are|can|does|do|should)\b/i.test(k);
+    const hasModifier = modifiers.some(m => k.includes(m));
+    const hasComparison = / vs | versus /.test(k);
+    if (!hasAnySignal && !hasQuestion && !hasModifier && !hasComparison && words.length >= 2 && words.length <= 4) {
+        score -= 14; // penalise random noun stacks with no recognisable search pattern
+    }
 
     return { score: Math.max(0, Math.min(100, Math.round(score))), pass: true, intent };
 }
@@ -977,13 +996,9 @@ function suggestTitle(kw, intent) {
     return `${tc(k)} — Official Resource`;
 }
 
-// ── N-GRAM ENTITY CLUSTERING (v4) ────────────────────────────
-// Groups keywords by the shared content entity they target,
-// not by raw character overlap. "best linkedin tools" and
-// "linkedin lead gen agency" both contain "linkedin" but are
-// different entities → correctly split into different clusters.
+// ── N-GRAM ENTITY CLUSTERING (v4.1 — 3-word minimum anchor) ──
 
-const CLUSTER_STOPS = new Set(['how','to','what','is','are','why','when','where','which','who','a','an','the','and','or','for','in','on','at','of','do','does','can','should','best','top','with','your','my','our','their','get','use','make','need','want','find','using','about','into','from','by','as','if','be','was','has','have','will','vs','versus','its','it','this','that','these','those','not','no','more','most','very','also','too','so','but','than','then','now','new','all','any','some','other','i','we','you','they','up','out','back','just','over','after','before','between','through','without','within','plus','since','per','via','re','un','pre','non','co','de','vs','both','each','every','many','much','few','less','more','same','such','long','high','low','big','small','great','good','well','better','best','look','here','know','think']);
+const CLUSTER_STOPS = new Set(['how','to','what','is','are','why','when','where','which','who','a','an','the','and','or','for','in','on','at','of','do','does','can','should','best','top','with','your','my','our','their','get','use','make','need','want','find','using','about','into','from','by','as','if','be','was','has','have','will','vs','versus','its','it','this','that','these','those','not','no','more','most','very','also','too','so','but','than','then','now','new','all','any','some','other','i','we','you','they','up','out','back','just','over','after','before','between','through','without','within','plus','since','per','via','re','un','pre','non','co','de','both','each','every','many','much','few','less','same','such','long','high','low','big','small','great','good','well','better','look','here','know','think']);
 
 function tokenizeForCluster(kw) {
     return kw.toLowerCase()
@@ -992,30 +1007,60 @@ function tokenizeForCluster(kw) {
         .filter(w => w.length > 2 && !CLUSTER_STOPS.has(w) && /^[a-z]/.test(w));
 }
 
+// Root cause of the 981-keyword cluster bug:
+// "linkedin" + "lead" is a 2-word anchor that matches hundreds of unrelated
+// keywords. "lead ninja", "female lead", "lead gibbon" all get pulled in.
+// Fix: anchors must be 3+ words. 2-word only if 6+ keywords share them.
+// "linkedin" + "lead" is a 2-word anchor that matches hundreds of unrelated
+// keywords. "lead ninja", "female lead", "lead gibbon" all get pulled in.
+// Fix: anchors must be 3+ words (specific topic phrases), not 2-word pairs.
+// 2-word anchors only allowed if they appear in 6+ keywords (not just generic).
+// Hard cap: 25 keywords per cluster max — no dumping grounds.
+
+const MAX_CLUSTER_SIZE = 25;
+
 function clusterKeywords(kwList) {
-    // Step 1: Build n-gram index (2–4 word sequences of content tokens)
-    const ngramIdx = new Map(); // ngram → Set<kw index>
+    // Step 1: Build n-gram index
+    const ngramIdx = new Map();
     kwList.forEach((item, i) => {
         const tokens = tokenizeForCluster(item.keyword);
-        for (let len = 2; len <= Math.min(4, tokens.length); len++) {
+
+        // 3–4 word anchors: require 2+ matches (specific enough to be meaningful)
+        for (let len = 3; len <= Math.min(4, tokens.length); len++) {
             for (let s = 0; s <= tokens.length - len; s++) {
                 const ng = tokens.slice(s, s + len).join(' ');
                 if (!ngramIdx.has(ng)) ngramIdx.set(ng, new Set());
                 ngramIdx.get(ng).add(i);
             }
         }
+
+        // 2-word anchors: only added to index, filtered below to require 6+ matches
+        // This prevents "linkedin lead" from grouping 981 unrelated keywords
+        if (tokens.length >= 2) {
+            for (let s = 0; s <= tokens.length - 2; s++) {
+                const ng = tokens.slice(s, s + 2).join(' ');
+                if (!ngramIdx.has(ng)) ngramIdx.set(ng, new Set());
+                ngramIdx.get(ng).add(i);
+            }
+        }
     });
 
-    // Step 2: Find shared anchors — n-grams that appear in 2+ keywords
-    // Sort by: longer n-grams first (more specific), then higher frequency
+    // Step 2: Select valid anchors
+    // 3-4 word: need 2+ keywords sharing it
+    // 2-word:   need 6+ keywords sharing it (conservative — prevents false groupings)
     const anchors = [...ngramIdx.entries()]
-        .filter(([, set]) => set.size >= 2)
+        .filter(([ng, set]) => {
+            const len = ng.split(' ').length;
+            if (len >= 3) return set.size >= 2;
+            if (len === 2) return set.size >= 6;
+            return false;
+        })
         .map(([ng, set]) => ({ ng, size: set.size, len: ng.split(' ').length, indices: [...set] }))
-        .sort((a, b) => (b.len * 3 + b.size) - (a.len * 3 + a.size));
+        .sort((a, b) => (b.len * 4 + b.size) - (a.len * 4 + a.size)); // longer = higher priority
 
-    // Step 3: Greedy assignment — each keyword goes to its best (longest/most frequent) anchor
-    const assigned = new Map(); // kw index → anchor string
-    const clusterMap = new Map(); // anchor → [kw indices]
+    // Step 3: Greedy assignment — longest/most-specific anchor wins
+    const assigned = new Map();
+    const clusterMap = new Map();
 
     anchors.forEach(({ ng, indices }) => {
         const free = indices.filter(i => !assigned.has(i));
@@ -1028,18 +1073,30 @@ function clusterKeywords(kwList) {
         }
     });
 
-    // Step 4: Build cluster objects
+    // Step 4: Build cluster objects — enforce MAX_CLUSTER_SIZE cap
     const clusters = [];
-
     clusterMap.forEach((indices, anchor) => {
-        const kws = indices.map(i => ({ ...kwList[i], isPrimary: false }));
-        kws.sort((a, b) => (b.volume || 0) - (a.volume || 0));
+        let kws = indices.map(i => ({ ...kwList[i], isPrimary: false }));
+        // Sort by volume desc, then quality score desc
+        kws.sort((a, b) => ((b.volume || 0) - (a.volume || 0)) || ((b.score || 0) - (a.score || 0)));
+
+        // ── SECONDARY QUALITY GATE ──────────────────────────────
+        // Primary keyword always stays. Secondary keywords need a higher
+        // quality bar (65 vs 55) OR meaningful volume (≥100) to be included.
+        // This removes low-quality, low-volume tail garbage from clusters
+        // even when they technically share the anchor phrase.
+        const primary = kws[0];
+        const secondaries = kws.slice(1).filter(k => (k.score || 0) >= 65 || (k.volume || 0) >= 100);
+        kws = [primary, ...secondaries];
+
+        // Hard cap — only keep the most relevant keywords
+        if (kws.length > MAX_CLUSTER_SIZE) kws = kws.slice(0, MAX_CLUSTER_SIZE);
         kws[0].isPrimary = true;
         const topicTitle = anchor.split(' ').map(w => w[0].toUpperCase() + w.slice(1)).join(' ');
         clusters.push({ topic: topicTitle, topicAnchor: anchor, keywords: kws });
     });
 
-    // Step 5: Singletons — keywords that shared no anchor
+    // Step 5: Singletons — keywords that found no 3-word anchor match
     kwList.forEach((item, i) => {
         if (assigned.has(i)) return;
         const tokens = tokenizeForCluster(item.keyword);
