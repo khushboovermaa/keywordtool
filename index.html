@@ -462,7 +462,16 @@
 
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
+<script>
+(function(){
+  function loadXLSX(src,fb){
+    var s=document.createElement("script");s.src=src;
+    s.onerror=function(){if(fb)loadXLSX(fb);};
+    document.head.appendChild(s);
+  }
+  loadXLSX("https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js","https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js");
+})();
+</script>
 <script>
 // ═══════════════════════════════════════════════════════════════
 // STATE
@@ -500,17 +509,37 @@ fi.addEventListener('change', e => { if (e.target.files[0]) loadFile(e.target.fi
 
 function loadFile(f) {
     const ext = f.name.split('.').pop().toLowerCase();
-    if (ext === 'csv') { const r = new FileReader(); r.onload = e => parseCSVRaw(e.target.result, f.name); r.readAsText(f); }
-    else if (['xlsx','xls'].includes(ext)) { const r = new FileReader(); r.onload = e => parseXLSXRaw(e.target.result, f.name); r.readAsArrayBuffer(f); }
-    else alert('Please upload a CSV or Excel file.');
+    const status = document.getElementById('fileStatus');
+    status.innerHTML = '⏳ Loading file...'; status.classList.add('show');
+    if (ext === 'csv') {
+        const r = new FileReader();
+        r.onerror = () => { status.innerHTML = '❌ Could not read file. Try saving as CSV UTF-8.'; };
+        r.onload = e => parseCSVRaw(e.target.result, f.name);
+        r.readAsText(f);
+    } else if (['xlsx','xls'].includes(ext)) {
+        if (typeof XLSX === 'undefined') {
+            status.innerHTML = '❌ Excel library still loading — wait 2 seconds and try again, or save your file as CSV.';
+            return;
+        }
+        const r = new FileReader();
+        r.onerror = () => { status.innerHTML = '❌ Could not read file.'; };
+        r.onload = e => parseXLSXRaw(e.target.result, f.name);
+        r.readAsArrayBuffer(f);
+    } else {
+        status.innerHTML = '❌ Unsupported format. Please upload a .csv, .xlsx, or .xls file.';
+        status.classList.add('show');
+    }
 }
 
 function parseCSVRaw(text, name) {
-    const lines = text.trim().split('\n').filter(l => l.trim());
-    const sep = detectSep(lines[0]);
-    rawHeaders = lines[0].split(sep).map(h => h.trim().replace(/^["']|["']$/g, ''));
-    rawRows = lines.slice(1).map(l => l.split(sep).map(c => c.trim().replace(/^["']|["']$/g, '')));
-    setupColumnMapper(name, rawHeaders, rawRows.length);
+    try {
+        const lines = text.trim().split('\n').filter(l => l.trim());
+        if (!lines.length) { alert('File appears empty.'); return; }
+        const sep = detectSep(lines[0]);
+        rawHeaders = lines[0].split(sep).map(h => h.trim().replace(/^["'"]|["'"]$/g, ''));
+        rawRows = lines.slice(1).map(l => l.split(sep).map(c => c.trim().replace(/^["'"]|["'"]$/g, '')));
+        setupColumnMapper(name, rawHeaders, rawRows.length);
+    } catch(e) { alert('CSV parse error: ' + e.message); }
 }
 
 function parseXLSXRaw(buf, name) {
@@ -521,7 +550,7 @@ function parseXLSXRaw(buf, name) {
         rawHeaders = (data[0] || []).map(h => String(h || '').trim());
         rawRows = data.slice(1).filter(r => r[0]).map(r => r.map(c => String(c || '').trim()));
         setupColumnMapper(name, rawHeaders, rawRows.length);
-    } catch(e) { alert('Error: ' + e.message); }
+    } catch(e) { alert('Excel read error: ' + e.message + '\n\nTry saving the file as CSV instead.'); }
 }
 
 function detectSep(line) {
