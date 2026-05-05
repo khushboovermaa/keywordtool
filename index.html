@@ -680,50 +680,36 @@ tbody tr:nth-child(even):hover { background: rgba(59,130,246,0.04); }
     <button class="btn-process" id="processBtn" onclick="processKeywords()">
       Process Keywords →
     </button>
-  </div>
-</div>
 
-<!-- ══ DASHBOARD PAGE ══ -->
-<div class="page" id="page-dashboard">
-
-  <div class="dash-header">
-    <div class="dash-title">Keyword Dashboard <span id="dashSubtitle"></span></div>
-    <!-- Download bar -->
-    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
-      <button onclick="exportToCSV()" style="padding:0.55rem 1.1rem;background:var(--green);color:#fff;border:none;border-radius:8px;font-weight:700;font-size:0.85rem;cursor:pointer;font-family:var(--sans);">⬇️ Download CSV</button>
-      <button onclick="exportToExcel()" style="padding:0.55rem 1.1rem;background:var(--blue);color:#fff;border:none;border-radius:8px;font-weight:700;font-size:0.85rem;cursor:pointer;font-family:var(--sans);">⬇️ Download Excel</button>
-      <button onclick="exportJSON()" style="padding:0.55rem 1.1rem;background:var(--surface2);color:var(--muted);border:1px solid var(--border2);border-radius:8px;font-weight:600;font-size:0.85rem;cursor:pointer;font-family:var(--sans);">⬇️ JSON</button>
-    </div>
-  </div>
-
-
-  <!-- API / Proxy Settings Panel -->
-  <div id="apiKeyBar" style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.25);border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1.5rem;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
-      <span style="font-size:0.9rem;color:var(--purple);font-weight:700;">🔑 Content Generation Setup</span>
-      <span style="font-size:0.75rem;color:var(--muted);">Keys stored in browser session only</span>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
-      <div>
-        <label style="display:block;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);margin-bottom:0.4rem;">Anthropic API Key</label>
-        <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." style="width:100%;padding:0.6rem 0.85rem;background:var(--bg);border:1px solid rgba(139,92,246,0.35);border-radius:7px;color:var(--text);font-size:0.85rem;font-family:var(--mono);">
-        <div style="font-size:0.72rem;color:var(--muted);margin-top:0.3rem;">Get from <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--purple);">console.anthropic.com</a></div>
+    <!-- API Key panel — collapsed by default, expands when needed -->
+    <div id="apiKeyBar" style="display:none;margin-top:1.25rem;background:rgba(139,92,246,0.07);border:1px solid rgba(139,92,246,0.25);border-radius:12px;padding:1.25rem 1.5rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
+        <span style="font-size:0.9rem;color:var(--purple);font-weight:700;">🔑 AI Clustering Setup</span>
+        <span style="font-size:0.75rem;color:var(--muted);">Stored in browser session only — never sent anywhere except Anthropic</span>
       </div>
-      <div>
-        <label style="display:block;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);margin-bottom:0.4rem;">Proxy URL <span style="color:var(--red);font-weight:400;">(required for GitHub Pages)</span></label>
-        <input type="text" id="proxyUrlInput" placeholder="https://your-worker.your-name.workers.dev" style="width:100%;padding:0.6rem 0.85rem;background:var(--bg);border:1px solid rgba(239,68,68,0.35);border-radius:7px;color:var(--text);font-size:0.82rem;font-family:var(--mono);">
-        <div style="font-size:0.72rem;color:var(--muted);margin-top:0.3rem;"><a href="#" onclick="toggleCorsHelp()" style="color:var(--red);">▶ How to set up a free proxy (2 min)</a></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+        <div>
+          <label style="display:block;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);margin-bottom:0.4rem;">Anthropic API Key <span style="color:var(--red)">*</span></label>
+          <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." style="width:100%;padding:0.6rem 0.85rem;background:var(--bg);border:1px solid rgba(139,92,246,0.35);border-radius:7px;color:var(--text);font-size:0.85rem;font-family:var(--mono);">
+          <div style="font-size:0.72rem;color:var(--muted);margin-top:0.35rem;">Get from <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--purple);">console.anthropic.com</a></div>
+        </div>
+        <div>
+          <label style="display:block;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);margin-bottom:0.4rem;">Proxy URL <span style="color:var(--muted);font-weight:400;">(only needed for GitHub Pages)</span></label>
+          <input type="text" id="proxyUrlInput" placeholder="https://your-worker.yourname.workers.dev" style="width:100%;padding:0.6rem 0.85rem;background:var(--bg);border:1px solid var(--border2);border-radius:7px;color:var(--text);font-size:0.82rem;font-family:var(--mono);">
+          <div style="font-size:0.72rem;color:var(--muted);margin-top:0.35rem;"><a href="#" onclick="toggleCorsHelp();return false;" style="color:var(--muted);">▶ What is this? Setup guide (2 min)</a></div>
+        </div>
       </div>
-    </div>
-    <button onclick="saveApiKey()" style="padding:0.6rem 1.5rem;background:var(--purple);color:#fff;border:none;border-radius:7px;font-weight:700;font-size:0.85rem;cursor:pointer;font-family:var(--sans);">Save Settings</button>
-    <span id="apiKeyStatus" style="font-size:0.8rem;color:var(--muted);margin-left:1rem;"></span>
+      <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+        <button onclick="saveApiKey()" style="padding:0.6rem 1.5rem;background:var(--purple);color:#fff;border:none;border-radius:7px;font-weight:700;font-size:0.85rem;cursor:pointer;font-family:var(--sans);">Save & Continue →</button>
+        <span id="apiKeyStatus" style="font-size:0.8rem;color:var(--muted);"></span>
+      </div>
 
-    <!-- CORS Help Panel -->
-    <div id="corsHelp" style="display:none;margin-top:1.25rem;padding:1.25rem;background:var(--bg);border:1px solid var(--border2);border-radius:10px;">
-      <div style="font-size:0.85rem;font-weight:700;color:var(--text);margin-bottom:0.75rem;">🚀 Free Cloudflare Worker Proxy — Setup in 2 minutes</div>
-      <div style="font-size:0.8rem;color:var(--muted);margin-bottom:0.75rem;">GitHub Pages cannot call the Anthropic API directly due to browser CORS restrictions. A free Cloudflare Worker acts as a relay — it's free (100,000 requests/day) and takes 2 minutes to set up.</div>
-      <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);margin-bottom:0.5rem;">Step 1 — Go to <a href="https://workers.cloudflare.com" target="_blank" style="color:var(--blue);">workers.cloudflare.com</a> → Sign up free → Create Worker → Paste this code:</div>
-      <pre id="workerCode" style="background:#0a0f1e;border:1px solid var(--border2);border-radius:8px;padding:1rem;font-family:var(--mono);font-size:0.78rem;color:#34d399;overflow-x:auto;white-space:pre;margin-bottom:0.75rem;">export default {
+      <!-- CORS Help Panel -->
+      <div id="corsHelp" style="display:none;margin-top:1.25rem;padding:1.25rem;background:var(--bg);border:1px solid var(--border2);border-radius:10px;">
+        <div style="font-size:0.85rem;font-weight:700;color:var(--text);margin-bottom:0.75rem;">🚀 Free Cloudflare Worker Proxy — Setup in 2 minutes</div>
+        <div style="font-size:0.8rem;color:var(--muted);margin-bottom:0.75rem;">GitHub Pages cannot call the Anthropic API directly due to browser CORS restrictions. A free Cloudflare Worker acts as a relay — 100,000 requests/day free.</div>
+        <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);margin-bottom:0.5rem;">Step 1 — Go to <a href="https://workers.cloudflare.com" target="_blank" style="color:var(--blue);">workers.cloudflare.com</a> → Sign up → Create Worker → Paste this code:</div>
+        <pre id="workerCode" style="background:#0a0f1e;border:1px solid var(--border2);border-radius:8px;padding:1rem;font-family:var(--mono);font-size:0.78rem;color:#34d399;overflow-x:auto;white-space:pre;margin-bottom:0.75rem;">export default {
   async fetch(request) {
     if (request.method === 'OPTIONS') {
       return new Response(null, { headers: {
@@ -753,11 +739,26 @@ tbody tr:nth-child(even):hover { background: rgba(59,130,246,0.04); }
     });
   }
 };</pre>
-      <button onclick="copyWorkerCode()" style="padding:0.45rem 1rem;background:var(--blue-dim);border:1px solid rgba(59,130,246,0.3);border-radius:6px;color:var(--blue);font-size:0.8rem;font-weight:600;cursor:pointer;font-family:var(--sans);margin-bottom:0.75rem;">📋 Copy Worker Code</button>
-      <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);margin-bottom:0.35rem;">Step 2 — Click Deploy → copy your worker URL (e.g. <code style="color:var(--green);">https://my-proxy.yourname.workers.dev</code>)</div>
-      <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);">Step 3 — Paste that URL in the Proxy URL field above → Save Settings → Done!</div>
+        <button onclick="copyWorkerCode()" style="padding:0.45rem 1rem;background:var(--blue-dim);border:1px solid rgba(59,130,246,0.3);border-radius:6px;color:var(--blue);font-size:0.8rem;font-weight:600;cursor:pointer;font-family:var(--sans);margin-bottom:0.75rem;">📋 Copy Worker Code</button>
+        <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);margin-bottom:0.35rem;">Step 2 — Click Deploy → copy your worker URL → paste it in Proxy URL above</div>
+      </div>
     </div>
   </div>
+</div>
+
+<!-- ══ DASHBOARD PAGE ══ -->
+<div class="page" id="page-dashboard">
+
+  <div class="dash-header">
+    <div class="dash-title">Keyword Dashboard <span id="dashSubtitle"></span></div>
+    <!-- Download bar -->
+    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
+      <button onclick="exportToCSV()" style="padding:0.55rem 1.1rem;background:var(--green);color:#fff;border:none;border-radius:8px;font-weight:700;font-size:0.85rem;cursor:pointer;font-family:var(--sans);">⬇️ Download CSV</button>
+      <button onclick="exportToExcel()" style="padding:0.55rem 1.1rem;background:var(--blue);color:#fff;border:none;border-radius:8px;font-weight:700;font-size:0.85rem;cursor:pointer;font-family:var(--sans);">⬇️ Download Excel</button>
+      <button onclick="exportJSON()" style="padding:0.55rem 1.1rem;background:var(--surface2);color:var(--muted);border:1px solid var(--border2);border-radius:8px;font-weight:600;font-size:0.85rem;cursor:pointer;font-family:var(--sans);">⬇️ JSON</button>
+    </div>
+  </div>
+
 
   <!-- Stat Cards -->
   <div class="stats-row">
@@ -1228,8 +1229,20 @@ async function processKeywords() {
   const apiKey   = getApiKey();
   const proxyUrl = getProxyUrl();
   if (!apiKey) {
-    document.getElementById('apiKeyBar').style.display = 'block';
-    alert('Please enter your Anthropic API key in the setup panel first — it\'s needed for AI clustering.');
+    // Scroll to key panel smoothly, highlight it — no alert popup
+    const bar = document.getElementById('apiKeyBar');
+    bar.style.display = 'block';
+    bar.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    bar.style.border = '1.5px solid var(--purple)';
+    bar.style.boxShadow = '0 0 0 3px rgba(139,92,246,0.2)';
+    const status = document.getElementById('apiKeyStatus');
+    status.textContent = '⬆ Enter your API key above to enable AI clustering';
+    status.style.color = 'var(--amber)';
+    document.getElementById('apiKeyInput').focus();
+    setTimeout(() => {
+      bar.style.boxShadow = '';
+      bar.style.border = '1px solid rgba(139,92,246,0.25)';
+    }, 3000);
     return;
   }
 
@@ -1322,9 +1335,12 @@ async function processKeywords() {
     hideClusterProgress();
     const isCors = err.name === 'TypeError' && err.message.includes('fetch');
     if (isCors) {
+      showPage('upload');
       document.getElementById('apiKeyBar').style.display = 'block';
       document.getElementById('corsHelp').style.display = 'block';
-      alert('❌ CORS error: GitHub Pages cannot call the Anthropic API directly.\n\nSee the proxy setup guide in the panel above.');
+      document.getElementById('apiKeyStatus').textContent = '❌ CORS error — you need a proxy URL for GitHub Pages (see guide below)';
+      document.getElementById('apiKeyStatus').style.color = 'var(--red)';
+      document.getElementById('apiKeyBar').scrollIntoView({ behavior: 'smooth' });
     } else {
       alert('❌ Clustering failed: ' + err.message);
     }
@@ -1778,11 +1794,12 @@ A: 2-sentence answer]`;
     const isCors = err.name === 'TypeError' && (err.message === 'Failed to fetch' || err.message.includes('fetch'));
     if (isCors) {
       closeModal();
+      showPage('upload');
       document.getElementById('apiKeyBar').style.display = 'block';
       document.getElementById('corsHelp').style.display = 'block';
-      document.getElementById('apiKeyStatus').textContent = '⬆ CORS error — set up a proxy (see below)';
+      document.getElementById('apiKeyStatus').textContent = '❌ CORS error — add a Proxy URL below for GitHub Pages';
       document.getElementById('apiKeyStatus').style.color = 'var(--red)';
-      alert('❌ CORS error: GitHub Pages cannot call the Anthropic API directly.\n\nSee the "How to set up a free proxy" guide in the setup panel above. It takes 2 minutes with a free Cloudflare account.');
+      document.getElementById('apiKeyBar').scrollIntoView({ behavior: 'smooth' });
     } else {
       alert('❌ Generation failed: ' + err.message);
     }
@@ -1823,20 +1840,29 @@ function saveApiKey() {
   if (!key && !proxy) {
     status.textContent = '❌ Enter at least an API key'; status.style.color = 'var(--red)'; return;
   }
-  if (key && !key.startsWith('sk-ant-')) {
-    status.textContent = '❌ Invalid key — must start with sk-ant-'; status.style.color = 'var(--red)'; return;
+  if (key && !key.startsWith('sk-ant-') && !key.startsWith('sk-')) {
+    status.textContent = '❌ Invalid key format'; status.style.color = 'var(--red)'; return;
   }
   if (key) sessionStorage.setItem('anthropic_key', key);
   if (proxy) sessionStorage.setItem('proxy_url', proxy);
 
-  status.textContent = '✅ Settings saved';
+  status.textContent = '✅ Saved! You can now process your keywords.';
   status.style.color = 'var(--green)';
-  if (key) document.getElementById('apiKeyInput').value = '••••••••••••••';
-  if (proxy) document.getElementById('proxyUrlInput').value = proxy; // keep visible
+  if (key) document.getElementById('apiKeyInput').value = '';
 
+  // Hide the panel after a moment and update the indicator
   setTimeout(() => {
     document.getElementById('apiKeyBar').style.display = 'none';
-  }, 2000);
+    // Update or add the "key saved" indicator
+    const existing = document.getElementById('keySavedIndicator');
+    if (existing) existing.remove();
+    const bar = document.getElementById('apiKeyBar');
+    const indicator = document.createElement('div');
+    indicator.id = 'keySavedIndicator';
+    indicator.style.cssText = 'font-size:0.75rem;color:var(--green);margin-top:0.5rem;text-align:center;';
+    indicator.innerHTML = '🔑 API key saved · <a href="#" onclick="document.getElementById(\'apiKeyBar\').style.display=\'block\';document.getElementById(\'apiKeyBar\').scrollIntoView({behavior:\'smooth\'});return false;" style="color:var(--muted);">Change</a>';
+    bar.parentNode.insertBefore(indicator, bar);
+  }, 1500);
 }
 
 function getApiKey()  { return sessionStorage.getItem('anthropic_key') || ''; }
@@ -2188,11 +2214,23 @@ document.getElementById('genModal').addEventListener('click', e => {
   if (e.target === document.getElementById('genModal')) closeModal();
 });
 
-// Restore API key bar state
+// Restore API key bar state on page load
 document.addEventListener('DOMContentLoaded', () => {
-  if (sessionStorage.getItem('anthropic_key')) {
-    const bar = document.getElementById('apiKeyBar');
-    if (bar) bar.style.display = 'none';
+  const hasKey = !!sessionStorage.getItem('anthropic_key');
+  const bar = document.getElementById('apiKeyBar');
+  if (bar) {
+    // Show the panel if no key saved yet — user needs to set it up
+    bar.style.display = hasKey ? 'none' : 'block';
+  }
+  // Show a small "key saved" indicator in the Process button area if key exists
+  if (hasKey) {
+    const btn = document.getElementById('processBtn');
+    if (btn) {
+      const indicator = document.createElement('div');
+      indicator.style.cssText = 'font-size:0.75rem;color:var(--green);margin-top:0.5rem;text-align:center;';
+      indicator.innerHTML = '🔑 API key saved · <a href="#" onclick="document.getElementById(\'apiKeyBar\').style.display=\'block\';document.getElementById(\'apiKeyBar\').scrollIntoView({behavior:\'smooth\'});return false;" style="color:var(--muted);">Change</a>';
+      btn.parentNode.insertBefore(indicator, bar);
+    }
   }
 });
 </script>
