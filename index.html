@@ -3,847 +3,1017 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SEO Keyword Segmenter Pro - Strategic Intent-Based Clustering</title>
+    <title>Keyword Curator Pro v2 — SEO Strategist Edition</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --bg: #080c14;
+            --surface: #0e1624;
+            --surface2: #131d2e;
+            --surface3: #1a2540;
+            --border: rgba(255,255,255,0.07);
+            --border-bright: rgba(96,165,250,0.25);
+            --text: #e2e8f0;
+            --muted: #64748b;
+            --accent: #3b82f6;
+            --accent2: #06b6d4;
+            --green: #10b981;
+            --amber: #f59e0b;
+            --red: #ef4444;
+            --purple: #a855f7;
+            --pink: #ec4899;
+            --mono: 'JetBrains Mono', monospace;
+            --sans: 'Syne', sans-serif;
         }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            color: #e2e8f0;
-            min-height: 100vh;
-            padding: 2rem;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100vh; }
+        body::before {
+            content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+            background-image: linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
         }
+        .wrap { position: relative; z-index: 1; max-width: 1500px; margin: 0 auto; padding: 2rem; }
 
-        .container {
-            max-width: 1600px;
-            margin: 0 auto;
-        }
+        /* HEADER */
+        header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 2.5rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+        .logo-block h1 { font-family: var(--sans); font-size: 1.9rem; font-weight: 800; letter-spacing: -0.03em; color: #fff; }
+        .logo-block h1 span { background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .logo-block p { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); margin-top: 0.35rem; letter-spacing: 0.08em; text-transform: uppercase; }
+        .header-badges { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.25rem; }
+        .hbadge { font-family: var(--mono); font-size: 0.65rem; padding: 0.3rem 0.65rem; border-radius: 4px; letter-spacing: 0.06em; border: 1px solid; }
+        .hbadge-green { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.25); color: var(--green); }
+        .hbadge-blue { background: rgba(59,130,246,0.1); border-color: rgba(59,130,246,0.25); color: var(--accent); }
+        .hbadge-purple { background: rgba(168,85,247,0.1); border-color: rgba(168,85,247,0.25); color: var(--purple); }
 
-        header {
-            text-align: center;
-            margin-bottom: 2.5rem;
-        }
+        /* PANELS */
+        .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.75rem; margin-bottom: 1.5rem; }
+        .panel-title { font-size: 0.7rem; font-family: var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem; }
+        .panel-title::before { content: ''; display: inline-block; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; flex-shrink: 0; }
 
-        h1 {
-            font-size: 2.8rem;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(135deg, #60a5fa, #34d399);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            font-weight: 700;
-        }
+        /* UPLOAD */
+        .upload-zone { border: 1.5px dashed rgba(59,130,246,0.3); border-radius: 8px; padding: 2.5rem; text-align: center; cursor: pointer; transition: all 0.25s; background: rgba(59,130,246,0.03); }
+        .upload-zone:hover, .upload-zone.dragover { border-color: var(--accent); background: rgba(59,130,246,0.08); }
+        .upload-zone .icon { font-size: 2.5rem; margin-bottom: 0.75rem; display: block; }
+        .upload-zone h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.35rem; }
+        .upload-zone p { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); }
+        #fileInput { display: none; }
+        .file-loaded { display: none; margin-top: 1rem; padding: 0.75rem 1rem; background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); border-radius: 6px; font-family: var(--mono); font-size: 0.8rem; color: var(--green); }
+        .file-loaded.show { display: block; }
 
-        .subtitle {
-            color: #94a3b8;
-            font-size: 1rem;
-        }
+        /* COLUMN MAPPER */
+        .col-mapper { display: none; margin-top: 1rem; background: rgba(245,158,11,0.07); border: 1px solid rgba(245,158,11,0.2); border-radius: 8px; padding: 1.2rem; }
+        .col-mapper.show { display: block; }
+        .col-mapper-title { font-family: var(--mono); font-size: 0.72rem; color: var(--amber); letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 0.9rem; }
+        .col-mapper-row { display: flex; gap: 1rem; flex-wrap: wrap; }
+        .col-mapper select { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: var(--mono); font-size: 0.8rem; padding: 0.45rem 0.7rem; outline: none; }
 
-        .info-box {
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 2rem;
-            font-size: 0.9rem;
-            color: #cbd5e1;
-        }
+        /* SETTINGS */
+        .settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.25rem; }
+        .field label { display: block; font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 0.5rem; text-transform: uppercase; }
+        .field input, .field select { width: 100%; padding: 0.6rem 0.8rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: var(--mono); font-size: 0.85rem; transition: border-color 0.2s; outline: none; }
+        .field input:focus, .field select:focus { border-color: var(--accent); }
+        .field select option { background: var(--surface2); }
 
-        .info-box strong {
-            color: #60a5fa;
-        }
+        /* INTENT PILLS */
+        .intent-pills { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+        .pill { padding: 0.35rem 0.8rem; border-radius: 20px; font-family: var(--mono); font-size: 0.72rem; cursor: pointer; border: 1px solid transparent; transition: all 0.2s; user-select: none; }
+        .pill[data-intent="transactional"] { background: rgba(16,185,129,0.1); color: var(--green); border-color: rgba(16,185,129,0.2); }
+        .pill[data-intent="commercial"] { background: rgba(245,158,11,0.1); color: var(--amber); border-color: rgba(245,158,11,0.2); }
+        .pill[data-intent="informational"] { background: rgba(59,130,246,0.1); color: var(--accent); border-color: rgba(59,130,246,0.2); }
+        .pill[data-intent="navigational"] { background: rgba(168,85,247,0.1); color: var(--purple); border-color: rgba(168,85,247,0.2); }
+        .pill.active { box-shadow: 0 0 0 2px currentColor; }
 
-        .input-section {
-            background: rgba(51, 65, 85, 0.5);
-            border: 1px solid rgba(148, 163, 184, 0.2);
-            border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            backdrop-filter: blur(10px);
-        }
+        /* BUTTONS */
+        .btn-row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+        .btn { padding: 0.7rem 1.5rem; border: none; border-radius: 7px; font-family: var(--sans); font-weight: 700; font-size: 0.88rem; cursor: pointer; transition: all 0.25s; letter-spacing: 0.01em; }
+        .btn-run { background: linear-gradient(135deg, #2563eb, #0ea5e9); color: #fff; flex: 1; min-width: 180px; }
+        .btn-run:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(37,99,235,0.35); }
+        .btn-run:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+        .btn-ghost:hover { border-color: var(--border-bright); color: var(--text); }
+        .btn-export { background: rgba(168,85,247,0.12); color: var(--purple); border: 1px solid rgba(168,85,247,0.2); }
+        .btn-export:hover { background: rgba(168,85,247,0.22); transform: translateY(-1px); }
 
-        .upload-area {
-            border: 2px dashed rgba(96, 165, 250, 0.5);
-            border-radius: 8px;
-            padding: 3rem;
-            text-align: center;
-            background: rgba(96, 165, 250, 0.05);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 1.5rem;
-        }
+        /* RESULTS */
+        #results { display: none; }
+        #results.show { display: block; }
 
-        .upload-area:hover,
-        .upload-area.dragover {
-            border-color: #60a5fa;
-            background: rgba(96, 165, 250, 0.15);
-        }
+        /* STATS BAR */
+        .stats-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 0.75rem; margin-bottom: 1.5rem; }
+        .stat { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 0.9rem 1rem; }
+        .stat-n { font-family: var(--mono); font-size: 1.6rem; font-weight: 700; line-height: 1; margin-bottom: 0.3rem; }
+        .stat-l { font-size: 0.68rem; font-family: var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+        .stat.good .stat-n { color: var(--green); }
+        .stat.warn .stat-n { color: var(--red); }
+        .stat.info .stat-n { color: var(--accent); }
+        .stat.amber .stat-n { color: var(--amber); }
+        .stat.purple .stat-n { color: var(--purple); }
+        .stat.pink .stat-n { color: var(--pink); }
+        .stat.cyan .stat-n { color: var(--accent2); }
 
-        .upload-icon {
-            font-size: 3rem;
-            margin-bottom: 0.5rem;
-        }
+        /* TABS */
+        .tabs { display: flex; gap: 0.4rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+        .tab { padding: 0.4rem 0.9rem; border-radius: 6px; font-family: var(--mono); font-size: 0.72rem; cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--muted); transition: all 0.2s; }
+        .tab:hover, .tab.active { background: rgba(59,130,246,0.12); border-color: var(--accent); color: var(--accent); }
+        .tab.tab-red.active { background: rgba(239,68,68,0.12); border-color: var(--red); color: var(--red); }
+        .tab.tab-amber.active { background: rgba(245,158,11,0.12); border-color: var(--amber); color: var(--amber); }
+        .tab.tab-purple.active { background: rgba(168,85,247,0.12); border-color: var(--purple); color: var(--purple); }
 
-        .upload-text {
-            font-size: 1.1rem;
-            color: #cbd5e1;
-            margin-bottom: 0.25rem;
-        }
+        /* TABLE */
+        .tbl-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid var(--border); }
+        table { width: 100%; border-collapse: collapse; }
+        thead { background: var(--surface2); border-bottom: 1px solid var(--border); }
+        th { padding: 0.7rem 1rem; text-align: left; font-family: var(--mono); font-size: 0.67rem; color: var(--muted); letter-spacing: 0.07em; text-transform: uppercase; white-space: nowrap; border-right: 1px solid var(--border); }
+        th:last-child { border-right: none; }
+        tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+        tbody tr:hover { background: rgba(59,130,246,0.05); }
+        tbody tr:last-child { border-bottom: none; }
+        td { padding: 0.65rem 1rem; font-size: 0.83rem; border-right: 1px solid var(--border); vertical-align: middle; }
+        td:last-child { border-right: none; }
+        .kw-cell { font-family: var(--mono); font-size: 0.8rem; color: #93c5fd; max-width: 200px; word-break: break-word; }
+        .title-cell { color: var(--text); max-width: 260px; font-size: 0.81rem; line-height: 1.4; }
 
-        .upload-hint {
-            font-size: 0.9rem;
-            color: #94a3b8;
-        }
+        /* BADGES */
+        .badge { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.22rem 0.55rem; border-radius: 4px; font-family: var(--mono); font-size: 0.65rem; font-weight: 600; letter-spacing: 0.04em; white-space: nowrap; }
+        .badge-tx { background: rgba(16,185,129,0.12); color: var(--green); }
+        .badge-cm { background: rgba(245,158,11,0.12); color: var(--amber); }
+        .badge-in { background: rgba(59,130,246,0.12); color: var(--accent); }
+        .badge-nv { background: rgba(168,85,247,0.12); color: var(--purple); }
 
-        #fileInput {
-            display: none;
-        }
+        /* CONTENT TYPE */
+        .ctype { display: inline-block; padding: 0.18rem 0.5rem; border-radius: 4px; font-family: var(--mono); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.05em; }
+        .ctype-page { background: rgba(6,182,212,0.12); color: var(--accent2); }
+        .ctype-blog { background: rgba(168,85,247,0.12); color: var(--purple); }
 
-        .file-status {
-            background: rgba(52, 211, 153, 0.1);
-            border: 1px solid rgba(52, 211, 153, 0.3);
-            color: #34d399;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
-            display: none;
-        }
+        /* SERP FEATURES */
+        .serp-tags { display: flex; gap: 0.25rem; flex-wrap: wrap; }
+        .serp-tag { display: inline-block; padding: 0.15rem 0.4rem; border-radius: 3px; font-family: var(--mono); font-size: 0.6rem; font-weight: 600; letter-spacing: 0.03em; white-space: nowrap; }
+        .serp-fs { background: rgba(16,185,129,0.12); color: var(--green); }
+        .serp-paa { background: rgba(59,130,246,0.12); color: var(--accent); }
+        .serp-local { background: rgba(245,158,11,0.12); color: var(--amber); }
+        .serp-video { background: rgba(239,68,68,0.12); color: var(--red); }
+        .serp-img { background: rgba(236,72,153,0.12); color: var(--pink); }
+        .serp-shop { background: rgba(168,85,247,0.12); color: var(--purple); }
 
-        .file-status.show {
-            display: block;
-        }
+        /* DIFFICULTY */
+        .diff-wrap { display: flex; align-items: center; gap: 0.4rem; min-width: 90px; }
+        .diff-bar { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+        .diff-fill { height: 100%; border-radius: 2px; }
+        .diff-label { font-family: var(--mono); font-size: 0.65rem; min-width: 22px; text-align: right; }
 
-        .button-group {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
+        /* SCORE */
+        .score-wrap { display: flex; align-items: center; gap: 0.4rem; min-width: 75px; }
+        .score-bar { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+        .score-fill { height: 100%; border-radius: 2px; }
+        .score-num { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); min-width: 24px; text-align: right; }
 
-        button {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.95rem;
-        }
+        /* CLUSTER SECTION */
+        .cluster-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1rem; }
+        .cluster-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 1.1rem; }
+        .cluster-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
+        .cluster-name { font-weight: 700; font-size: 0.88rem; color: #fff; }
+        .cluster-count { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); }
+        .cluster-pill { font-family: var(--mono); font-size: 0.65rem; padding: 0.15rem 0.5rem; border-radius: 3px; margin-top: 0.3rem; display: inline-block; }
+        .cluster-kw { font-family: var(--mono); font-size: 0.75rem; color: #93c5fd; padding: 0.3rem 0; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+        .cluster-kw:last-child { border-bottom: none; }
+        .cluster-kw-primary { color: var(--green) !important; font-weight: 700; }
+        .cluster-vol { color: var(--muted); font-size: 0.68rem; }
+        .cannibal-warn { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 6px; padding: 0.5rem 0.75rem; margin-bottom: 0.5rem; font-family: var(--mono); font-size: 0.72rem; color: var(--red); }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #60a5fa, #3b82f6);
-            color: white;
-            flex: 1;
-            min-width: 200px;
-        }
+        /* REJECTED TABLE */
+        .reject-reason { font-family: var(--mono); font-size: 0.68rem; color: var(--red); }
+        .reject-reason-label { display: inline-block; padding: 0.18rem 0.5rem; border-radius: 3px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(96, 165, 250, 0.3);
-        }
+        /* TIP BOX */
+        .tip-box { background: rgba(59,130,246,0.06); border: 1px solid rgba(59,130,246,0.15); border-left: 3px solid var(--accent); border-radius: 6px; padding: 0.9rem 1.1rem; font-family: var(--mono); font-size: 0.75rem; color: #94a3b8; line-height: 1.6; margin-bottom: 1.25rem; }
+        .tip-box strong { color: var(--accent); }
 
-        .btn-secondary {
-            background: rgba(148, 163, 184, 0.2);
-            color: #cbd5e1;
-            border: 1px solid rgba(148, 163, 184, 0.3);
-        }
+        /* EMPTY STATE */
+        .empty { padding: 3rem; text-align: center; color: var(--muted); font-family: var(--mono); font-size: 0.82rem; }
 
-        .btn-secondary:hover {
-            background: rgba(148, 163, 184, 0.3);
-        }
+        /* LOADING */
+        .spin { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.2); border-top-color: #fff; border-radius: 50%; animation: rotate 0.7s linear infinite; vertical-align: middle; margin-right: 0.4rem; }
+        @keyframes rotate { to { transform: rotate(360deg); } }
 
-        .results-section {
-            display: none;
-        }
+        /* EXPORT */
+        .export-row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
 
-        .results-section.show {
-            display: block;
-        }
+        /* DUPE BADGE */
+        .dupe-badge { font-family: var(--mono); font-size: 0.62rem; padding: 0.12rem 0.4rem; border-radius: 3px; background: rgba(236,72,153,0.12); color: var(--pink); border: 1px solid rgba(236,72,153,0.2); }
 
-        .card {
-            background: rgba(51, 65, 85, 0.3);
-            border: 1px solid rgba(148, 163, 184, 0.2);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            backdrop-filter: blur(10px);
-        }
-
-        .card h2 {
-            font-size: 1.3rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .stat-box {
-            background: rgba(15, 23, 42, 0.8);
-            padding: 1rem;
-            border-radius: 8px;
-            border-left: 4px solid #60a5fa;
-        }
-
-        .stat-label {
-            font-size: 0.85rem;
-            color: #94a3b8;
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-value {
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: #34d399;
-        }
-
-        .table-wrapper {
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: rgba(15, 23, 42, 0.6);
-        }
-
-        thead {
-            background: rgba(51, 65, 85, 0.8);
-            border-bottom: 2px solid rgba(96, 165, 250, 0.3);
-        }
-
-        th {
-            padding: 1rem;
-            text-align: left;
-            font-weight: 600;
-            color: #cbd5e1;
-            border-right: 1px solid rgba(148, 163, 184, 0.1);
-            white-space: nowrap;
-        }
-
-        th:last-child {
-            border-right: none;
-        }
-
-        tbody tr {
-            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
-            transition: background 0.2s ease;
-        }
-
-        tbody tr:hover {
-            background: rgba(96, 165, 250, 0.1);
-        }
-
-        td {
-            padding: 0.75rem 1rem;
-            color: #e2e8f0;
-            border-right: 1px solid rgba(148, 163, 184, 0.05);
-            font-size: 0.9rem;
-        }
-
-        td:last-child {
-            border-right: none;
-        }
-
-        .keyword-cell {
-            font-weight: 600;
-            color: #60a5fa;
-            word-break: break-word;
-        }
-
-        .intent-badge {
-            display: inline-block;
-            padding: 0.35rem 0.75rem;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        .intent-commercial {
-            background: rgba(34, 197, 94, 0.2);
-            color: #22c55e;
-        }
-
-        .intent-informational {
-            background: rgba(59, 130, 246, 0.2);
-            color: #60a5fa;
-        }
-
-        .intent-navigational {
-            background: rgba(139, 92, 246, 0.2);
-            color: #a855f7;
-        }
-
-        .category-badge {
-            display: inline-block;
-            padding: 0.35rem 0.75rem;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            background: rgba(251, 146, 60, 0.2);
-            color: #fb923c;
-        }
-
-        .category-badge.service {
-            background: rgba(34, 197, 94, 0.2);
-            color: #22c55e;
-        }
-
-        .category-badge.blog {
-            background: rgba(59, 130, 246, 0.2);
-            color: #60a5fa;
-        }
-
-        .category-badge.tool {
-            background: rgba(139, 92, 246, 0.2);
-            color: #a855f7;
-        }
-
-        .category-badge.comparison {
-            background: rgba(245, 158, 11, 0.2);
-            color: #f59e0b;
-        }
-
-        .page-type {
-            font-size: 0.8rem;
-            padding: 0.3rem 0.6rem;
-            background: rgba(148, 163, 184, 0.2);
-            border-radius: 4px;
-            color: #cbd5e1;
-        }
-
-        .filters {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-        }
-
-        .filter-btn {
-            padding: 0.5rem 1rem;
-            background: rgba(96, 165, 250, 0.2);
-            color: #60a5fa;
-            border: 1px solid rgba(96, 165, 250, 0.3);
-            border-radius: 6px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .filter-btn:hover,
-        .filter-btn.active {
-            background: rgba(96, 165, 250, 0.4);
-            border-color: rgba(96, 165, 250, 0.6);
-        }
-
-        .export-buttons {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .export-btn {
-            padding: 0.75rem 1.25rem;
-            background: linear-gradient(135deg, #a855f7, #7c3aed);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .export-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(168, 85, 247, 0.3);
-        }
-
-        .loading {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(96, 165, 250, 0.3);
-            border-top-color: #60a5fa;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 2rem;
-            }
-
-            .button-group {
-                flex-direction: column;
-            }
-
-            th, td {
-                padding: 0.5rem;
-                font-size: 0.8rem;
-            }
+        @media (max-width: 640px) {
+            .wrap { padding: 1rem; }
+            header { flex-direction: column; }
+            .logo-block h1 { font-size: 1.4rem; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🎯 SEO Keyword Segmenter Pro</h1>
-            <p class="subtitle">Intent-Based Clustering • Strategic Page Mapping • Clean Keyword Validation</p>
-            
-            <div class="info-box">
-                <strong>✨ Smart Segmentation:</strong> Separates Commercial Intent → Informational → Navigational. Maps to Landing Page / Blog / Guide / Tutorial / Comparison. Validates keyword naturalness.
-            </div>
-        </header>
+<div class="wrap">
 
-        <div class="input-section">
-            <div class="upload-area" id="uploadArea">
-                <div class="upload-icon">📁</div>
-                <div class="upload-text">Drag & drop CSV or Excel file</div>
-                <div class="upload-hint">Format: Keyword | Volume | Type (optional)</div>
-            </div>
-            <input type="file" id="fileInput" accept=".csv,.xlsx,.xls">
-            
-            <div class="file-status" id="fileStatus"></div>
-
-            <div class="button-group">
-                <button class="btn-primary" id="processBtn" onclick="processKeywords()">
-                    🔄 Analyze & Segment Keywords
-                </button>
-                <button class="btn-secondary" onclick="resetForm()">Clear All</button>
-            </div>
+    <header>
+        <div class="logo-block">
+            <h1>Keyword<span>Curator</span> Pro</h1>
+            <p>SEO Strategist-Grade Filtering Engine v2.0</p>
         </div>
+        <div class="header-badges">
+            <span class="hbadge hbadge-green">✦ 7 PRO FEATURES</span>
+            <span class="hbadge hbadge-blue">⚡ CANNIBALIZATION DETECTION</span>
+            <span class="hbadge hbadge-purple">🗂 TOPIC CLUSTERING</span>
+        </div>
+    </header>
 
-        <div class="results-section" id="resultsSection">
-            <div class="card">
-                <h2>📊 Segmentation Summary</h2>
-                <div class="stats">
-                    <div class="stat-box">
-                        <div class="stat-label">Total Keywords</div>
-                        <div class="stat-value" id="totalKw">0</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-label">After Cleaning</div>
-                        <div class="stat-value" id="cleanKw">0</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-label">Commercial</div>
-                        <div class="stat-value" id="commercialCount">0</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-label">Informational</div>
-                        <div class="stat-value" id="informationalCount">0</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-label">Navigational</div>
-                        <div class="stat-value" id="navigationalCount">0</div>
-                    </div>
+    <!-- UPLOAD -->
+    <div class="panel">
+        <div class="panel-title">01 — Import Keywords</div>
+        <div class="upload-zone" id="uploadZone">
+            <span class="icon">📂</span>
+            <h3>Drop your CSV or Excel file here</h3>
+            <p>Ahrefs · SEMrush · GSC · Ubersuggest · Any format · Auto column detection</p>
+        </div>
+        <input type="file" id="fileInput" accept=".csv,.xlsx,.xls">
+        <div class="file-loaded" id="fileStatus"></div>
+
+        <!-- COLUMN MAPPER (auto-detect fallback) -->
+        <div class="col-mapper" id="colMapper">
+            <div class="col-mapper-title">⚠ Column Mapping — We detected your file. Confirm or adjust:</div>
+            <div class="col-mapper-row">
+                <div>
+                    <label style="font-family:var(--mono);font-size:0.7rem;color:var(--muted);display:block;margin-bottom:0.3rem;">KEYWORD COLUMN</label>
+                    <select id="kwColSelect"></select>
                 </div>
-            </div>
-
-            <div class="card">
-                <h2>🔍 Filter Results</h2>
-                <div class="filters">
-                    <button class="filter-btn active" onclick="filterIntent('all')">All Keywords</button>
-                    <button class="filter-btn" onclick="filterIntent('commercial')">💰 Commercial</button>
-                    <button class="filter-btn" onclick="filterIntent('informational')">📚 Informational</button>
-                    <button class="filter-btn" onclick="filterIntent('navigational')">🔗 Navigational</button>
-                </div>
-
-                <div class="table-wrapper">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style="width: 40px">#</th>
-                                <th>Keyword</th>
-                                <th>Intent</th>
-                                <th>Category</th>
-                                <th>Page Type</th>
-                                <th style="text-align: right">Volume</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableBody"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="card">
-                <h2>💾 Export Segmentation</h2>
-                <div class="export-buttons">
-                    <button class="export-btn" onclick="exportCSV()">📊 CSV (Spreadsheet)</button>
-                    <button class="export-btn" onclick="exportJSON()">📥 JSON (Detailed)</button>
-                    <button class="export-btn" onclick="exportText()">📄 Text Format</button>
+                <div>
+                    <label style="font-family:var(--mono);font-size:0.7rem;color:var(--muted);display:block;margin-bottom:0.3rem;">VOLUME COLUMN</label>
+                    <select id="volColSelect"></select>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
-    <script>
-        let allKeywords = [];
-        let segmentedData = [];
-        let currentFilter = 'all';
+    <!-- SETTINGS -->
+    <div class="panel">
+        <div class="panel-title">02 — Filter Settings</div>
+        <div class="tip-box">
+            <strong>Pro filtering active:</strong> Keyword length is irrelevant — long-tail is welcome. Filters by intent clarity, natural phrasing, topic actionability, junk signals, near-duplicates, and cannibalization. SERP opportunities and difficulty are estimated from keyword patterns.
+        </div>
+        <div class="settings-grid">
+            <div class="field">
+                <label>Min Search Volume</label>
+                <input type="number" id="minVolume" value="0" min="0" placeholder="0 = no limit">
+            </div>
+            <div class="field">
+                <label>Quality Threshold (0–100)</label>
+                <input type="number" id="qualityThreshold" value="55" min="0" max="100">
+            </div>
+            <div class="field">
+                <label>Max Words Per Keyword</label>
+                <input type="number" id="maxWords" value="12" min="1" max="20">
+            </div>
+            <div class="field">
+                <label>Cannibal Similarity Threshold</label>
+                <select id="cannibalThreshold">
+                    <option value="0.75">Strict (75% similar)</option>
+                    <option value="0.65" selected>Balanced (65% similar)</option>
+                    <option value="0.55">Loose (55% similar)</option>
+                </select>
+            </div>
+        </div>
+        <div class="panel-title" style="margin-bottom:0.75rem;">Intent Focus (optional)</div>
+        <div class="intent-pills" id="intentPills">
+            <span class="pill" data-intent="transactional">💳 Transactional</span>
+            <span class="pill" data-intent="commercial">🔍 Commercial</span>
+            <span class="pill" data-intent="informational">📖 Informational</span>
+            <span class="pill" data-intent="navigational">🧭 Navigational</span>
+        </div>
+        <div class="btn-row">
+            <button class="btn btn-run" id="runBtn" onclick="run()">⚡ Analyze & Curate Keywords</button>
+            <button class="btn btn-ghost" onclick="resetAll()">Clear All</button>
+        </div>
+    </div>
 
-        const uploadArea = document.getElementById('uploadArea');
-        const fileInput = document.getElementById('fileInput');
+    <!-- RESULTS -->
+    <div id="results">
 
-        uploadArea.addEventListener('click', () => fileInput.click());
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.classList.add('dragover');
-        });
-        uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('dragover');
-            if (e.dataTransfer.files.length) loadFile(e.dataTransfer.files[0]);
-        });
+        <!-- STATS -->
+        <div class="panel">
+            <div class="panel-title">03 — Curation Summary</div>
+            <div class="stats-bar" id="statsBar"></div>
+        </div>
 
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length) loadFile(e.target.files[0]);
-        });
+        <!-- TOPIC CLUSTERS -->
+        <div class="panel" id="clusterPanel">
+            <div class="panel-title">04 — Topic Clusters & Content Pillars</div>
+            <div class="tip-box" style="margin-bottom:1rem;">
+                <strong>How to read this:</strong> Each cluster = one content pillar. The <span style="color:var(--green)">green keyword</span> is the primary (highest volume) — build your main page/post around it. Others = supporting content or internal links. Keywords in the same cluster targeting the same page = <span style="color:var(--red)">cannibalization risk</span>.
+            </div>
+            <div class="cluster-grid" id="clusterGrid"></div>
+        </div>
 
-        function loadFile(file) {
-            const ext = file.name.split('.').pop().toLowerCase();
-            
-            if (ext === 'csv') {
-                const reader = new FileReader();
-                reader.onload = (e) => parseCSV(e.target.result, file.name);
-                reader.readAsText(file);
-            } else if (['xlsx', 'xls'].includes(ext)) {
-                const reader = new FileReader();
-                reader.onload = (e) => parseExcel(e.target.result, file.name);
-                reader.readAsArrayBuffer(file);
+        <!-- CURATED TABLE -->
+        <div class="panel">
+            <div class="panel-title">05 — Curated Keywords</div>
+            <div class="tabs" id="tabsEl"></div>
+            <div class="tbl-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Keyword</th>
+                            <th>Suggested Title</th>
+                            <th>Intent</th>
+                            <th>Content</th>
+                            <th>SERP Features</th>
+                            <th>KD~</th>
+                            <th>Volume</th>
+                            <th>Quality</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- REJECTED TABLE -->
+        <div class="panel">
+            <div class="panel-title">06 — Rejected Keywords (with reasons)</div>
+            <div class="tip-box" style="margin-bottom:1rem;">
+                <strong>Transparency:</strong> Every rejected keyword shows exactly why it was cut. Review these — some may be worth saving with edits.
+            </div>
+            <div class="tbl-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Keyword</th>
+                            <th>Rejection Reason</th>
+                            <th>Score</th>
+                            <th>Volume</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rejBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- EXPORT -->
+        <div class="panel">
+            <div class="panel-title">07 — Export</div>
+            <div class="export-row">
+                <button class="btn btn-export" onclick="exportCSV()">📊 Export Curated CSV</button>
+                <button class="btn btn-export" onclick="exportClusters()">🗂 Export Clusters CSV</button>
+                <button class="btn btn-export" onclick="exportJSON()">📥 Export Full JSON</button>
+                <button class="btn btn-export" onclick="exportText()">📄 Export TXT Report</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
+<script>
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+let allKw = [];
+let curated = [];
+let rejected = [];
+let clusters = [];
+let rawHeaders = [];
+let rawRows = [];
+let activeTab = 'all';
+let selectedIntents = new Set();
+
+// ═══════════════════════════════════════════════════════════════
+// INTENT PILLS
+// ═══════════════════════════════════════════════════════════════
+document.querySelectorAll('.pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+        const intent = pill.dataset.intent;
+        if (selectedIntents.has(intent)) { selectedIntents.delete(intent); pill.classList.remove('active'); }
+        else { selectedIntents.add(intent); pill.classList.add('active'); }
+    });
+});
+
+// ═══════════════════════════════════════════════════════════════
+// UPLOAD & FILE PARSING
+// ═══════════════════════════════════════════════════════════════
+const zone = document.getElementById('uploadZone');
+const fi = document.getElementById('fileInput');
+zone.addEventListener('click', () => fi.click());
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('dragover'); if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]); });
+fi.addEventListener('change', e => { if (e.target.files[0]) loadFile(e.target.files[0]); });
+
+function loadFile(f) {
+    const ext = f.name.split('.').pop().toLowerCase();
+    if (ext === 'csv') { const r = new FileReader(); r.onload = e => parseCSVRaw(e.target.result, f.name); r.readAsText(f); }
+    else if (['xlsx','xls'].includes(ext)) { const r = new FileReader(); r.onload = e => parseXLSXRaw(e.target.result, f.name); r.readAsArrayBuffer(f); }
+    else alert('Please upload a CSV or Excel file.');
+}
+
+function parseCSVRaw(text, name) {
+    const lines = text.trim().split('\n').filter(l => l.trim());
+    const sep = detectSep(lines[0]);
+    rawHeaders = lines[0].split(sep).map(h => h.trim().replace(/^["']|["']$/g, ''));
+    rawRows = lines.slice(1).map(l => l.split(sep).map(c => c.trim().replace(/^["']|["']$/g, '')));
+    setupColumnMapper(name, rawHeaders, rawRows.length);
+}
+
+function parseXLSXRaw(buf, name) {
+    try {
+        const wb = XLSX.read(buf, { type: 'array' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
+        rawHeaders = (data[0] || []).map(h => String(h || '').trim());
+        rawRows = data.slice(1).filter(r => r[0]).map(r => r.map(c => String(c || '').trim()));
+        setupColumnMapper(name, rawHeaders, rawRows.length);
+    } catch(e) { alert('Error: ' + e.message); }
+}
+
+function detectSep(line) {
+    if ((line.match(/\|/g) || []).length > 1) return '|';
+    if ((line.match(/\t/g) || []).length > 0) return '\t';
+    return ',';
+}
+
+// ── AUTO COLUMN DETECTION ──────────────────────────────────────
+function autoDetectColumns(headers) {
+    const kwPatterns = /keyword|query|term|phrase|search term|kw/i;
+    const volPatterns = /volume|vol|search vol|monthly|searches|avg/i;
+    let kwIdx = headers.findIndex(h => kwPatterns.test(h));
+    let volIdx = headers.findIndex(h => volPatterns.test(h));
+    // Fallback: first text-looking col = keyword, first numeric = volume
+    if (kwIdx === -1) kwIdx = 0;
+    if (volIdx === -1) {
+        // Try to find a column with numeric data
+        volIdx = headers.findIndex((h, i) => i !== kwIdx && /vol|search|monthly|avg|traffic/i.test(h));
+        if (volIdx === -1) volIdx = kwIdx === 0 ? 1 : 0;
+    }
+    return { kwIdx, volIdx };
+}
+
+function setupColumnMapper(name, headers, count) {
+    const { kwIdx, volIdx } = autoDetectColumns(headers);
+    const kwSel = document.getElementById('kwColSelect');
+    const volSel = document.getElementById('volColSelect');
+    kwSel.innerHTML = headers.map((h, i) => `<option value="${i}" ${i === kwIdx ? 'selected' : ''}>${h || 'Column ' + (i+1)}</option>`).join('');
+    volSel.innerHTML = `<option value="-1">— None —</option>` + headers.map((h, i) => `<option value="${i}" ${i === volIdx ? 'selected' : ''}>${h || 'Column ' + (i+1)}</option>`).join('');
+    document.getElementById('colMapper').classList.add('show');
+    const status = document.getElementById('fileStatus');
+    status.innerHTML = `✅ <strong>${name}</strong> — ${count.toLocaleString()} rows · Auto-detected: keyword = "<strong>${headers[kwIdx] || 'Col ' + (kwIdx+1)}</strong>", volume = "<strong>${headers[volIdx] || 'none'}</strong>"`;
+    status.classList.add('show');
+}
+
+function buildKwArray() {
+    const kwIdx = parseInt(document.getElementById('kwColSelect').value);
+    const volIdx = parseInt(document.getElementById('volColSelect').value);
+    allKw = [];
+    rawRows.forEach(row => {
+        const kw = (row[kwIdx] || '').trim();
+        if (!kw) return;
+        const vol = volIdx >= 0 ? (parseInt(String(row[volIdx]).replace(/[^0-9]/g, '')) || 0) : 0;
+        allKw.push({ keyword: kw, volume: vol });
+    });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FEATURE 7: NEAR-DUPLICATE REMOVAL
+// ═══════════════════════════════════════════════════════════════
+function normalize(kw) {
+    return kw.toLowerCase().trim()
+        .replace(/s\b/g, '')       // crude plural → singular
+        .replace(/ing\b/g, '')     // gerund
+        .replace(/ed\b/g, '')      // past tense
+        .replace(/[^a-z0-9\s]/g, '')
+        .replace(/\s+/g, ' ').trim();
+}
+
+function deduplicateKeywords(kwList) {
+    const seen = new Map(); // normalized → original best (highest volume)
+    const dupeOf = new Map(); // index → index of canonical
+    kwList.forEach((item, i) => {
+        const norm = normalize(item.keyword);
+        if (seen.has(norm)) {
+            const existingIdx = seen.get(norm);
+            if (item.volume > kwList[existingIdx].volume) {
+                dupeOf.set(existingIdx, i);
+                seen.set(norm, i);
             } else {
-                alert('❌ Only CSV and Excel files supported');
+                dupeOf.set(i, existingIdx);
             }
+        } else {
+            seen.set(norm, i);
         }
+    });
+    return { unique: kwList.filter((_, i) => !dupeOf.has(i)), dupeIndices: dupeOf };
+}
 
-        function parseCSV(content, fileName) {
-            const lines = content.trim().split('\n');
-            allKeywords = [];
+// ═══════════════════════════════════════════════════════════════
+// INTENT CLASSIFICATION
+// ═══════════════════════════════════════════════════════════════
+const SIGNALS = {
+    transactional: ['buy','order','purchase','shop','price','pricing','cost','cheap','deal','discount','coupon','near me','delivery','hire','book','booking','quote','get quote','free trial','subscribe','sign up','install','apply','rent','affordable','best price','low cost','offer','checkout','order online','buy online'],
+    informational: ['how to','how do','how does','what is','what are','why is','why does','when to','where to','guide','tutorial','tips','learn','understand','explain','difference between','meaning of','definition','examples','types of','list of','overview','introduction','beginners','step by step','checklist','template','ideas','inspiration','benefits','advantages','disadvantages','problems','mistakes','common','complete','ultimate','everything about','explained','vs','versus'],
+    commercial: ['best','top','review','reviews','comparison','compare','alternative','alternatives','recommend','recommended','which','pros cons','worth it','is it good','should i','ranking','rated','2024','2025','2026'],
+    navigational: ['login','sign in','website','official','contact','support','customer service','helpdesk','app','portal','dashboard','account','homepage']
+};
 
-            lines.forEach((line, i) => {
-                if (i === 0 || !line.trim()) return;
-                const parts = line.split('|');
-                const kw = parts[0]?.trim();
-                
-                if (kw) {
-                    allKeywords.push({
-                        keyword: kw,
-                        volume: parseInt(parts[1]?.trim()) || 0,
-                        type: parts[2]?.trim() || ''
-                    });
-                }
-            });
+function classifyIntent(kw) {
+    const k = kw.toLowerCase();
+    if (SIGNALS.transactional.some(s => k.includes(s))) return 'transactional';
+    if (SIGNALS.informational.some(s => k.includes(s))) return 'informational';
+    if (SIGNALS.commercial.some(s => k.includes(s))) return 'commercial';
+    if (SIGNALS.navigational.some(s => k.includes(s))) return 'navigational';
+    const words = k.split(/\s+/).filter(Boolean);
+    return words.length >= 3 ? 'informational' : 'commercial';
+}
 
-            showFileLoaded(fileName, allKeywords.length);
-        }
+// ═══════════════════════════════════════════════════════════════
+// FEATURE 2: SERP FEATURE PREDICTION
+// ═══════════════════════════════════════════════════════════════
+function predictSerpFeatures(kw, intent) {
+    const k = kw.toLowerCase();
+    const features = [];
+    // Featured Snippet: question-format or how-to
+    if (/^(how|what|why|when|where|which|who|is|are|can|does|do|should)\b/.test(k) || k.includes('how to') || k.includes('what is')) features.push('FS');
+    // PAA: questions + informational
+    if ((/^(how|what|why|when|where|which|who)\b/.test(k)) || intent === 'informational') features.push('PAA');
+    // Local pack: near me, local, city names pattern
+    if (k.includes('near me') || k.includes('local') || k.includes('in ') || k.includes('near')) features.push('LOCAL');
+    // Video: tutorial, how to, learn
+    if (k.includes('tutorial') || k.includes('how to') || k.includes('learn') || k.includes('step by step') || k.includes('course')) features.push('VIDEO');
+    // Image pack: types, examples, ideas, inspiration, design, style
+    if (k.includes('examples') || k.includes('ideas') || k.includes('inspiration') || k.includes('design') || k.includes('template') || k.includes('style')) features.push('IMG');
+    // Shopping: buy, price, shop, product
+    if (intent === 'transactional' && (k.includes('buy') || k.includes('price') || k.includes('shop') || k.includes('cheap'))) features.push('SHOP');
+    return features;
+}
 
-        function parseExcel(buffer, fileName) {
-            try {
-                const workbook = XLSX.read(buffer, { type: 'array' });
-                const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                const data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-                allKeywords = [];
+// ═══════════════════════════════════════════════════════════════
+// FEATURE 3: KEYWORD DIFFICULTY ESTIMATE
+// ═══════════════════════════════════════════════════════════════
+function estimateDifficulty(kw, volume) {
+    const k = kw.toLowerCase();
+    const words = k.split(/\s+/).filter(Boolean);
+    let d = 50; // base
 
-                data.forEach((row, i) => {
-                    if (i === 0 || !row[0]) return;
-                    
-                    const kw = row[0]?.toString().trim();
-                    if (kw) {
-                        allKeywords.push({
-                            keyword: kw,
-                            volume: parseInt(row[1]) || 0,
-                            type: row[2]?.toString().trim() || ''
-                        });
-                    }
-                });
+    // More words = less competition (long-tail effect)
+    if (words.length === 1) d += 35;
+    else if (words.length === 2) d += 20;
+    else if (words.length === 3) d += 5;
+    else if (words.length >= 4) d -= 10;
+    else if (words.length >= 6) d -= 20;
 
-                showFileLoaded(fileName, allKeywords.length);
-            } catch (error) {
-                alert('❌ Error reading Excel: ' + error.message);
+    // High volume = more competitive
+    if (volume > 100000) d += 25;
+    else if (volume > 10000) d += 15;
+    else if (volume > 1000) d += 5;
+    else if (volume <= 100) d -= 10;
+
+    // Branded = high difficulty
+    const brandSignals = ['google','facebook','amazon','apple','microsoft','youtube','instagram','twitter','linkedin','shopify','hubspot','salesforce','mailchimp'];
+    if (brandSignals.some(b => k.includes(b))) d += 20;
+
+    // Question-format = often easier (less exact competition)
+    if (/^(how|what|why|when|where|which|who)\b/.test(k)) d -= 8;
+
+    // Informational long-tail = typically easier
+    if (words.length >= 5 && SIGNALS.informational.some(s => k.includes(s))) d -= 12;
+
+    // Near me = local = moderate
+    if (k.includes('near me')) d = Math.max(d - 5, 20);
+
+    return Math.max(1, Math.min(99, Math.round(d)));
+}
+
+function diffLabel(d) {
+    if (d >= 80) return { label: 'VH', color: '#ef4444' };
+    if (d >= 60) return { label: 'H', color: '#f59e0b' };
+    if (d >= 40) return { label: 'M', color: '#3b82f6' };
+    if (d >= 20) return { label: 'L', color: '#10b981' };
+    return { label: 'VL', color: '#34d399' };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// QUALITY SCORING
+// ═══════════════════════════════════════════════════════════════
+const JUNK_PATTERNS = [
+    /\s{2,}/, /\|{2,}/, /\[.*\[/, /\(.*\(/, /[^\w\s'\-&.,()\/+%#@!?:]{2,}/,
+    /^\d+$/, /^[a-z]{1,2}$/, /webhook|api key|json\b|xml\b|html tag|css class|onclick/i,
+    /\btest\b|\bdemo\b|\bsample\b|\bfoo\b|\bbar\b/i, /(.)\1{4,}/, /\b(xxx|nsfw)\b/i
+];
+
+const EMPTY_SEEDS = new Set(['software','tool','tools','app','website','service','services','platform','solution','solutions','product','products','company','business','management','system','data','marketing','digital','online','web','content','media','technology','tech','process','strategy','information','work','job','jobs','career']);
+
+const REJECTION_REASONS = {
+    junk_pattern: 'Junk/noise pattern detected',
+    vague_seed: 'Single vague seed word — no content potential',
+    low_score: 'Quality score below threshold',
+    low_volume: 'Search volume below minimum',
+    too_many_words: 'Too many words (exceeds max)',
+    intent_filtered: 'Filtered out by intent selection',
+    near_duplicate: 'Near-duplicate of another keyword',
+};
+
+function scoreKeyword(kw, volume) {
+    const k = kw.toLowerCase().trim();
+    const words = k.split(/\s+/).filter(Boolean);
+    let score = 0;
+
+    for (const p of JUNK_PATTERNS) {
+        if (p.test(k)) return { score: 0, pass: false, reason: 'junk_pattern' };
+    }
+
+    if (words.length === 1 && EMPTY_SEEDS.has(k)) {
+        if (volume > 5000) score = 35;
+        else return { score: 10, pass: false, reason: 'vague_seed' };
+    }
+
+    if (words.length === 1) score += 5;
+    else if (words.length === 2) score += 12;
+    else if (words.length <= 5) score += 22;
+    else if (words.length <= 9) score += 20;
+    else if (words.length <= 12) score += 14;
+    else score += 6;
+
+    const realWords = words.filter(w => w.length >= 3 && /^[a-zA-Z]/.test(w));
+    score += Math.round((realWords.length / Math.max(words.length, 1)) * 15);
+
+    const intent = classifyIntent(kw);
+    score += intent !== 'navigational' ? 18 : 5;
+
+    const hasSignal = Object.values(SIGNALS).flat().some(s => k.includes(s));
+    if (hasSignal) score += 15;
+
+    if (volume > 10000) score += 20;
+    else if (volume > 1000) score += 15;
+    else if (volume > 100) score += 10;
+    else if (volume > 0) score += 5;
+
+    const specialCount = (k.match(/[^a-zA-Z0-9\s'\-&]/g) || []).length;
+    if (specialCount > 2) score -= specialCount * 4;
+
+    const stopwords = ['the','a','an','to','for','of','in','on','at','by'];
+    if (stopwords.includes(words[0]) && words.length <= 2) score -= 10;
+
+    if (/^(how|what|why|when|where|which|who|is|are|can|does|do|should)\b/i.test(k)) score += 8;
+
+    const modifiers = ['best','top','cheap','affordable','free','easy','fast','quick','complete','ultimate','full','simple'];
+    if (modifiers.some(m => k.includes(m))) score += 8;
+
+    return { score: Math.max(0, Math.min(100, Math.round(score))), pass: true, intent };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CONTENT TYPE
+// ═══════════════════════════════════════════════════════════════
+function contentType(intent, kw) {
+    if (intent === 'transactional' || intent === 'navigational') return 'page';
+    if (intent === 'commercial') return kw.split(/\s+/).filter(Boolean).length >= 4 ? 'blog' : 'page';
+    return 'blog';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TITLE GENERATION
+// ═══════════════════════════════════════════════════════════════
+function suggestTitle(kw, intent) {
+    const k = kw.trim();
+    const isQ = /^(how|what|why|when|where|which|who|is|are|can|does|do|should)\b/i.test(k);
+    const h = s => { let n = 0; for (let i = 0; i < s.length; i++) n = (Math.imul(31,n) + s.charCodeAt(i)) | 0; return Math.abs(n); };
+    const tc = s => s.replace(/\b\w+/g, (w,i) => { const m = new Set(['a','an','the','and','but','or','for','nor','on','at','to','by','in','of','up','as','if','is','are']); return (i===0||!m.has(w.toLowerCase())) ? w[0].toUpperCase()+w.slice(1) : w; });
+    const T = {
+        informational: isQ ? [`${tc(k.replace(/^(how to|what is|what are|how do|how does)\s+/i,''))}: Complete Guide`] : [`How to ${tc(k)}: Step-by-Step Guide`,`${tc(k)}: Everything You Need to Know`,`The Ultimate Guide to ${tc(k)}`,`${tc(k)} Explained for Beginners`,`${tc(k)}: Tips, Examples & Best Practices`],
+        transactional: [`Best ${tc(k)} — Pricing & Options`,`${tc(k)}: Get Started Today`,`Hire ${tc(k)} Experts — Free Quote`,`Top-Rated ${tc(k)} Services`,`${tc(k)}: Compare Plans & Pricing`],
+        commercial: [`Best ${tc(k)} in 2026 — In-Depth Review`,`${tc(k)} vs Alternatives: Which Is Best?`,`Top ${tc(k)} Tools Compared`,`${tc(k)}: Pros, Cons & Our Verdict`,`Is ${tc(k)} Worth It? Honest Review`],
+        navigational: [`${tc(k)} — Official Resource`]
+    };
+    const opts = T[intent] || T.informational;
+    return opts[h(k) % opts.length];
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FEATURE 4: TOPIC CLUSTERING
+// ═══════════════════════════════════════════════════════════════
+function extractTopicCore(kw) {
+    const stopwords = new Set(['how','to','what','is','are','why','when','where','which','who','a','an','the','and','or','for','in','on','at','of','do','does','can','should','best','top','vs','with','your','my','our','their','get','use','make','need','want','find','buy','using']);
+    const words = kw.toLowerCase().split(/\s+/).filter(w => w.length > 2 && !stopwords.has(w));
+    return words.slice(0, 3).join(' '); // take up to 3 core words
+}
+
+function clusterKeywords(kwList) {
+    // Build clusters by finding overlapping core topic words
+    const clusters = [];
+    const assigned = new Set();
+
+    kwList.forEach((item, i) => {
+        if (assigned.has(i)) return;
+        const coreA = extractTopicCore(item.keyword);
+        const wordsA = new Set(coreA.split(' '));
+
+        const cluster = { topic: item.keyword, keywords: [{ ...item, isPrimary: true }] };
+        assigned.add(i);
+
+        kwList.forEach((other, j) => {
+            if (i === j || assigned.has(j)) return;
+            const coreB = extractTopicCore(other.keyword);
+            const wordsB = new Set(coreB.split(' '));
+            // Jaccard similarity on core words
+            const intersection = [...wordsA].filter(w => wordsB.has(w)).length;
+            const union = new Set([...wordsA, ...wordsB]).size;
+            const sim = union > 0 ? intersection / union : 0;
+            if (sim >= 0.4 || coreA.includes(coreB) || coreB.includes(coreA)) {
+                cluster.keywords.push({ ...other, isPrimary: false });
+                assigned.add(j);
             }
-        }
+        });
 
-        function showFileLoaded(fileName, count) {
-            document.getElementById('fileStatus').innerHTML = `✅ <strong>${fileName}</strong> loaded with ${count} keywords`;
-            document.getElementById('fileStatus').classList.add('show');
-        }
+        // Sort: highest volume = primary
+        cluster.keywords.sort((a, b) => (b.volume || 0) - (a.volume || 0));
+        cluster.keywords[0].isPrimary = true;
+        cluster.topic = cluster.keywords[0].keyword;
 
-        // KEYWORD VALIDATION - Check if natural search query
-        function isNaturalKeyword(keyword) {
-            const kw = keyword.toLowerCase().trim();
-            
-            // Remove noise
-            if (kw.length < 2) return false;
-            if (/^[^a-zA-Z0-9]*$/.test(kw)) return false;
-            if (kw.match(/\d{5,}/)) return false;
-            
-            // Check for obviously unnatural patterns
-            const unnatural = [
-                /^\d[\d\s]*$/, // pure numbers
-                /\|\|/, // double pipe
-                /{{/, // template
-                /\[\[/, // wiki syntax
-                /[^\w\s\-'&].*[^\w\s\-'&].*[^\w\s\-'&]/, // too many special chars
-            ];
-            
-            return !unnatural.some(pattern => pattern.test(kw));
-        }
+        clusters.push(cluster);
+    });
 
-        // COMMERCIAL INTENT DETECTION
-        function isCommercialIntent(keyword) {
-            const kw = keyword.toLowerCase();
-            const commercialTerms = [
-                'service', 'agency', 'hire', 'company', 'provider',
-                'solution', 'software', 'tool', 'platform',
-                'buy', 'purchase', 'price', 'cost', 'pricing',
-                'best', 'top', 'cheap', 'affordable',
-                'professional', 'expert', 'trusted',
-                'vs', 'alternative', 'compare'
-            ];
-            
-            return commercialTerms.some(term => kw.includes(term));
-        }
+    return clusters.sort((a, b) => b.keywords.length - a.keywords.length);
+}
 
-        // INFORMATIONAL INTENT DETECTION
-        function isInformationalIntent(keyword) {
-            const kw = keyword.toLowerCase();
-            const informationalTerms = [
-                'how', 'what', 'why', 'when', 'where', 'which',
-                'guide', 'tutorial', 'tips', 'best practices',
-                'learn', 'understand', 'explain', 'meaning',
-                'definition', 'example', 'examples',
-                'tool', 'feature', 'how to use', 'how to create'
-            ];
-            
-            return informationalTerms.some(term => kw.includes(term));
-        }
+// ═══════════════════════════════════════════════════════════════
+// FEATURE 1: CANNIBALIZATION DETECTION
+// ═══════════════════════════════════════════════════════════════
+function detectCannibalization(clusterList, simThreshold) {
+    clusterList.forEach(cluster => {
+        // Within a cluster: if 2+ keywords have the same intent AND same content type → cannibalization risk
+        const sameTarget = {};
+        cluster.keywords.forEach(kw => {
+            const key = `${kw.intent}-${kw.ctype}`;
+            if (!sameTarget[key]) sameTarget[key] = [];
+            sameTarget[key].push(kw);
+        });
+        cluster.cannibalGroups = Object.values(sameTarget).filter(g => g.length > 1);
+        cluster.hasCannibal = cluster.cannibalGroups.length > 0;
+    });
+    return clusterList;
+}
 
-        // DETERMINE INTENT
-        function determineIntent(keyword) {
-            if (isCommercialIntent(keyword)) return 'commercial';
-            if (isInformationalIntent(keyword)) return 'informational';
-            return 'navigational';
-        }
+// ═══════════════════════════════════════════════════════════════
+// MAIN RUN
+// ═══════════════════════════════════════════════════════════════
+function run() {
+    if (!rawRows.length) { alert('Please upload a keyword file first.'); return; }
 
-        // CATEGORIZE BY BUCKET
-        function categorizeKeyword(keyword, intent) {
-            const kw = keyword.toLowerCase();
+    const btn = document.getElementById('runBtn');
+    btn.innerHTML = '<span class="spin"></span> Analyzing...';
+    btn.disabled = true;
 
-            // COMMERCIAL
-            if (intent === 'commercial') {
-                if (kw.includes('vs') || kw.includes('comparison')) return 'comparison';
-                return 'service';
-            }
+    buildKwArray();
 
-            // INFORMATIONAL
-            if (intent === 'informational') {
-                if (kw.includes('tool') || kw.includes('feature')) return 'tool';
-                if (kw.includes('vs') || kw.includes('comparison')) return 'comparison';
-                return 'blog';
-            }
+    const minVol = parseInt(document.getElementById('minVolume').value) || 0;
+    const threshold = parseInt(document.getElementById('qualityThreshold').value) || 55;
+    const maxWords = parseInt(document.getElementById('maxWords').value) || 12;
+    const cannibalThreshold = parseFloat(document.getElementById('cannibalThreshold').value) || 0.65;
+    const intentFilter = selectedIntents.size > 0 ? selectedIntents : null;
 
-            // NAVIGATIONAL
-            return 'blog';
-        }
+    setTimeout(() => {
+        // Step 1: Near-duplicate removal
+        const { unique: dedupedKw, dupeIndices } = deduplicateKeywords(allKw);
 
-        // DETERMINE PAGE TYPE
-        function determinePageType(category, intent) {
-            const pageTypes = {
-                'service-commercial': 'Landing Page',
-                'service-informational': 'Blog',
-                'service-navigational': 'Blog',
-                'blog-commercial': 'Comparison',
-                'blog-informational': 'Guide/Tutorial',
-                'blog-navigational': 'Blog',
-                'tool-commercial': 'Comparison',
-                'tool-informational': 'Tutorial',
-                'tool-navigational': 'Guide',
-                'comparison-commercial': 'Comparison',
-                'comparison-informational': 'Comparison',
-                'comparison-navigational': 'Comparison'
-            };
-            
-            return pageTypes[`${category}-${intent}`] || 'Blog';
-        }
+        // Step 2: Score, filter, enrich each keyword
+        const scored = allKw.map((item, origIdx) => {
+            const isDupe = dupeIndices.has(origIdx);
+            const result = scoreKeyword(item.keyword, item.volume);
+            const intent = result.intent || classifyIntent(item.keyword);
+            const ctype = contentType(intent, item.keyword);
+            const title = suggestTitle(item.keyword, intent);
+            const wordCount = item.keyword.split(/\s+/).filter(Boolean).length;
+            const diff = estimateDifficulty(item.keyword, item.volume);
+            const serpFeatures = predictSerpFeatures(item.keyword, intent);
 
-        function processKeywords() {
-            if (!allKeywords.length) {
-                alert('❌ Please upload a file first');
-                return;
-            }
+            let rejectReason = null;
+            if (isDupe) rejectReason = 'near_duplicate';
+            else if (!result.pass) rejectReason = result.reason;
+            else if (item.volume < minVol) rejectReason = 'low_volume';
+            else if (wordCount > maxWords) rejectReason = 'too_many_words';
+            else if (result.score < threshold) rejectReason = 'low_score';
+            else if (intentFilter && !intentFilter.has(intent)) rejectReason = 'intent_filtered';
 
-            const btn = document.getElementById('processBtn');
-            btn.innerHTML = '<span class="loading"></span> Processing...';
-            btn.disabled = true;
+            return { ...item, score: result.score, intent, ctype, title, diff, serpFeatures, passes: !rejectReason, rejectReason };
+        });
 
-            setTimeout(() => {
-                // Clean keywords
-                const cleanedKeywords = allKeywords.filter(k => isNaturalKeyword(k.keyword));
-                const removed = allKeywords.length - cleanedKeywords.length;
+        curated = scored.filter(k => k.passes).sort((a, b) => (b.volume || 0) - (a.volume || 0));
+        rejected = scored.filter(k => !k.passes);
 
-                // Segment
-                segmentedData = cleanedKeywords.map((kw, idx) => {
-                    const intent = determineIntent(kw.keyword);
-                    const category = categorizeKeyword(kw.keyword, intent);
-                    const pageType = determinePageType(category, intent);
+        // Step 3: Topic clustering
+        let rawClusters = clusterKeywords(curated);
+        clusters = detectCannibalization(rawClusters, cannibalThreshold);
 
-                    return {
-                        index: idx + 1,
-                        keyword: kw.keyword,
-                        intent: intent,
-                        category: category,
-                        pageType: pageType,
-                        volume: kw.volume,
-                        originalType: kw.type
-                    };
-                }).sort((a, b) => (b.volume || 0) - (a.volume || 0));
+        // Stats
+        const tx = curated.filter(k => k.intent === 'transactional').length;
+        const cm = curated.filter(k => k.intent === 'commercial').length;
+        const inf = curated.filter(k => k.intent === 'informational').length;
+        const nv = curated.filter(k => k.intent === 'navigational').length;
+        const pages = curated.filter(k => k.ctype === 'page').length;
+        const blogs = curated.filter(k => k.ctype === 'blog').length;
+        const cannibalCount = clusters.filter(c => c.hasCannibal).length;
+        const dupeCount = rejected.filter(k => k.rejectReason === 'near_duplicate').length;
 
-                // Stats
-                const commercial = segmentedData.filter(k => k.intent === 'commercial').length;
-                const informational = segmentedData.filter(k => k.intent === 'informational').length;
-                const navigational = segmentedData.filter(k => k.intent === 'navigational').length;
+        document.getElementById('statsBar').innerHTML = `
+            <div class="stat good"><div class="stat-n">${curated.length.toLocaleString()}</div><div class="stat-l">Passed</div></div>
+            <div class="stat warn"><div class="stat-n">${rejected.length.toLocaleString()}</div><div class="stat-l">Rejected</div></div>
+            <div class="stat pink"><div class="stat-n">${dupeCount}</div><div class="stat-l">Dupes Removed</div></div>
+            <div class="stat warn"><div class="stat-n">${cannibalCount}</div><div class="stat-l">Cannibal Risk</div></div>
+            <div class="stat info"><div class="stat-n">${clusters.length}</div><div class="stat-l">Clusters</div></div>
+            <div class="stat info"><div class="stat-n">${tx}</div><div class="stat-l">Transactional</div></div>
+            <div class="stat amber"><div class="stat-n">${cm}</div><div class="stat-l">Commercial</div></div>
+            <div class="stat purple"><div class="stat-n">${inf}</div><div class="stat-l">Informational</div></div>
+            <div class="stat good"><div class="stat-n">${pages}</div><div class="stat-l">→ Pages</div></div>
+            <div class="stat purple"><div class="stat-n">${blogs}</div><div class="stat-l">→ Blogs</div></div>
+        `;
 
-                document.getElementById('totalKw').textContent = allKeywords.length;
-                document.getElementById('cleanKw').textContent = cleanedKeywords.length;
-                document.getElementById('commercialCount').textContent = commercial;
-                document.getElementById('informationalCount').textContent = informational;
-                document.getElementById('navigationalCount').textContent = navigational;
+        // Tabs
+        document.getElementById('tabsEl').innerHTML = `
+            <button class="tab active" onclick="switchTab('all',this)">All (${curated.length})</button>
+            <button class="tab" onclick="switchTab('transactional',this)">💳 Transactional (${tx})</button>
+            <button class="tab tab-amber" onclick="switchTab('commercial',this)">🔍 Commercial (${cm})</button>
+            <button class="tab" onclick="switchTab('informational',this)">📖 Informational (${inf})</button>
+            <button class="tab tab-purple" onclick="switchTab('navigational',this)">🧭 Navigational (${nv})</button>
+            <button class="tab" onclick="switchTab('page',this)">📄 Page (${pages})</button>
+            <button class="tab tab-purple" onclick="switchTab('blog',this)">✍ Blog (${blogs})</button>
+        `;
 
-                renderTable('all');
-                document.getElementById('resultsSection').classList.add('show');
+        activeTab = 'all';
+        renderTable();
+        renderClusters();
+        renderRejected();
 
-                btn.innerHTML = '🔄 Analyze & Segment Keywords';
-                btn.disabled = false;
-            }, 500);
-        }
+        document.getElementById('results').classList.add('show');
+        btn.innerHTML = '⚡ Analyze & Curate Keywords';
+        btn.disabled = false;
+        document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 300);
+}
 
-        function renderTable(intent) {
-            currentFilter = intent;
-            const filtered = intent === 'all' ? segmentedData : segmentedData.filter(k => k.intent === intent);
-            
-            const tbody = document.getElementById('tableBody');
-            tbody.innerHTML = filtered.map((row, idx) => `
-                <tr>
-                    <td>${row.index}</td>
-                    <td class="keyword-cell">${row.keyword}</td>
-                    <td>
-                        <span class="intent-badge intent-${row.intent}">
-                            ${row.intent === 'commercial' ? '💰' : row.intent === 'informational' ? '📚' : '🔗'} 
-                            ${row.intent.charAt(0).toUpperCase() + row.intent.slice(1)}
-                        </span>
-                    </td>
-                    <td>
-                        <span class="category-badge ${row.category}">
-                            ${row.category === 'service' ? '🛠️' : row.category === 'blog' ? '📝' : row.category === 'tool' ? '⚙️' : '📊'} 
-                            ${row.category.charAt(0).toUpperCase() + row.category.slice(1)}
-                        </span>
-                    </td>
-                    <td><span class="page-type">${row.pageType}</span></td>
-                    <td style="text-align: right">${row.volume ? row.volume.toLocaleString() : '—'}</td>
-                    <td>✅ Clean</td>
-                </tr>
-            `).join('');
-        }
+// ═══════════════════════════════════════════════════════════════
+// RENDER: CURATED TABLE
+// ═══════════════════════════════════════════════════════════════
+function switchTab(tab, el) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    activeTab = tab;
+    renderTable();
+}
 
-        function filterIntent(intent) {
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-            renderTable(intent);
-        }
+function renderTable() {
+    const rows = curated.filter(k => {
+        if (activeTab === 'all') return true;
+        if (activeTab === 'page' || activeTab === 'blog') return k.ctype === activeTab;
+        return k.intent === activeTab;
+    });
 
-        function exportCSV() {
-            let csv = 'Keyword,Intent,Category,Page Type,Volume,Status\n';
-            
-            segmentedData.forEach(row => {
-                csv += `"${row.keyword}","${row.intent}","${row.category}","${row.pageType}","${row.volume || 0}","Clean"\n`;
-            });
+    if (!rows.length) { document.getElementById('tBody').innerHTML = `<tr><td colspan="9"><div class="empty">No keywords in this category.</div></td></tr>`; return; }
 
-            download(csv, 'keyword-segmentation.csv', 'text/csv');
-        }
+    const iB = { transactional:'<span class="badge badge-tx">💳 TX</span>', commercial:'<span class="badge badge-cm">🔍 CM</span>', informational:'<span class="badge badge-in">📖 INFO</span>', navigational:'<span class="badge badge-nv">🧭 NAV</span>' };
+    const serpMap = { FS:'serp-fs', PAA:'serp-paa', LOCAL:'serp-local', VIDEO:'serp-video', IMG:'serp-img', SHOP:'serp-shop' };
+    const sc = s => s >= 80 ? '#10b981' : s >= 60 ? '#f59e0b' : '#ef4444';
 
-        function exportJSON() {
-            const data = {
-                exportDate: new Date().toISOString(),
-                summary: {
-                    total: segmentedData.length,
-                    commercial: segmentedData.filter(k => k.intent === 'commercial').length,
-                    informational: segmentedData.filter(k => k.intent === 'informational').length,
-                    navigational: segmentedData.filter(k => k.intent === 'navigational').length
-                },
-                keywords: segmentedData.map(k => ({
-                    keyword: k.keyword,
-                    intent: k.intent,
-                    category: k.category,
-                    pageType: k.pageType,
-                    volume: k.volume
-                }))
-            };
+    document.getElementById('tBody').innerHTML = rows.map((r, i) => {
+        const { label, color } = diffLabel(r.diff);
+        const serpHTML = r.serpFeatures.length ? `<div class="serp-tags">${r.serpFeatures.map(f => `<span class="serp-tag ${serpMap[f]}">${f}</span>`).join('')}</div>` : '<span style="color:var(--muted);font-size:0.7rem">—</span>';
+        return `<tr>
+            <td style="color:var(--muted);font-family:var(--mono);font-size:0.72rem">${i+1}</td>
+            <td class="kw-cell">${escHtml(r.keyword)}</td>
+            <td class="title-cell">${escHtml(r.title)}</td>
+            <td>${iB[r.intent]||r.intent}</td>
+            <td><span class="ctype ctype-${r.ctype}">${r.ctype.toUpperCase()}</span></td>
+            <td>${serpHTML}</td>
+            <td><div class="diff-wrap"><div class="diff-bar"><div class="diff-fill" style="width:${r.diff}%;background:${color}"></div></div><span class="diff-label" style="color:${color}">${label}</span></div></td>
+            <td style="font-family:var(--mono);font-size:0.78rem;text-align:right">${r.volume ? r.volume.toLocaleString() : '—'}</td>
+            <td><div class="score-wrap"><div class="score-bar"><div class="score-fill" style="width:${r.score}%;background:${sc(r.score)}"></div></div><span class="score-num" style="color:${sc(r.score)}">${r.score}</span></div></td>
+        </tr>`;
+    }).join('');
+}
 
-            download(JSON.stringify(data, null, 2), 'keyword-segmentation.json', 'application/json');
-        }
+// ═══════════════════════════════════════════════════════════════
+// RENDER: CLUSTERS
+// ═══════════════════════════════════════════════════════════════
+function renderClusters() {
+    if (!clusters.length) { document.getElementById('clusterGrid').innerHTML = '<div class="empty">No clusters generated.</div>'; return; }
 
-        function exportText() {
-            let text = 'SEO KEYWORD SEGMENTATION REPORT\n';
-            text += '='.repeat(50) + '\n\n';
+    const intentColors = { transactional:'var(--green)', commercial:'var(--amber)', informational:'var(--accent)', navigational:'var(--purple)' };
 
-            text += 'SUMMARY:\n';
-            text += `Total Keywords: ${segmentedData.length}\n`;
-            text += `Commercial Intent: ${segmentedData.filter(k => k.intent === 'commercial').length}\n`;
-            text += `Informational Intent: ${segmentedData.filter(k => k.intent === 'informational').length}\n`;
-            text += `Navigational Intent: ${segmentedData.filter(k => k.intent === 'navigational').length}\n\n`;
+    document.getElementById('clusterGrid').innerHTML = clusters.map(c => {
+        const primaryIntent = c.keywords[0]?.intent || 'informational';
+        const cannibalWarn = c.hasCannibal ? `<div class="cannibal-warn">⚠ Cannibalization risk — ${c.cannibalGroups.map(g => g.length + ' keywords targeting same ' + g[0].ctype).join(', ')}. Consolidate into one page.</div>` : '';
+        const kwRows = c.keywords.slice(0, 6).map(kw => `
+            <div class="cluster-kw ${kw.isPrimary ? 'cluster-kw-primary' : ''}">
+                <span>${kw.isPrimary ? '★ ' : ''}${escHtml(kw.keyword)}</span>
+                <span class="cluster-vol">${kw.volume ? kw.volume.toLocaleString() : '—'}</span>
+            </div>`).join('');
+        const more = c.keywords.length > 6 ? `<div style="font-family:var(--mono);font-size:0.68rem;color:var(--muted);padding-top:0.4rem;">+${c.keywords.length - 6} more</div>` : '';
+        return `<div class="cluster-card">
+            <div class="cluster-header">
+                <span class="cluster-name">${escHtml(c.topic)}</span>
+                <span class="cluster-count">${c.keywords.length} kw</span>
+            </div>
+            <span class="cluster-pill" style="background:rgba(59,130,246,0.1);color:${intentColors[primaryIntent]};border:1px solid currentColor">${primaryIntent}</span>
+            ${cannibalWarn}
+            <div style="margin-top:0.75rem">${kwRows}${more}</div>
+        </div>`;
+    }).join('');
+}
 
-            text += 'COMMERCIAL INTENT (Landing Pages):\n';
-            text += '-'.repeat(50) + '\n';
-            segmentedData.filter(k => k.intent === 'commercial').forEach(k => {
-                text += `• ${k.keyword} (${k.pageType}) - Volume: ${k.volume || 0}\n`;
-            });
+// ═══════════════════════════════════════════════════════════════
+// RENDER: REJECTED TABLE (Feature 5)
+// ═══════════════════════════════════════════════════════════════
+function renderRejected() {
+    if (!rejected.length) { document.getElementById('rejBody').innerHTML = `<tr><td colspan="5"><div class="empty">No rejected keywords.</div></td></tr>`; return; }
+    const sc = s => s >= 60 ? '#10b981' : s >= 40 ? '#f59e0b' : '#ef4444';
+    document.getElementById('rejBody').innerHTML = rejected.map((r, i) => `
+        <tr>
+            <td style="color:var(--muted);font-family:var(--mono);font-size:0.72rem">${i+1}</td>
+            <td class="kw-cell" style="color:var(--muted)">${escHtml(r.keyword)}</td>
+            <td><span class="reject-reason-label">${REJECTION_REASONS[r.rejectReason] || r.rejectReason}</span></td>
+            <td><div class="score-wrap"><div class="score-bar"><div class="score-fill" style="width:${r.score}%;background:${sc(r.score)}"></div></div><span class="score-num" style="color:${sc(r.score)}">${r.score}</span></div></td>
+            <td style="font-family:var(--mono);font-size:0.78rem;text-align:right">${r.volume ? r.volume.toLocaleString() : '—'}</td>
+        </tr>`).join('');
+}
 
-            text += '\nINFORMATIONAL INTENT (Blog/Guides):\n';
-            text += '-'.repeat(50) + '\n';
-            segmentedData.filter(k => k.intent === 'informational').forEach(k => {
-                text += `• ${k.keyword} (${k.pageType}) - Volume: ${k.volume || 0}\n`;
-            });
+// ═══════════════════════════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════════════════════════
+function exportCSV() {
+    let csv = 'Keyword,Suggested Title,Intent,Content Type,SERP Features,KD Estimate,Volume,Quality Score\n';
+    curated.forEach(r => { csv += `"${r.keyword}","${r.title}","${r.intent}","${r.ctype}","${r.serpFeatures.join('/')}","${diffLabel(r.diff).label}","${r.volume}","${r.score}"\n`; });
+    dl(csv, 'curated-keywords.csv', 'text/csv');
+}
 
-            text += '\nNAVIGATIONAL INTENT:\n';
-            text += '-'.repeat(50) + '\n';
-            segmentedData.filter(k => k.intent === 'navigational').forEach(k => {
-                text += `• ${k.keyword} (${k.pageType}) - Volume: ${k.volume || 0}\n`;
-            });
+function exportClusters() {
+    let csv = 'Cluster Topic,Keyword,Is Primary,Intent,Content Type,Volume,Quality Score,Cannibalization Risk\n';
+    clusters.forEach(c => {
+        c.keywords.forEach(kw => {
+            csv += `"${c.topic}","${kw.keyword}","${kw.isPrimary ? 'YES' : 'no'}","${kw.intent}","${kw.ctype}","${kw.volume}","${kw.score}","${c.hasCannibal ? 'YES' : 'no'}"\n`;
+        });
+    });
+    dl(csv, 'keyword-clusters.csv', 'text/csv');
+}
 
-            download(text, 'keyword-segmentation.txt', 'text/plain');
-        }
+function exportJSON() {
+    const out = {
+        exportDate: new Date().toISOString(),
+        summary: { total: curated.length, rejected: rejected.length, clusters: clusters.length, cannibalizationRisks: clusters.filter(c => c.hasCannibal).length },
+        curated: curated.map(k => ({ keyword: k.keyword, title: k.title, intent: k.intent, contentType: k.ctype, serpFeatures: k.serpFeatures, difficultyEstimate: diffLabel(k.diff).label, volume: k.volume, qualityScore: k.score })),
+        clusters: clusters.map(c => ({ topic: c.topic, cannibalizationRisk: c.hasCannibal, keywords: c.keywords.map(k => ({ keyword: k.keyword, isPrimary: k.isPrimary, intent: k.intent, ctype: k.ctype, volume: k.volume })) })),
+        rejected: rejected.map(k => ({ keyword: k.keyword, reason: REJECTION_REASONS[k.rejectReason] || k.rejectReason, score: k.score, volume: k.volume }))
+    };
+    dl(JSON.stringify(out, null, 2), 'keyword-report.json', 'application/json');
+}
 
-        function download(content, filename, type) {
-            const blob = new Blob([content], { type });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            a.click();
-            URL.revokeObjectURL(url);
-        }
+function exportText() {
+    const sep = '─'.repeat(60);
+    let t = `SEO KEYWORD CURATION REPORT v2\n${sep}\nGenerated: ${new Date().toLocaleString()}\nCurated: ${curated.length} | Rejected: ${rejected.length} | Clusters: ${clusters.length}\n\n`;
+    t += `CANNIBALIZATION RISKS: ${clusters.filter(c=>c.hasCannibal).length} cluster(s)\n${sep}\n`;
+    clusters.filter(c=>c.hasCannibal).forEach(c => { t += `• ${c.topic} → ${c.cannibalGroups.map(g=>g.map(k=>k.keyword).join(' vs ')).join('; ')}\n`; });
+    t += `\nTOPIC CLUSTERS\n${sep}\n`;
+    clusters.forEach(c => { t += `\n[${c.keywords.length} kw] ${c.topic}${c.hasCannibal?' ⚠ CANNIBAL':''}\n`; c.keywords.forEach(k => { t += `  ${k.isPrimary?'★':' '} ${k.keyword} (${k.intent}, ${k.ctype}, vol: ${k.volume||'—'})\n`; }); });
+    t += `\nCURATED KEYWORDS\n${sep}\n`;
+    ['transactional','commercial','informational','navigational'].forEach(intent => {
+        const g = curated.filter(k=>k.intent===intent);
+        if (!g.length) return;
+        t += `\n${intent.toUpperCase()} (${g.length})\n`;
+        g.forEach(k => { t += `• ${k.keyword}\n  Title: ${k.title}\n  Type: ${k.ctype.toUpperCase()} | SERP: ${k.serpFeatures.join(',')||'—'} | KD: ${diffLabel(k.diff).label} | Vol: ${k.volume||'N/A'} | Score: ${k.score}\n\n`; });
+    });
+    t += `\nREJECTED KEYWORDS\n${sep}\n`;
+    rejected.forEach(k => { t += `✗ ${k.keyword} — ${REJECTION_REASONS[k.rejectReason]||k.rejectReason}\n`; });
+    dl(t, 'keyword-report.txt', 'text/plain');
+}
 
-        function resetForm() {
-            allKeywords = [];
-            segmentedData = [];
-            fileInput.value = '';
-            document.getElementById('fileStatus').classList.remove('show');
-            document.getElementById('resultsSection').classList.remove('show');
-        }
-    </script>
+function dl(content, name, type) {
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([content],{type})); a.download = name; a.click();
+}
+
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function resetAll() {
+    allKw=[]; curated=[]; rejected=[]; clusters=[]; rawHeaders=[]; rawRows=[];
+    document.getElementById('fileStatus').classList.remove('show');
+    document.getElementById('colMapper').classList.remove('show');
+    document.getElementById('results').classList.remove('show');
+    document.getElementById('fileInput').value='';
+    document.querySelectorAll('.pill.active').forEach(p=>p.classList.remove('active'));
+    selectedIntents.clear();
+}
+
+const REJECTION_REASONS = {
+    junk_pattern: 'Junk / noise pattern detected',
+    vague_seed: 'Single vague seed — no content potential',
+    low_score: 'Quality score below threshold',
+    low_volume: 'Search volume below minimum',
+    too_many_words: 'Exceeds max word count',
+    intent_filtered: 'Filtered by intent selection',
+    near_duplicate: 'Near-duplicate of higher-volume keyword',
+};
+</script>
 </body>
 </html>
