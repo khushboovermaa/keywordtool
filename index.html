@@ -1054,40 +1054,134 @@ function scoreKeyword(kw, volume) {
 // "how to generate leads on linkedin" = blog (educational)
 // "proven content framework for inbound leads" = blog (educational)
 function contentType(intent, kw) {
-    const k = kw.toLowerCase();
+    const k = kw.toLowerCase().trim();
+    const words = k.split(/\s+/);
 
-    // Navigational = always page (brand/direct searches)
-    if (intent === 'navigational') return 'page';
-
-    // Hard service page signals — someone is looking to HIRE or BUY
+    // ─────────────────────────────────────────────────────────────────────
+    // TIER 1: CLEAR SERVICE PAGE INTENT (HIRE / BUY / COMMERCIAL)
+    // ─────────────────────────────────────────────────────────────────────
     const SERVICE_SIGNALS = [
-        'agency','agencies','service','services','company','companies',
-        'provider','providers','consultant','consultancy','outsource',
-        'hire','pricing','price','cost','quote','package','packages',
-        'firm','firms','partner','managed','done for you','done-for-you',
-        'freelancer','contractor','retainer','proposal'
+        // BUYING/HIRING INTENT
+        'buy ', 'purchase', 'order', 'pricing', 'price', 'cost', 'quote',
+        'package', 'plan', 'deal', 'discount', 'coupon', 'offer', 'free trial',
+        
+        // SERVICE PROVIDER INTENT
+        'agency', 'agencies', 'service', 'services', 'provider', 'providers',
+        'company', 'companies', 'firm', 'consultant', 'consulting',
+        'hire', 'freelancer', 'contractor', 'outsource',
+        
+        // MANAGED/PROFESSIONAL SERVICES
+        'done for you', 'done-for-you', 'managed', 'managed service',
+        'white label', 'partner', 'work with',
+        
+        // COMMERCIAL COMPARISON
+        'vs ', 'versus', 'compare', 'alternative', 'better than'
     ];
-    const isServiceIntent = SERVICE_SIGNALS.some(s => k.includes(s));
 
-    // Hard blog signals — someone is learning, comparing, or researching
+    // ─────────────────────────────────────────────────────────────────────
+    // TIER 2: CLEAR BLOG INTENT (LEARN / UNDERSTAND / HOW-TO)
+    // ─────────────────────────────────────────────────────────────────────
     const BLOG_SIGNALS = [
-        'how to','what is','what are','why','guide','tutorial','tips',
-        'best ','top ','vs ','versus','review','reviews','alternative',
-        'examples','template','checklist','framework','strategy','strategies',
-        'ideas','inspiration','explained','learn','understand','difference',
-        'comparison','compare','tool','tools','software','platform','app',
-        'headline','recommendation','export','download','import','extract',
-        'course','training','certification','program','programme','webinar'
+        // LEARNING INTENT (HIGHEST PRIORITY)
+        'how to', 'how do', 'how can', 'how will',
+        'what is', 'what are', 'what does', 'explain',
+        'why ', 'when ', 'where ',
+        
+        // GUIDE/TUTORIAL INTENT
+        'guide', 'tutorial', 'step by step', 'step-by-step', 
+        'tips', 'tricks', 'best practices', 'strategies', 'technique',
+        'learn', 'understand', 'beginner', 'advanced',
+        
+        // EDUCATIONAL
+        'course', 'training', 'certification', 'webinar', 'workshop',
+        'template', 'checklist', 'examples', 'sample',
+        
+        // REFERENCE/RESEARCH
+        'definition', 'meaning', 'difference', 'comparison',
+        'tool', 'tools', 'software', 'app', 'platform', 'feature',
+        'benefits', 'advantages', 'disadvantages'
     ];
-    const isBlogIntent = BLOG_SIGNALS.some(s => k.includes(s));
 
-    // Blog signals override transactional if the keyword is educational/research
-    if (isBlogIntent && !isServiceIntent) return 'blog';
+    const serviceSignalCount = SERVICE_SIGNALS.filter(s => k.includes(s)).length;
+    const blogSignalCount = BLOG_SIGNALS.filter(s => k.includes(s)).length;
 
-    // Pure transactional + service signal = service page
-    if (intent === 'transactional' && isServiceIntent) return 'page';
+    // ─────────────────────────────────────────────────────────────────────
+    // DECISION LOGIC (CORRECTED)
+    // ─────────────────────────────────────────────────────────────────────
 
-    // Everything else defaults to blog — safer than wrongly labelling as service page
+    // RULE 1: Question format ALWAYS wins (how, what, why)
+    const isQuestion = /^(how|what|why|when|where|which|who)\b/.test(k);
+    if (isQuestion && intent === 'informational') {
+        // Exception: "how to hire/buy" still service page
+        if (/^how to (hire|buy|get|find|book)\b/.test(k) && serviceSignalCount > 0) {
+            return 'page';
+        }
+        return 'blog';
+    }
+
+    // RULE 2: Clear service intent + service signals = SERVICE PAGE
+    if ((intent === 'transactional' || intent === 'commercial') && serviceSignalCount > 0) {
+        // Check for comparison-specific signals
+        if (k.includes(' vs ') || k.includes('versus') || k.includes('comparison') || k.includes('compare')) {
+            return 'comparison';
+        }
+        // Check for pricing-specific signals
+        if (k.includes('pricing') || k.includes('price') || k.includes('cost')) {
+            return 'pricing';
+        }
+        return 'page';
+    }
+
+    // RULE 3: Mixed signals (both service AND blog signals)
+    if (serviceSignalCount > 0 && blogSignalCount > 0) {
+        // If blog signals are stronger → BLOG (educational approach to service)
+        if (blogSignalCount > serviceSignalCount) {
+            return 'blog';
+        }
+        // If service signals are stronger → SERVICE PAGE
+        if (serviceSignalCount > blogSignalCount) {
+            // Check if it's comparison or pricing
+            if (k.includes(' vs ') || k.includes('versus') || k.includes('comparison')) {
+                return 'comparison';
+            }
+            if (k.includes('pricing') || k.includes('price') || k.includes('cost')) {
+                return 'pricing';
+            }
+            return 'page';
+        }
+        // If equal, favor blog (safer)
+        return 'blog';
+    }
+
+    // RULE 4: Only blog signals → BLOG
+    if (blogSignalCount > 0 && serviceSignalCount === 0) {
+        // Check for comparison or guide-specific
+        if (k.includes(' vs ') || k.includes('versus')) {
+            return 'comparison';
+        }
+        if (k.includes('guide') || k.includes('tutorial') || k.includes('step by step')) {
+            return 'guide';
+        }
+        return 'blog';
+    }
+
+    // RULE 5: Only service signals, NO blog signals → SERVICE PAGE
+    if (serviceSignalCount > 0 && blogSignalCount === 0) {
+        if (k.includes('pricing') || k.includes('price') || k.includes('cost')) {
+            return 'pricing';
+        }
+        if (k.includes(' vs ') || k.includes('versus')) {
+            return 'comparison';
+        }
+        return 'page';
+    }
+
+    // RULE 6: Use intent as fallback
+    if (intent === 'transactional' || intent === 'commercial') {
+        return 'page';
+    }
+
+    // RULE 7: Default to blog (safer)
     return 'blog';
 }
 
@@ -1334,6 +1428,73 @@ function isQuickWin(kw) {
 // ═══════════════════════════════════════════════════════════════
 // MAIN RUN
 // ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
+// QUALITY FILTER - REJECT GARBAGE KEYWORDS
+// ═══════════════════════════════════════════════════════════════════════════
+function shouldRejectKeyword(keyword, volume, qualityScore, intent) {
+    const k = keyword.toLowerCase().trim();
+
+    // RULE 1: Zero volume + low quality + no clear intent = REJECT
+    if (volume === 0 && qualityScore < 65) {
+        return { rejected: true, reason: 'Zero volume with low quality score' };
+    }
+
+    // RULE 2: Obvious job title patterns = REJECT
+    const jobTitlePatterns = [
+        /linkedin.*(lead\s+engineer|lead\s+scientist|lead\s+designer|lead\s+manager)/i,
+        /linkedin.*(senior\s+engineer|staff\s+engineer|principal\s+engineer)/i,
+        /linkedin.*\s+(at\s+\w+|for\s+\w+)\s*$/i, // "linkedin X at Company"
+        /linkedin.*(director|vp|cto|cfo|coo)\b/i,
+        /linkedin.*(product\s+manager|project\s+manager|program\s+manager)\b/i
+    ];
+    
+    if (jobTitlePatterns.some(p => p.test(k))) {
+        return { rejected: true, reason: 'Job title/LinkedIn profile pattern' };
+    }
+
+    // RULE 3: Generic brand + person name + linkedin = REJECT
+    const brandJobPatterns = [
+        /linkedin.*(coca\s+cola|apple|google|microsoft|facebook|amazon)/i,
+        /linkedin.*(mckinsey|bcg|bain|goldman|merrill)/i,
+        /linkedin.*\b(einstein|jobs|gates|musk|bezos)\b/i
+    ];
+
+    if (brandJobPatterns.some(p => p.test(k))) {
+        return { rejected: true, reason: 'Brand employee/directory listing' };
+    }
+
+    // RULE 4: Directory listing pattern = REJECT
+    const directoryPatterns = [
+        /\b(at|for|with|in)\s+\w+\s+linkedin$/i,
+        /linkedin\s+(director|lead|manager)\s+(at|for)/i,
+        /who\s+(is|are|leads)\s+\w+\s+linkedin/i
+    ];
+
+    if (directoryPatterns.some(p => p.test(k))) {
+        return { rejected: true, reason: 'Directory/people search listing' };
+    }
+
+    // RULE 5: Too generic + no intent = REJECT
+    if (/^linkedin\s+(jobs|news|profile|news|feed|messages)$/i.test(k)) {
+        return { rejected: true, reason: 'Generic LinkedIn feature keyword' };
+    }
+
+    // RULE 6: Random word combinations with zero volume = REJECT
+    const words = k.split(/\s+/).filter(w => w.length > 2);
+    if (volume === 0 && words.length >= 5 && intent === 'navigational') {
+        return { rejected: true, reason: 'Long random phrase with zero volume' };
+    }
+
+    // RULE 7: Special characters excessive = REJECT
+    const specialChars = (k.match(/[^a-z0-9\s\-&']/gi) || []).length;
+    if (specialChars > 3 || volume === 0) {
+        return { rejected: true, reason: 'Too many special characters' };
+    }
+
+    // NO REJECTION - KEYWORD IS GOOD
+    return { rejected: false, reason: 'Passed quality check' };
+}
+
 function run() {
     if (!rawRows.length) { alert('Please upload a keyword file first.'); return; }
 
@@ -1365,8 +1526,12 @@ function run() {
             const diff = estimateDifficulty(item.keyword, item.volume);
             const serpFeatures = predictSerpFeatures(item.keyword, intent);
 
+            // APPLY QUALITY REJECTION
+            const qualityCheck = shouldRejectKeyword(item.keyword, item.volume, result.score, intent);
+
             let rejectReason = null;
             if (isDupe) rejectReason = 'near_duplicate';
+            else if (qualityCheck.rejected) rejectReason = 'quality_filter:' + qualityCheck.reason;
             else if (!result.pass) rejectReason = result.reason;
             else if (item.volume < minVol) rejectReason = 'low_volume';
             else if (wordCount > maxWords) rejectReason = 'too_many_words';
